@@ -70,25 +70,7 @@
         </div>
 
        <!-- Progress Dashboard -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-4 rounded-lg">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="text-lg font-semibold">Total Points</h3>
-                        <p id="totalPoints" class="text-2xl font-bold">0</p>
-                    </div>
-                    <div class="text-3xl">⭐</div>
-                </div>
-            </div>
-            <div class="bg-gradient-to-br from-green-500 to-green-600 text-white p-4 rounded-lg">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="text-lg font-semibold">Current Streak</h3>
-                        <p id="currentStreak" class="text-2xl font-bold">0 days</p>
-                    </div>
-                    <div class="text-3xl">🔥</div>
-                </div>
-            </div>
+       
             <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white p-4 rounded-lg">
                 <div class="flex items-center justify-between">
                     <div>
@@ -98,16 +80,7 @@
                     <div class="text-3xl">🏃</div>
                 </div>
             </div>
-            <div class="bg-gradient-to-br from-orange-500 to-orange-600 text-white p-4 rounded-lg">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="text-lg font-semibold">Achievements</h3>
-                        <p id="achievementCount" class="text-2xl font-bold">0/30</p>
-                    </div>
-                    <div class="text-3xl">🏆</div>
-                </div>
-            </div>
-        </div>
+         
 
         <!-- Week Progress -->
         <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg mb-6">
@@ -1593,6 +1566,12 @@ document.addEventListener('DOMContentLoaded', () => {
     updateWeekInfo();
     renderWeeklyCalendar();
 });
+
+  function updateStats() {
+           
+            // Update total distance
+            document.getElementById('totalDistance').textContent = `${gameStats.totalDistance.toFixed(1)} km`;
+
     </script>
 </body>
 </html>
