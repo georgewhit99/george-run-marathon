@@ -939,38 +939,44 @@ test
                 }
             }, delay);
         }
+function updateAllWorkoutPaces() {
+    // Update training plan with current paces
+    for (let week = 1; week <= 40; week++) {
+        const weekData = trainingPlan[week];
+        if (weekData) {
+            weekData.workouts.forEach(workout => {
+                // Update pace based on workout type
+                if (workout.type === 'long' && paces.long) {
+                    workout.pace = paces.long;
+                } else if (workout.type === 'tempo' && paces.tempo) {
+                    workout.pace = paces.tempo;
+                } else if (workout.type === 'speed' && paces.speed) {
+                    workout.pace = paces.speed;
+                } else if (workout.type === 'easy' && paces.easy) {
+                    workout.pace = paces.easy;
+                } else if (workout.type === 'recovery' && paces.recovery) {
+                    workout.pace = paces.recovery;
+                }
 
-        function updateAllWorkoutPaces() {
-            // Update training plan with current paces
-            for (let week = 1; week <= 40; week++) {
-                const weekData = trainingPlan[week];
-                if (weekData) {
-                    weekData.workouts.forEach(workout => {
-                        // Update pace based on workout type
-                        if (workout.type === 'long' && paces.long) {
-                            workout.pace = paces.long;
-                        } else if (workout.type === 'tempo' && paces.tempo) {
-                            workout.pace = paces.tempo;
-                        } else if (workout.type === 'speed' && paces.speed) {
-                            workout.pace = paces.speed;
-                        } else if (workout.type === 'easy' && paces.easy) {
-                            workout.pace = paces.easy;
-                        } else if (workout.type === 'recovery' && paces.recovery) {
-                            workout.pace = paces.recovery;
+                // Update description to reflect new pace
+                if (workout.pace !== 'varied' && workout.pace !== 'strides' && workout.pace !== 'progression') {
+                    if (workout.type === 'long') {
+                        workout.description = `Long Run: ${workout.distance} km @ ${workout.pace}/km`;
+                    } else if (workout.type === 'tempo') {
+                        workout.description = `Tempo Run: ${workout.distance} km @ ${workout.pace}/km`;
+                    } else if (workout.type === 'speed' && workout.description.includes('x')) {
+                        // Update interval descriptions but keep the format intact
+                        const intervalMatch = workout.description.match(/(\d+x\d+m)/);
+                        if (intervalMatch) {
+                            workout.description = workout.description.replace(/@\s*[\d:]+\/km/, `@ ${workout.pace}/km`);
                         }
-                        
-                        // Update description to reflect new pace
-                        if (workout.pace !== 'varied' && workout.pace !== 'strides' && workout.pace !== 'progression') {
-                            if (workout.type === 'long') {
-                                workout.description = `Long Run: ${workout.distance} km @ ${workout.pace}/km`;
-                            } else if (workout.type === 'tempo') {
-                                workout.description = `Tempo Run: ${workout.distance} km @ ${workout.pace}/km`;
-                            } else if (workout.type === 'speed' && workout.description.includes('x')) {
-                                // Keep interval descriptions but update pace references
-                                const intervalMatch = workout.description.match(/(\d+x\d+m)/);
-                                if (intervalMatch) {
-                                    workout.description = workout.description.replace(/@\s*[\d:]+\/km/, `@ ${workout.pace}/km`);
-                                }
+                    }
+                }
+            });
+        }
+    }
+}
+ 
                             }
                         }
                     });
