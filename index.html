@@ -1486,6 +1486,48 @@
         window.addEventListener('beforeunload', () => {
             saveProgress();
         });
+        // Populate the dropdown with weeks
+function populateWeekDropdown() {
+    const dropdown = document.getElementById('week-dropdown');
+    dropdown.innerHTML = ''; // Clear existing options
+
+    for (let week = 1; week <= 40; week++) {
+        const option = document.createElement('option');
+        option.value = week;
+        option.textContent = `Week ${week}`;
+        dropdown.appendChild(option);
+    }
+
+    // Set the current week as the selected option
+    dropdown.value = currentWeek;
+}
+
+// Handle week selection from the dropdown
+function selectWeek() {
+    const dropdown = document.getElementById('week-dropdown');
+    const selectedWeek = parseInt(dropdown.value, 10);
+
+    if (selectedWeek >= 1 && selectedWeek <= 40) {
+        currentWeek = selectedWeek;
+        renderWeeklyCalendar();
+        updateWeekInfo();
+    }
+}
+
+// Update the week title and subtitle
+function updateWeekInfo() {
+    const weekTitle = document.getElementById('week-title');
+    const weekSubtitle = document.getElementById('week-subtitle');
+    weekTitle.textContent = `Week ${currentWeek}`;
+    weekSubtitle.textContent = weekPhases[currentWeek] || 'Training Phase';
+}
+
+// Call populateWeekDropdown on page load
+document.addEventListener('DOMContentLoaded', () => {
+    populateWeekDropdown();
+    updateWeekInfo();
+    renderWeeklyCalendar();
+});
     </script>
 </body>
 </html>
