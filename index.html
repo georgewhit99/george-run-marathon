@@ -783,62 +783,23 @@ Outdated design but with local storage working RunGeorge
         }
 
         function loadProgress() {
-            if (!isStorageAvailable()) {
+    try {
+        const savedData = getStorageItem('marathonTrainingProgress');
+        if (savedData) {
+            const progressData = JSON.parse(savedData);
+            if (progressData.weeklySchedule && typeof progressData.weeklySchedule === 'object') {
+                weeklySchedule = progressData.weeklySchedule;
+            } else {
                 initializeSchedule();
-                showSaveNotification(`${storageMethod} storage not available - progress will not be saved`, 'error');
-                return false;
             }
-
-            try {
-                const savedData = getStorageItem('marathonTrainingProgress');
-                if (savedData) {
-                    const progressData = JSON.parse(savedData);
-                    
-                    // Validate data structure
-                    if (typeof progressData !== 'object' || progressData === null) {
-                        throw new Error('Invalid data format');
-                    }
-                    
-                    // Restore all state with fallbacks
-                    currentWeek = Math.max(1, Math.min(40, progressData.currentWeek || 1));
-                    completedWorkouts = new Set(Array.isArray(progressData.completedWorkouts) ? progressData.completedWorkouts : []);
-                    totalDistance = Math.max(0, progressData.totalDistance || 0);
-                    currentStreak = Math.max(0, progressData.currentStreak || 0);
-                    achievements = Array.isArray(progressData.achievements) ? progressData.achievements : [];
-                    lastCompletionDate = progressData.lastCompletionDate || null;
-                    
-                    // Restore custom paces if they exist
-                    if (progressData.paces && typeof progressData.paces === 'object') {
-                        Object.assign(paces, progressData.paces);
-                        updateAllWorkoutPaces();
-                    }
-                    
-                    // Restore weekly schedule if it exists
-                    if (progressData.weeklySchedule && typeof progressData.weeklySchedule === 'object') {
-                        weeklySchedule = progressData.weeklySchedule;
-                    } else {
-                        initializeSchedule();
-                    }
-                    
-                    // Only show success notification if we have meaningful data
-                    if (completedWorkouts.size > 0 || currentWeek > 1) {
-                        const method = progressData.storageMethod || storageMethod;
-                        showSaveNotification(`Previous progress restored (${method})`, 'success');
-                    }
-                    return true;
-                }
-            } catch (error) {
-                console.error('Failed to load progress:', error);
-                // Don't show error for normal "no data" case
-                if (getStorageItem('marathonTrainingProgress')) {
-                    showSaveNotification('Previous progress corrupted - starting fresh', 'error');
-                }
-            }
-            
-            // Initialize if no saved data or loading failed
+        } else {
             initializeSchedule();
-            return false;
         }
+    } catch (error) {
+        console.error('Failed to load progress:', error);
+        initializeSchedule();
+    }
+}
 
         function clearProgress() {
             try {
