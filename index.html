@@ -1576,6 +1576,57 @@ document.addEventListener('DOMContentLoaded', () => {
     renderWeeklyCalendar();
 });
 
+function updateGamifiedView() {
+    // Calculate total distance run
+    const totalDistanceRun = completedWorkouts.size > 0
+        ? Array.from(completedWorkouts).reduce((sum, workoutId) => {
+            const workout = findWorkoutById(workoutId);
+            return workout ? sum + workout.distance : sum;
+        }, 0)
+        : 0;
+
+    // Update total distance run
+    document.getElementById('total-distance').textContent = `${totalDistanceRun} km`;
+
+    // Calculate weekly progress
+    const weeklyWorkouts = weeklySchedule[currentWeek];
+    const totalWeeklyDistance = weeklyWorkouts
+        ? Object.values(weeklyWorkouts).flat().reduce((sum, workout) => sum + workout.distance, 0)
+        : 0;
+    const completedWeeklyDistance = weeklyWorkouts
+        ? Object.values(weeklyWorkouts).flat().reduce((sum, workout) => {
+            return completedWorkouts.has(workout.id) ? sum + workout.distance : sum;
+        }, 0)
+        : 0;
+    const weeklyProgress = totalWeeklyDistance > 0
+        ? Math.round((completedWeeklyDistance / totalWeeklyDistance) * 100)
+        : 0;
+
+    // Update weekly progress bar
+    const progressBar = document.getElementById('weekly-progress-bar');
+    progressBar.style.width = `${weeklyProgress}%`;
+
+    // Update weekly progress text
+    document.getElementById('weekly-progress-text').textContent = `${weeklyProgress}%`;
+}
+
+// Helper function to find a workout by ID
+function findWorkoutById(workoutId) {
+    for (const week in trainingPlan) {
+        const weekData = trainingPlan[week];
+        if (weekData) {
+            const workout = weekData.workouts.find(workout => workout.id === workoutId);
+            if (workout) return workout;
+        }
+    }
+    return null;
+}
+
+// Call updateGamifiedView on page load and whenever the calendar is updated
+document.addEventListener('DOMContentLoaded', () => {
+    updateGamifiedView();
+    renderWeeklyCalendar();
+});
   
     </script>
 </body>
