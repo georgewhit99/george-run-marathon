@@ -975,25 +975,24 @@ Outdated design but with local storage working RunGeorge
 }
 
         function renderWeeklyCalendar() {
-            const calendar = document.getElementById('weekly-calendar');
-            const weekData = weeklySchedule[currentWeek] || {};
-            
-            calendar.innerHTML = dayNames.map(day => `
-                <div class="day-column">
-                    <div class="day-header bg-white dark:bg-gray-800 rounded-t-xl p-3 border-b border-gray-200 dark:border-gray-700">
-                        <h4 class="font-semibold text-center">${day}</h4>
-                    </div>
-                    <div class="day-slot bg-gray-50 dark:bg-gray-800 rounded-b-xl p-3 min-h-[120px]" 
-                         data-day="${day}" 
-                         ondragover="allowDrop(event)" 
-                         ondrop="drop(event)">
-                        ${(weekData[day] || []).map(workout => renderWorkoutCard(workout)).join('')}
-                    </div>
-                </div>
-            `).join('');
-            
-            updateWeekInfo();
-        }
+    const calendar = document.getElementById('weekly-calendar');
+    const weekData = weeklySchedule[currentWeek] || {};
+
+    calendar.innerHTML = dayNames.map(day => `
+        <div class="day-column">
+            <div class="day-header bg-white dark:bg-gray-800 rounded-t-xl p-3 border-b border-gray-200 dark:border-gray-700">
+                <h4 class="font-semibold text-center">${day}</h4>
+            </div>
+            <div class="day-slot bg-gray-50 dark:bg-gray-800 rounded-b-xl p-3 min-h-[120px]" 
+                 data-day="${day}" 
+                 ondragover="allowDrop(event)" 
+                 ondrop="drop(event)">
+                ${(weekData[day] || []).map(workout => renderWorkoutCard(workout)).join('')}
+            </div>
+        </div>
+    `).join('');
+    console.log('Rendered Weekly Calendar:', weekData);
+}
 
         function renderWorkoutCard(workout) {
             const isCompleted = completedWorkouts.has(workout.id);
