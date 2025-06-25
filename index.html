@@ -783,23 +783,62 @@ Outdated design but with local storage working RunGeorge
         }
 
         function loadProgress() {
-    try {
-        const savedData = getStorageItem('marathonTrainingProgress');
-        if (savedData) {
-            const progressData = JSON.parse(savedData);
-            if (progressData.weeklySchedule && typeof progressData.weeklySchedule === 'object') {
-                weeklySchedule = progressData.weeklySchedule;
-            } else {
+            if (!isStorageAvailable()) {
                 initializeSchedule();
+                showSaveNotification(`${storageMethod} storage not available - progress will not be saved`, 'error');
+                return false;
             }
-        } else {
+
+            try {
+                const savedData = getStorageItem('marathonTrainingProgress');
+                if (savedData) {
+                    const progressData = JSON.parse(savedData);
+                    
+                    // Validate data structure
+                    if (typeof progressData !== 'object' || progressData === null) {
+                        throw new Error('Invalid data format');
+                    }
+                    
+                    // Restore all state with fallbacks
+                    currentWeek = Math.max(1, Math.min(40, progressData.currentWeek || 1));
+                    completedWorkouts = new Set(Array.isArray(progressData.completedWorkouts) ? progressData.completedWorkouts : []);
+                    totalDistance = Math.max(0, progressData.totalDistance || 0);
+                    currentStreak = Math.max(0, progressData.currentStreak || 0);
+                    achievements = Array.isArray(progressData.achievements) ? progressData.achievements : [];
+                    lastCompletionDate = progressData.lastCompletionDate || null;
+                    
+                    // Restore custom paces if they exist
+                    if (progressData.paces && typeof progressData.paces === 'object') {
+                        Object.assign(paces, progressData.paces);
+                        updateAllWorkoutPaces();
+                    }
+                    
+                    // Restore weekly schedule if it exists
+                    if (progressData.weeklySchedule && typeof progressData.weeklySchedule === 'object') {
+                        weeklySchedule = progressData.weeklySchedule;
+                    } else {
+                        initializeSchedule();
+                    }
+                    
+                    // Only show success notification if we have meaningful data
+                    if (completedWorkouts.size > 0 || currentWeek > 1) {
+                        const method = progressData.storageMethod || storageMethod;
+                        showSaveNotification(`Previous progress restored (${method})`, 'success');
+                    }
+                    return true;
+                }
+            } catch (error) {
+                console.error('Failed to load progress:', error);
+                // Don't show error for normal "no data" case
+                if (getStorageItem('marathonTrainingProgress')) {
+                    showSaveNotification('Previous progress corrupted - starting fresh', 'error');
+                }
+            }
+            
+            // Initialize if no saved data or loading failed
             initializeSchedule();
+            return false;
         }
-    } catch (error) {
-        console.error('Failed to load progress:', error);
-        initializeSchedule();
-    }
-}
 
         function clearProgress() {
             try {
@@ -913,66 +952,79 @@ Outdated design but with local storage working RunGeorge
         }
 
         function initializeSchedule() {
-    for (let week = 1; week <= 40; week++) {
-        weeklySchedule[week] = {
-            Monday: [],
-            Tuesday: [],
-            Wednesday: [],
-            Thursday: [],
-            Friday: [],
-            Saturday: [],
-            Sunday: []
-        };
+            for (let week = 1; week <= 40; week++) {
+                weeklySchedule[week] = {
+                    Monday: [],
+                    Tuesday: [],
+                    Wednesday: [],
+                    Thursday: [],
+                    Friday: [],
+                    Saturday: [],
+                    Sunday: []
+                };
 
-        const weekData = trainingPlan[week];
-        if (weekData) {
-            const workouts = weekData.workouts;
-            if (workouts[0]) weeklySchedule[week].Sunday.push(workouts[0]); // Long Run
-            if (workouts[1]) weeklySchedule[week].Tuesday.push(workouts[1]); // Tempo Run
-            if (workouts[2]) weeklySchedule[week].Thursday.push(workouts[2]); // Speed Work
+                const weekData = trainingPlan[week];
+                if (weekData) {
+                    // Default assignment: Long run on Sunday, Tempo on Tuesday, Speed on Thursday
+                    const workouts = weekData.workouts;
+                    if (workouts[0]) weeklySchedule[week].Sunday.push(workouts[0]); // Long run
+                    if (workouts[1]) weeklySchedule[week].Tuesday.push(workouts[1]); // Tempo
+                    if (workouts[2]) weeklySchedule[week].Thursday.push(workouts[2]); // Speed
+                }
+            }
         }
-    }
-    console.log('Initialized Weekly Schedule:', weeklySchedule);
-}
 
         function renderWeeklyCalendar() {
-    const calendar = document.getElementById('weekly-calendar');
-    const weekData = weeklySchedule[currentWeek] || {};
-
-    calendar.innerHTML = dayNames.map(day => `
-        <div class="day-column">
-            <div class="day-header bg-white dark:bg-gray-800 rounded-t-xl p-3 border-b border-gray-200 dark:border-gray-700">
-                <h4 class="font-semibold text-center">${day}</h4>
-            </div>
-            <div class="day-slot bg-gray-50 dark:bg-gray-800 rounded-b-xl p-3 min-h-[120px]" 
-                 data-day="${day}" 
-                 ondragover="allowDrop(event)" 
-                 ondrop="drop(event)">
-                ${(weekData[day] || []).map(workout => renderWorkoutCard(workout)).join('')}
-            </div>
-        </div>
-    `).join('');
-    console.log('Rendered Weekly Calendar:', weekData);
-}
+            const calendar = document.getElementById('weekly-calendar');
+            const weekData = weeklySchedule[currentWeek] || {};
+            
+            calendar.innerHTML = dayNames.map(day => `
+                <div class="day-column">
+                    <div class="day-header bg-white dark:bg-gray-800 rounded-t-xl p-3 border-b border-gray-200 dark:border-gray-700">
+                        <h4 class="font-semibold text-center">${day}</h4>
+                    </div>
+                    <div class="day-slot bg-gray-50 dark:bg-gray-800 rounded-b-xl p-3 min-h-[120px]" 
+                         data-day="${day}" 
+                         ondragover="allowDrop(event)" 
+                         ondrop="drop(event)">
+                        ${(weekData[day] || []).map(workout => renderWorkoutCard(workout)).join('')}
+                    </div>
+                </div>
+            `).join('');
+            
+            updateWeekInfo();
+        }
 
         function renderWorkoutCard(workout) {
-    if (!workout || !workout.id || !workout.description) return '';
-    
-    const isCompleted = completedWorkouts.has(workout.id);
-    const typeColors = {
-        long: 'border-blue-500',
-        tempo: 'border-orange-500',
-        speed: 'border-red-500',
-        easy: 'border-green-500',
-        race: 'border-purple-500'
-    };
+            const isCompleted = completedWorkouts.has(workout.id);
+            const typeColors = {
+                long: 'border-blue-500',
+                tempo: 'border-orange-500', 
+                speed: 'border-red-500',
+                easy: 'border-green-500',
+                race: 'border-purple-500'
+            };
 
-    return `
-        <div class="workout-card ${isCompleted ? 'completed-workout' : ''} ${typeColors[workout.type] || ''}">
-            <p>${workout.description}</p>
-        </div>
-    `;
-}
+            return `
+                <div class="workout-card ${isCompleted ? 'completed-workout' : ''} bg-white dark:bg-gray-700 rounded-lg p-3 mb-2 border-l-4 ${typeColors[workout.type] || 'border-gray-500'} cursor-pointer shadow-sm hover:shadow-md transition-all"
+                     draggable="true" 
+                     ondragstart="dragStart(event)" 
+                     data-workout-id="${workout.id}"
+                     onclick="showWorkoutDetails('${workout.id}')">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="font-medium text-sm capitalize">${workout.type}</span>
+                        <span class="text-xs text-gray-500">${workout.distance}km</span>
+                    </div>
+                    <div class="text-xs text-gray-600 dark:text-gray-400 truncate">
+                        ${workout.description}
+                    </div>
+                    <div class="text-xs text-primary font-medium mt-1">
+                        @ ${workout.pace}/km
+                    </div>
+                    ${isCompleted ? '<div class="text-xs text-green-600 dark:text-green-400 mt-1">✅ Completed</div>' : ''}
+                </div>
+            `;
+        }
 
         function getWeekDateRange(weekNumber) {
             // Start from June 16, 2025 (which is a Monday)
@@ -1435,4 +1487,3 @@ Outdated design but with local storage working RunGeorge
     </script>
 </body>
 </html>
-
