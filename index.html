@@ -995,35 +995,23 @@ Outdated design but with local storage working RunGeorge
 }
 
         function renderWorkoutCard(workout) {
-            const isCompleted = completedWorkouts.has(workout.id);
-            const typeColors = {
-                long: 'border-blue-500',
-                tempo: 'border-orange-500', 
-                speed: 'border-red-500',
-                easy: 'border-green-500',
-                race: 'border-purple-500'
-            };
+    if (!workout || !workout.id || !workout.description) return '';
+    
+    const isCompleted = completedWorkouts.has(workout.id);
+    const typeColors = {
+        long: 'border-blue-500',
+        tempo: 'border-orange-500',
+        speed: 'border-red-500',
+        easy: 'border-green-500',
+        race: 'border-purple-500'
+    };
 
-            return `
-                <div class="workout-card ${isCompleted ? 'completed-workout' : ''} bg-white dark:bg-gray-700 rounded-lg p-3 mb-2 border-l-4 ${typeColors[workout.type] || 'border-gray-500'} cursor-pointer shadow-sm hover:shadow-md transition-all"
-                     draggable="true" 
-                     ondragstart="dragStart(event)" 
-                     data-workout-id="${workout.id}"
-                     onclick="showWorkoutDetails('${workout.id}')">
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="font-medium text-sm capitalize">${workout.type}</span>
-                        <span class="text-xs text-gray-500">${workout.distance}km</span>
-                    </div>
-                    <div class="text-xs text-gray-600 dark:text-gray-400 truncate">
-                        ${workout.description}
-                    </div>
-                    <div class="text-xs text-primary font-medium mt-1">
-                        @ ${workout.pace}/km
-                    </div>
-                    ${isCompleted ? '<div class="text-xs text-green-600 dark:text-green-400 mt-1">✅ Completed</div>' : ''}
-                </div>
-            `;
-        }
+    return `
+        <div class="workout-card ${isCompleted ? 'completed-workout' : ''} ${typeColors[workout.type] || ''}">
+            <p>${workout.description}</p>
+        </div>
+    `;
+}
 
         function getWeekDateRange(weekNumber) {
             // Start from June 16, 2025 (which is a Monday)
