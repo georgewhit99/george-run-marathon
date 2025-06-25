@@ -1621,6 +1621,41 @@ document.addEventListener('DOMContentLoaded', () => {
     renderWeeklyCalendar();
 });
   
+// Example start date for Week 1 (adjust as per your training plan start date)
+const trainingStartDate = new Date('2025-16-06'); // Replace with the actual start date of Week 1
+
+function calculateWeekDates(weekNumber) {
+    const startDate = new Date(trainingStartDate);
+    startDate.setDate(startDate.getDate() + (weekNumber - 1) * 7);
+
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + 6);
+
+    const formatDate = (date) => {
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
+        return `${day}/${month}`;
+    };
+
+    return `${formatDate(startDate)} - ${formatDate(endDate)}`;
+}
+
+function updateWeekInfo() {
+    const weekTitle = document.getElementById('week-title');
+    const weekSubtitle = document.getElementById('week-subtitle');
+    const weekDates = document.getElementById('week-dates'); // New element for date range
+
+    weekTitle.textContent = `Week ${currentWeek}`;
+    weekSubtitle.textContent = weekPhases[currentWeek] || 'Training Phase';
+    weekDates.textContent = calculateWeekDates(currentWeek); // Update date range
+}
+
+// Call updateWeekInfo whenever the week changes
+document.addEventListener('DOMContentLoaded', () => {
+    updateWeekInfo();
+    renderWeeklyCalendar();
+});
+
     </script>
 </body>
 </html>
