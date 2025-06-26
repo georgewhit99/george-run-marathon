@@ -1560,6 +1560,26 @@ function updateWeeklyProgress() {
     progressBar.style.width = `${progressPercentage}%`;
     progressText.textContent = `${progressPercentage}% workouts completed`;
 }
+
+function calculateTotalDistance() {
+    let totalDistance = 0;
+
+    for (let week = 1; week <= 40; week++) {
+        const weekData = trainingPlan[week];
+        if (weekData && weekData.workouts) {
+            weekData.workouts.forEach(workout => {
+                totalDistance += workout.distance || 0;
+            });
+        }
+    }
+
+    return totalDistance;
+}
+
+function showTotalDistance() {
+    const totalDistance = calculateTotalDistance();
+    alert(`Total Distance Run Over the Plan: ${totalDistance} km`);
+}
         
         
         
