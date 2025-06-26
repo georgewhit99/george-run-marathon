@@ -1486,6 +1486,39 @@
         window.addEventListener('beforeunload', () => {
             saveProgress();
         });
+        document.addEventListener('DOMContentLoaded', () => {
+    // Populate the week dropdown with options dynamically
+    populateWeekDropdown();
+});
+
+function populateWeekDropdown() {
+    const weekDropdown = document.getElementById('week-dropdown');
+    weekDropdown.innerHTML = ''; // Clear existing options
+
+    for (let week = 1; week <= 40; week++) {
+        const option = document.createElement('option');
+        option.value = week;
+        option.textContent = `Week ${week}`;
+        weekDropdown.appendChild(option);
+    }
+
+    // Set the default selected week based on currentWeek
+    weekDropdown.value = currentWeek;
+}
+
+function selectWeek() {
+    const selectedWeek = document.getElementById('week-dropdown').value;
+    currentWeek = parseInt(selectedWeek);
+    renderWeeklyCalendar(); // Re-render the calendar for the selected week
+}
+        
+        
+        
+        
+        
+        
+        
+        
     </script>
 </body>
 </html>
