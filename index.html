@@ -1,3 +1,6 @@
+Working app 25/06
+
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -68,11 +71,6 @@
             </div>
         </div>
 
-    
-         
-
-       
-
         <!-- Week Navigation -->
      
 <div class="flex items-center justify-between mb-6 bg-white dark:bg-gray-800 rounded-xl p-4">
@@ -82,7 +80,7 @@
     <div class="text-center">
         <h2 id="week-title" class="text-2xl font-bold text-primary">Week 1</h2>
         <div id="week-subtitle" class="text-sm text-gray-600 dark:text-gray-400">Aerobic Base & Routine Building</div>
-        <div id="week-dates" class="text-xs text-gray-500 dark:text-gray-400 mt-1">16/06 - 23/06</div> <!-- Date range -->
+        <!-- Dropdown for selecting a specific week -->
         <select id="week-dropdown" onchange="selectWeek()" class="mt-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 rounded-lg">
             <!-- Options will be populated dynamically -->
         </select>
@@ -91,25 +89,6 @@
         Next →
     </button>
 </div>
-
-<!-- Gamified View -->
-<div id="gamified-view" class="flex items-center justify-between mb-6 bg-white dark:bg-gray-800 rounded-xl p-4">
-    <!-- Total Distance Run -->
-    <div class="flex items-center gap-3">
-        <div class="text-3xl font-bold text-primary" id="total-distance">0 km</div>
-        <div class="text-sm text-gray-600 dark:text-gray-400">Total Distance Run</div>
-    </div>
-    
-    <!-- Weekly Progress Bar -->
-    <div class="flex flex-col w-full max-w-md">
-        <div class="text-sm text-gray-600 dark:text-gray-400 mb-2">Weekly Progress</div>
-        <div class="relative w-full bg-gray-200 dark:bg-gray-700 rounded-lg h-6">
-            <div id="weekly-progress-bar" class="absolute top-0 left-0 h-6 bg-primary rounded-lg transition-all"></div>
-        </div>
-        <div id="weekly-progress-text" class="text-sm mt-1 text-right text-gray-600 dark:text-gray-400">0%</div>
-    </div>
-</div>
-
         <!-- Weekly Calendar -->
         <div id="weekly-calendar" class="grid grid-cols-1 md:grid-cols-7 gap-4 mb-8">
             <!-- Calendar days will be populated here -->
@@ -142,7 +121,6 @@
             </div>
         </div>
     </div>
-    
 
     <!-- Workout Detail Modal -->
     <div id="workout-modal" class="hidden fixed inset-0 z-50 modal-backdrop bg-black/50 flex items-center justify-center p-4">
@@ -938,44 +916,38 @@
                 }
             }, delay);
         }
-function updateAllWorkoutPaces() {
-    // Update training plan with current paces
-    for (let week = 1; week <= 40; week++) {
-        const weekData = trainingPlan[week];
-        if (weekData) {
-            weekData.workouts.forEach(workout => {
-                // Update pace based on workout type
-                if (workout.type === 'long' && paces.long) {
-                    workout.pace = paces.long;
-                } else if (workout.type === 'tempo' && paces.tempo) {
-                    workout.pace = paces.tempo;
-                } else if (workout.type === 'speed' && paces.speed) {
-                    workout.pace = paces.speed;
-                } else if (workout.type === 'easy' && paces.easy) {
-                    workout.pace = paces.easy;
-                } else if (workout.type === 'recovery' && paces.recovery) {
-                    workout.pace = paces.recovery;
-                }
 
-                // Update description to reflect new pace
-                if (workout.pace !== 'varied' && workout.pace !== 'strides' && workout.pace !== 'progression') {
-                    if (workout.type === 'long') {
-                        workout.description = `Long Run: ${workout.distance} km @ ${workout.pace}/km`;
-                    } else if (workout.type === 'tempo') {
-                        workout.description = `Tempo Run: ${workout.distance} km @ ${workout.pace}/km`;
-                    } else if (workout.type === 'speed' && workout.description.includes('x')) {
-                        // Update interval descriptions but keep the format intact
-                        const intervalMatch = workout.description.match(/(\d+x\d+m)/);
-                        if (intervalMatch) {
-                            workout.description = workout.description.replace(/@\s*[\d:]+\/km/, `@ ${workout.pace}/km`);
+        function updateAllWorkoutPaces() {
+            // Update training plan with current paces
+            for (let week = 1; week <= 40; week++) {
+                const weekData = trainingPlan[week];
+                if (weekData) {
+                    weekData.workouts.forEach(workout => {
+                        // Update pace based on workout type
+                        if (workout.type === 'long' && paces.long) {
+                            workout.pace = paces.long;
+                        } else if (workout.type === 'tempo' && paces.tempo) {
+                            workout.pace = paces.tempo;
+                        } else if (workout.type === 'speed' && paces.speed) {
+                            workout.pace = paces.speed;
+                        } else if (workout.type === 'easy' && paces.easy) {
+                            workout.pace = paces.easy;
+                        } else if (workout.type === 'recovery' && paces.recovery) {
+                            workout.pace = paces.recovery;
                         }
-                    }
-                }
-            });
-        }
-    }
-}
- 
+                        
+                        // Update description to reflect new pace
+                        if (workout.pace !== 'varied' && workout.pace !== 'strides' && workout.pace !== 'progression') {
+                            if (workout.type === 'long') {
+                                workout.description = `Long Run: ${workout.distance} km @ ${workout.pace}/km`;
+                            } else if (workout.type === 'tempo') {
+                                workout.description = `Tempo Run: ${workout.distance} km @ ${workout.pace}/km`;
+                            } else if (workout.type === 'speed' && workout.description.includes('x')) {
+                                // Keep interval descriptions but update pace references
+                                const intervalMatch = workout.description.match(/(\d+x\d+m)/);
+                                if (intervalMatch) {
+                                    workout.description = workout.description.replace(/@\s*[\d:]+\/km/, `@ ${workout.pace}/km`);
+                                }
                             }
                         }
                     });
@@ -1558,94 +1530,6 @@ document.addEventListener('DOMContentLoaded', () => {
     updateWeekInfo();
     renderWeeklyCalendar();
 });
-
-function updateGamifiedView() {
-    // Calculate total distance run
-    const totalDistanceRun = completedWorkouts.size > 0
-        ? Array.from(completedWorkouts).reduce((sum, workoutId) => {
-            const workout = findWorkoutById(workoutId);
-            return workout ? sum + workout.distance : sum;
-        }, 0)
-        : 0;
-
-    // Update total distance run
-    document.getElementById('total-distance').textContent = `${totalDistanceRun} km`;
-
-    // Calculate weekly progress
-    const weeklyWorkouts = weeklySchedule[currentWeek];
-    const totalWeeklyDistance = weeklyWorkouts
-        ? Object.values(weeklyWorkouts).flat().reduce((sum, workout) => sum + workout.distance, 0)
-        : 0;
-    const completedWeeklyDistance = weeklyWorkouts
-        ? Object.values(weeklyWorkouts).flat().reduce((sum, workout) => {
-            return completedWorkouts.has(workout.id) ? sum + workout.distance : sum;
-        }, 0)
-        : 0;
-    const weeklyProgress = totalWeeklyDistance > 0
-        ? Math.round((completedWeeklyDistance / totalWeeklyDistance) * 100)
-        : 0;
-
-    // Update weekly progress bar
-    const progressBar = document.getElementById('weekly-progress-bar');
-    progressBar.style.width = `${weeklyProgress}%`;
-
-    // Update weekly progress text
-    document.getElementById('weekly-progress-text').textContent = `${weeklyProgress}%`;
-}
-
-// Helper function to find a workout by ID
-function findWorkoutById(workoutId) {
-    for (const week in trainingPlan) {
-        const weekData = trainingPlan[week];
-        if (weekData) {
-            const workout = weekData.workouts.find(workout => workout.id === workoutId);
-            if (workout) return workout;
-        }
-    }
-    return null;
-}
-
-// Call updateGamifiedView on page load and whenever the calendar is updated
-document.addEventListener('DOMContentLoaded', () => {
-    updateGamifiedView();
-    renderWeeklyCalendar();
-});
-  
-// Example start date for Week 1 (adjust as per your training plan start date)
-const trainingStartDate = new Date('2025-06-16'); // Replace with the actual start date of Week 1
-
-function calculateWeekDates(weekNumber) {
-    const startDate = new Date(trainingStartDate);
-    startDate.setDate(startDate.getDate() + (weekNumber - 1) * 7);
-
-    const endDate = new Date(startDate);
-    endDate.setDate(endDate.getDate() + 6);
-
-    const formatDate = (date) => {
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
-        return `${day}/${month}`;
-    };
-
-    return `${formatDate(startDate)} - ${formatDate(endDate)}`;
-}
-
-function updateWeekInfo() {
-    const weekTitle = document.getElementById('week-title');
-    const weekSubtitle = document.getElementById('week-subtitle');
-    const weekDates = document.getElementById('week-dates'); // New element for date range
-
-    weekTitle.textContent = `Week ${currentWeek}`;
-    weekSubtitle.textContent = weekPhases[currentWeek] || 'Training Phase';
-    weekDates.textContent = calculateWeekDates(currentWeek); // Update date range
-}
-
-// Call updateWeekInfo whenever the week changes
-document.addEventListener('DOMContentLoaded', () => {
-    updateWeekInfo();
-    renderWeeklyCalendar();
-});
-
     </script>
 </body>
 </html>
