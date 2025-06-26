@@ -1520,8 +1520,23 @@ function populateWeekDropdown() {
 function selectWeek() {
     const selectedWeek = document.getElementById('week-dropdown').value;
     currentWeek = parseInt(selectedWeek);
-    renderWeeklyCalendar(); // Re-render the calendar for the selected week
+    renderWeeklyCalendar(); // Re-render the calendar for the selected function updateWeeklyProgress() {
+    const weekData = trainingPlan[currentWeek];
+    if (!weekData || !weekData.workouts) return;
+
+    const totalWorkouts = weekData.workouts.length;
+    const completedWorkouts = weekData.workouts.filter(workout => completedWorkouts.has(workout.id)).length;
+
+    const progressPercentage = Math.round((completedWorkouts / totalWorkouts) * 100);
+
+    // Update progress bar and text
+    const progressBar = document.getElementById('weekly-progress-bar');
+    const progressText = document.getElementById('weekly-progress-text');
+    progressBar.style.width = `${progressPercentage}%`;
+    progressText.textContent = `${progressPercentage}% workouts completed`;
 }
+
+
         
         
         
