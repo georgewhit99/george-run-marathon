@@ -1,7 +1,3 @@
-Working app 25/06
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -67,28 +63,26 @@ Working app 25/06
                 <button onclick="showProgress()" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-medium transition-colors">
                     📊 Progress
                 </button>
-         
+                <button onclick="showDataManagement()" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                    💾 Data
+                </button>
             </div>
         </div>
 
         <!-- Week Navigation -->
-     
-<div class="flex items-center justify-between mb-6 bg-white dark:bg-gray-800 rounded-xl p-4">
-    <button onclick="changeWeek(-1)" class="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-colors">
-        ← Previous
-    </button>
-    <div class="text-center">
-        <h2 id="week-title" class="text-2xl font-bold text-primary">Week 1</h2>
-        <div id="week-subtitle" class="text-sm text-gray-600 dark:text-gray-400">Aerobic Base & Routine Building</div>
-        <!-- Dropdown for selecting a specific week -->
-        <select id="week-dropdown" onchange="selectWeek()" class="mt-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 rounded-lg">
-            <!-- Options will be populated dynamically -->
-        </select>
-    </div>
-    <button onclick="changeWeek(1)" class="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-colors">
-        Next →
-    </button>
-</div>
+        <div class="flex items-center justify-between mb-6 bg-white dark:bg-gray-800 rounded-xl p-4">
+            <button onclick="changeWeek(-1)" class="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-colors">
+                ← Previous
+            </button>
+            <div class="text-center">
+                <h2 id="week-title" class="text-2xl font-bold text-primary">Week 1</h2>
+                <div id="week-subtitle" class="text-sm text-gray-600 dark:text-gray-400">Aerobic Base & Routine Building</div>
+            </div>
+            <button onclick="changeWeek(1)" class="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-colors">
+                Next →
+            </button>
+        </div>
+
         <!-- Weekly Calendar -->
         <div id="weekly-calendar" class="grid grid-cols-1 md:grid-cols-7 gap-4 mb-8">
             <!-- Calendar days will be populated here -->
@@ -262,9 +256,9 @@ Working app 25/06
 
         // Default paces (adjustable by user)
         let paces = {
-            long: '6:00',
-            tempo: '5:30',
-            speed: '5:00',
+            long: '5:50',
+            tempo: '4:45',
+            speed: '4:10',
             easy: '6:15',
             recovery: '6:30'
         };
@@ -466,25 +460,25 @@ Working app 25/06
             25: {
                 title: "Peak Marathon Training",
                 workouts: [
-                    { id: 'w25-long', type: 'long', distance: 34, pace: '6:00', description: 'Long Run: 34 km @ 6:00/km', details: 'Peak training distance. Practice race strategy and nutrition timing.' },
-                    { id: 'w25-tempo', type: 'tempo', distance: 11, pace: '5:30', description: 'Tempo Run: 11 km @ 5:30/km', details: 'Longest tempo run. Build ultimate confidence in sustained pace.' },
-                    { id: 'w25-speed', type: 'speed', distance: 5, pace: '5:00', description: '4x1.5 km @ 5:00/km', details: '4 × 1.5km intervals at 5:00/km pace\n• 2.5 minutes jog recovery\n• Focus on race pace rhythm and control' }
+                    { id: 'w25-long', type: 'long', distance: 32, pace: '5:50', description: 'Long Run: 32 km @ 5:50/km', details: 'Peak training distance. Practice race strategy and nutrition timing.' },
+                    { id: 'w25-tempo', type: 'tempo', distance: 11, pace: '4:45', description: 'Tempo Run: 11 km @ 4:45/km', details: 'Longest tempo run. Build ultimate confidence in sustained pace.' },
+                    { id: 'w25-speed', type: 'speed', distance: 5, pace: '4:10', description: '4x1.5 km @ 4:10/km', details: '4 × 1.5km intervals at 4:10/km pace\n• 2.5 minutes jog recovery\n• Focus on race pace rhythm and control' }
                 ]
             },
             26: {
                 title: "Peak Marathon Training",
                 workouts: [
-                    { id: 'w26-long', type: 'long', distance: 36, pace: '6:00', description: 'Long Run: 36 km @ 6:00/km', details: 'Longest training run. Simulate race day conditions completely.' },
-                    { id: 'w26-tempo', type: 'tempo', distance: 10, pace: '5:30', description: 'Tempo Run: 10 km @ 5:30/km', details: 'Strong tempo effort. Build confidence for marathon pace segments.' },
-                    { id: 'w26-speed', type: 'speed', distance: 4, pace: '4:45', description: '7x600m @ 4:45/km', details: '7 × 600m intervals at 4:45/km pace\n• 90 seconds jog recovery\n• Maintain leg speed and power' }
+                    { id: 'w26-long', type: 'long', distance: 33, pace: '5:50', description: 'Long Run: 33 km @ 5:50/km', details: 'Longest training run. Simulate race day conditions completely.' },
+                    { id: 'w26-tempo', type: 'tempo', distance: 10, pace: '4:45', description: 'Tempo Run: 10 km @ 4:45/km', details: 'Strong tempo effort. Build confidence for marathon pace segments.' },
+                    { id: 'w26-speed', type: 'speed', distance: 4, pace: '4:10', description: '7x600m @ 4:10/km', details: '7 × 600m intervals at 4:10/km pace\n• 90 seconds jog recovery\n• Maintain leg speed and power' }
                 ]
             },
             27: {
                 title: "Peak Marathon Training",
                 workouts: [
-                    { id: 'w27-long', type: 'long', distance: 38, pace: '6:00', description: 'Long Run: 38 km @ 6:00/km', details: 'Peak long run. Final test of endurance and race strategy.' },
-                    { id: 'w27-tempo', type: 'tempo', distance: 12, pace: '5:30', description: 'Tempo Run: 12 km @ 5:30/km', details: 'Peak tempo distance. Ultimate test of sustained pace ability.' },
-                    { id: 'w27-speed', type: 'speed', distance: 4, pace: 'progression', description: '4 km progression (finish @ 4:50/km)', details: 'Progression run:\n• 1km at 6:00/km\n• 1km at 5:30/km\n• 1km at 5:00/km\n• 1km at 4:50/km' }
+                    { id: 'w27-long', type: 'long', distance: 33, pace: '5:50', description: 'Long Run: 33 km @ 5:50/km', details: 'Peak long run. Final test of endurance and race strategy.' },
+                    { id: 'w27-tempo', type: 'tempo', distance: 12, pace: '4:45', description: 'Tempo Run: 12 km @ 4:45/km', details: 'Peak tempo distance. Ultimate test of sustained pace ability.' },
+                    { id: 'w27-speed', type: 'speed', distance: 4, pace: 'progression', description: '4 km progression (finish @ 4:00/km)', details: 'Progression run:\n• 1km at 6:00/km\n• 1km at 5:30/km\n• 1km at 4:30/km\n• 1km at 4:00/km' }
                 ]
             },
             28: {
@@ -858,9 +852,9 @@ Working app 25/06
                 
                 // Reset paces to defaults
                 paces = {
-                    long: '6:00',
-                    tempo: '5:30',
-                    speed: '5:00',
+                    long: '5:50',
+                    tempo: '4:45',
+                    speed: '4:10',
                     easy: '6:15',
                     recovery: '6:30'
                 };
@@ -1488,48 +1482,6 @@ Working app 25/06
         window.addEventListener('beforeunload', () => {
             saveProgress();
         });
-        // Populate the dropdown with weeks
-function populateWeekDropdown() {
-    const dropdown = document.getElementById('week-dropdown');
-    dropdown.innerHTML = ''; // Clear existing options
-
-    for (let week = 1; week <= 40; week++) {
-        const option = document.createElement('option');
-        option.value = week;
-        option.textContent = `Week ${week}`;
-        dropdown.appendChild(option);
-    }
-
-    // Set the current week as the selected option
-    dropdown.value = currentWeek;
-}
-
-// Handle week selection from the dropdown
-function selectWeek() {
-    const dropdown = document.getElementById('week-dropdown');
-    const selectedWeek = parseInt(dropdown.value, 10);
-
-    if (selectedWeek >= 1 && selectedWeek <= 40) {
-        currentWeek = selectedWeek;
-        renderWeeklyCalendar();
-        updateWeekInfo();
-    }
-}
-
-// Update the week title and subtitle
-function updateWeekInfo() {
-    const weekTitle = document.getElementById('week-title');
-    const weekSubtitle = document.getElementById('week-subtitle');
-    weekTitle.textContent = `Week ${currentWeek}`;
-    weekSubtitle.textContent = weekPhases[currentWeek] || 'Training Phase';
-}
-
-// Call populateWeekDropdown on page load
-document.addEventListener('DOMContentLoaded', () => {
-    populateWeekDropdown();
-    updateWeekInfo();
-    renderWeeklyCalendar();
-});
     </script>
 </body>
 </html>
