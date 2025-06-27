@@ -1,5 +1,4 @@
 27-06
-
 Code working 26-06
 
 <!DOCTYPE html>
@@ -70,6 +69,12 @@ Code working 26-06
            
             </div>
         </div>
+        
+        <div class="bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl p-6 mt-4 shadow-lg">
+    <h3 class="text-2xl font-bold mb-2 text-center">Total Distance Covered</h3>
+    <p id="total-distance" class="text-4xl font-extrabold text-center">0 km</p>
+</div>
+
    <!-- Weekly Navigation -->
   <div class="flex items-center justify-between mb-6 bg-white dark:bg-gray-800 rounded-xl p-4">
     <button onclick="changeWeek(-1)" class="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-colors">
@@ -1221,7 +1226,9 @@ Code working 26-06
             renderWeeklyCalendar();
             
             // Save progress after completing workout
-            saveProgress(true);
+            updateWeeklyProgress();
+updateTotalDistance();
+saveProgress(true);
         }
 
         function showCelebration(workout) {
@@ -1537,7 +1544,15 @@ function selectWeek() {
     progressText.textContent = `${progressPercentage}% workouts completed`;
 }
 
+function updateTotalDistance() {
+    const totalDistance = Object.values(trainingPlan)
+        .flatMap(week => week.workouts)
+        .filter(workout => completedWorkouts.has(workout.id))
+        .reduce((sum, workout) => sum + workout.distance, 0);
 
+    const totalDistanceElement = document.getElementById('total-distance');
+    totalDistanceElement.textContent = `${totalDistance} km`;
+}
         
         
         
