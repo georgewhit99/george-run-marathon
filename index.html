@@ -1,4 +1,5 @@
-Code working 27-06
+Code working 27-06 v1
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -87,15 +88,13 @@ Code working 27-06
     </button>
 </div>
 <!-- Weekly Progress Feature -->
-<div id="weekly-progress" class="flex items-center justify-between mb-6 bg-white dark:bg-gray-800 rounded-xl p-4">
-    <div class="flex flex-col">
-        <div class="text-sm text-gray-600 dark:text-gray-400 mb-2">Weekly Progress</div>
-        <div class="relative w-full bg-gray-200 dark:bg-gray-700 rounded-lg h-6">
-            <div id="weekly-progress-bar" class="absolute top-0 left-0 h-6 bg-primary rounded-lg transition-all"></div>
-        </div>
-        <div id="weekly-progress-text" class="text-sm mt-1 text-right text-gray-600 dark:text-gray-400">0% workouts completed</div>
+<div class="text-sm text-gray-600 dark:text-gray-400 mb-2">Weekly Progress</div>
+<div class="relative w-full bg-gray-200 dark:bg-gray-700 rounded-lg h-6">
+    <div id="weekly-progress-bar" class="absolute top-0 left-0 h-6 bg-primary rounded-lg transition-all">
+        <span id="weekly-progress-label" class="absolute left-2 text-white text-xs font-bold"></span>
     </div>
 </div>
+<div id="weekly-progress-text" class="text-sm mt-1 text-right text-gray-600 dark:text-gray-400">0/3 workouts completed, 0 km total</div>
         <!-- Weekly Calendar -->
         <div id="weekly-calendar" class="grid grid-cols-1 md:grid-cols-7 gap-4 mb-8">
             <!-- Calendar days will be populated here -->
@@ -1007,37 +1006,29 @@ Code working 27-06
             updateWeeklyProgress(); // Update weekly progress bar after rendering the calendar
         }
 
-        function renderWorkoutCard(workout) {
-            const isCompleted = completedWorkouts.has(workout.id);
-            const typeColors = {
-                long: 'border-blue-500',
-                tempo: 'border-orange-500', 
-                speed: 'border-red-500',
-                easy: 'border-green-500',
-                race: 'border-purple-500'
-            };
+        function updateWeeklyProgress() {
+    const weekData = trainingPlan[currentWeek];
+    if (!weekData || !weekData.workouts) return;
 
-            return `
-                <div class="workout-card ${isCompleted ? 'completed-workout' : ''} bg-white dark:bg-gray-700 rounded-lg p-3 mb-2 border-l-4 ${typeColors[workout.type] || 'border-gray-500'} cursor-pointer shadow-sm hover:shadow-md transition-all"
-                     draggable="true" 
-                     ondragstart="dragStart(event)" 
-                     data-workout-id="${workout.id}"
-                     onclick="showWorkoutDetails('${workout.id}')">
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="font-medium text-sm capitalize">${workout.type}</span>
-                        <span class="text-xs text-gray-500">${workout.distance}km</span>
-                    </div>
-                    <div class="text-xs text-gray-600 dark:text-gray-400 truncate">
-                        ${workout.description}
-                    </div>
-                    <div class="text-xs text-primary font-medium mt-1">
-                        @ ${workout.pace}/km
-                    </div>
-                    ${isCompleted ? '<div class="text-xs text-green-600 dark:text-green-400 mt-1">✅ Completed</div>' : ''}
-                </div>
-            `;
-        }
+    const totalWorkouts = 3; // Assuming a fixed number of workouts per week
+    const completedWorkoutsCount = weekData.workouts.filter(workout => completedWorkouts.has(workout.id)).length;
+    const totalKm = weekData.workouts
+        .filter(workout => completedWorkouts.has(workout.id))
+        .reduce((sum, workout) => sum + workout.distance, 0);
 
+    const progressPercentage = Math.round((completedWorkoutsCount / totalWorkouts) * 100);
+
+    // Update progress bar width and label
+    const progressBar = document.getElementById('weekly-progress-bar');
+    const progressLabel = document.getElementById('weekly-progress-label');
+    const progressText = document.getElementById('weekly-progress-text');
+
+    progressBar.style.width = `${progressPercentage}%`;
+    progressLabel.textContent = `${progressPercentage}%`; // Show percentage inside the progress bar
+
+    // Update progress text
+    progressText.textContent = `${completedWorkoutsCount}/${totalWorkouts} workouts completed, ${totalKm} km total`;
+}
         function getWeekDateRange(weekNumber) {
             // Start from June 16, 2025 (which is a Monday)
             const baseDate = new Date('2025-06-16');
@@ -1133,6 +1124,10 @@ Code working 27-06
             
             renderWeeklyCalendar();
             
+    // Save progress
+    saveProgress(true);
+}
+            
             // Save progress after moving workout
             saveProgress();
         }
@@ -1201,6 +1196,11 @@ Code working 27-06
             completedWorkouts.add(currentWorkout.id);
             totalDistance += currentWorkout.distance;
             updateWeeklyProgress();
+            
+  
+    // Save progress
+    saveProgress(true);
+}
             
             // Update streak logic
             const today = new Date().toDateString();
