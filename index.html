@@ -1,4 +1,4 @@
-Code working 26-06 v1
+Code working 26-06
 
 <!DOCTYPE html>
 <html lang="en">
@@ -55,8 +55,8 @@ Code working 26-06 v1
         <!-- Header -->
         <div class="flex items-center justify-between mb-8">
             <div>
-                <h1 class="text-4xl font-bold text-primary">George's Marathon Training Plan</h1>
-               
+                <h1 class="text-4xl font-bold text-primary">Marathon Training Calendar</h1>
+                <p class="text-gray-600 dark:text-gray-400">Professional training plan with flexible scheduling</p>
             </div>
             <div class="flex gap-3">
                 <button onclick="showPaceSettings()" class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 px-4 py-2 rounded-lg font-medium transition-colors">
@@ -1224,7 +1224,7 @@ Code working 26-06 v1
             closeModal();
             renderWeeklyCalendar();
             updateWeeklyProgress();
-updateTotalDistance();
+updateTotalDistance(); // Ensure total distance is updated
 saveProgress(true);
             
             // Save progress after completing workout
@@ -1547,13 +1547,20 @@ function selectWeek() {
 }
 
 function updateTotalDistance() {
-    const totalDistance = Object.values(trainingPlan)
+    // Calculate total distance from completed workouts
+    const totalDistanceCovered = Object.values(trainingPlan)
         .flatMap(week => week.workouts)
         .filter(workout => completedWorkouts.has(workout.id))
         .reduce((sum, workout) => sum + workout.distance, 0);
 
+    // Update the global total distance variable
+    totalDistance = totalDistanceCovered;
+
+    // Update the displayed total distance
     const totalDistanceElement = document.getElementById('total-distance');
-    totalDistanceElement.textContent = `${totalDistance} km`;
+    if (totalDistanceElement) {
+        totalDistanceElement.textContent = `${totalDistance} km`;
+    }
 }
         
         
