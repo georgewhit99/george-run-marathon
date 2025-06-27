@@ -1,4 +1,4 @@
-Code working 26-06
+Code working 27-06
 
 <!DOCTYPE html>
 <html lang="en">
@@ -1200,6 +1200,7 @@ Code working 26-06
             
             completedWorkouts.add(currentWorkout.id);
             totalDistance += currentWorkout.distance;
+            updateWeeklyProgress();
             
             // Update streak logic
             const today = new Date().toDateString();
@@ -1535,7 +1536,21 @@ function selectWeek() {
     progressText.textContent = `${progressPercentage}% workouts completed`;
 }
 
+function updateWeeklyProgress() {
+    const weekData = trainingPlan[currentWeek];
+    if (!weekData || !weekData.workouts) return;
 
+    const totalWorkouts = weekData.workouts.length;
+    const completedWorkoutsCount = weekData.workouts.filter(workout => completedWorkouts.has(workout.id)).length;
+
+    const progressPercentage = Math.round((completedWorkoutsCount / totalWorkouts) * 100);
+
+    // Update progress bar and text
+    const progressBar = document.getElementById('weekly-progress-bar');
+    const progressText = document.getElementById('weekly-progress-text');
+    progressBar.style.width = `${progressPercentage}%`;
+    progressText.textContent = `${progressPercentage}% workouts completed`;
+}
         
         
         
