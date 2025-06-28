@@ -1,65 +1,21 @@
+28-09
+
+Code working 26-06 New plan 2
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Marathon Training App</title>
+    <title>Marathon Training Calendar</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/sortablejs@1.15.0/Sortable.min.js"></script>
     <script>
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
                         primary: '#5D5CDE',
-                        longRun: '#ef4444',
-                        tempoRun: '#f59e0b',
-                        speedRun: '#10b981',
-                        easyRun: '#3b82f6'
-                    },
-                    animation: {
-                        'bounce-in': 'bounceIn 0.6s ease-out',
-                        'pulse-glow': 'pulseGlow 2s infinite',
-                        'confetti': 'confetti 3s ease-out',
-                        'medal-earn': 'medalEarn 1s ease-out',
-                        'level-up': 'levelUp 2s ease-out',
-                        'xp-gain': 'xpGain 1s ease-out',
-                        'streak-fire': 'streakFire 1.5s ease-in-out infinite'
-                    },
-                    keyframes: {
-                        bounceIn: {
-                            '0%': { transform: 'scale(0.3)', opacity: '0' },
-                            '50%': { transform: 'scale(1.05)' },
-                            '70%': { transform: 'scale(0.9)' },
-                            '100%': { transform: 'scale(1)', opacity: '1' }
-                        },
-                        pulseGlow: {
-                            '0%, 100%': { boxShadow: '0 0 5px rgba(93, 92, 222, 0.5)' },
-                            '50%': { boxShadow: '0 0 20px rgba(93, 92, 222, 0.8)' }
-                        },
-                        confetti: {
-                            '0%': { transform: 'translateY(-100vh) rotate(0deg)', opacity: '1' },
-                            '100%': { transform: 'translateY(100vh) rotate(720deg)', opacity: '0' }
-                        },
-                        medalEarn: {
-                            '0%': { transform: 'scale(0) rotate(-180deg)', opacity: '0' },
-                            '50%': { transform: 'scale(1.2) rotate(0deg)', opacity: '1' },
-                            '100%': { transform: 'scale(1) rotate(0deg)', opacity: '1' }
-                        },
-                        levelUp: {
-                            '0%': { transform: 'scale(1)', textShadow: '0 0 0px #FFD700' },
-                            '50%': { transform: 'scale(1.1)', textShadow: '0 0 20px #FFD700' },
-                            '100%': { transform: 'scale(1)', textShadow: '0 0 0px #FFD700' }
-                        },
-                        xpGain: {
-                            '0%': { transform: 'translateY(0)', opacity: '1' },
-                            '100%': { transform: 'translateY(-30px)', opacity: '0' }
-                        },
-                        streakFire: {
-                            '0%, 100%': { transform: 'scale(1) rotate(-2deg)' },
-                            '50%': { transform: 'scale(1.1) rotate(2deg)' }
-                        }
+                        'primary-dark': '#4A49B8',
                     }
                 }
             }
@@ -68,405 +24,233 @@
     <style>
         .workout-card {
             transition: all 0.2s ease;
+            cursor: grab;
         }
-        .workout-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        .workout-card:active {
+            cursor: grabbing;
+            transform: rotate(2deg) scale(1.05);
         }
-        .sortable-ghost {
-            opacity: 0.4;
-        }
-        .sortable-chosen {
+        .workout-card.dragging {
+            opacity: 0.5;
             transform: rotate(5deg);
         }
-        .confetti-piece {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            background: #5D5CDE;
-            animation: confetti 3s ease-out forwards;
+        .day-slot {
+            min-height: 120px;
+            transition: background-color 0.2s ease;
         }
-        .celebration-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 9999;
+        .day-slot.drag-over {
+            background-color: rgba(93, 92, 222, 0.1);
+            border: 2px dashed rgba(93, 92, 222, 0.3);
         }
-        .xp-bar {
-            background: linear-gradient(90deg, #FFD700, #FFA500);
-            transition: width 0.8s ease-out;
+        .completed-workout {
+            opacity: 0.7;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-color: #059669;
         }
-        .challenge-glow {
-            box-shadow: 0 0 15px rgba(34, 197, 94, 0.5);
-            animation: pulseGlow 2s infinite;
-        }
-        .record-badge {
-            background: linear-gradient(45deg, #FFD700, #FF6B35);
-            background-clip: text;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .modal-backdrop {
+            backdrop-filter: blur(4px);
         }
     </style>
 </head>
-<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-white min-h-screen">
-    <div class="container mx-auto px-4 py-6 max-w-7xl">
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
+    <div id="app" class="max-w-7xl mx-auto px-4 py-6">
         <!-- Header -->
-        <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-            <div class="text-center sm:text-left">
-                <h1 class="text-3xl font-bold text-primary">Marathon Training</h1>
-                <div class="flex items-center gap-3 mt-2">
-                    <div class="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full font-bold text-sm">
-                        Level <span id="currentLevel">1</span>
-                    </div>
-                    <div class="text-sm text-gray-600 dark:text-gray-400">
-                        <span id="currentXP">0</span> / <span id="nextLevelXP">100</span> XP
-                    </div>
-                </div>
-                <div class="w-48 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mt-1">
-                    <div id="xpBar" class="xp-bar h-2 rounded-full" style="width: 0%"></div>
-                </div>
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="text-4xl font-bold text-primary">Marathon Training Calendar</h1>
+                <p class="text-gray-600 dark:text-gray-400">Professional training plan with flexible scheduling</p>
             </div>
-            <div class="flex items-center gap-4">
-                <select id="planDuration" class="px-4 py-2 text-base border rounded-lg dark:bg-gray-800 dark:border-gray-600">
-                    <option value="40">40 Week Plan</option>
-                    <option value="32">32 Week Plan</option>
-                    <option value="24">24 Week Plan</option>
-                    <option value="16">16 Week Plan</option>
-                </select>
-                <button id="challengesBtn" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition relative challenge-glow">
-                    🎯 Challenges
-                    <span id="newChallengeBadge" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center hidden animate-pulse">!</span>
+            <div class="flex gap-3">
+                <button onclick="showPaceSettings()" class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 px-4 py-2 rounded-lg font-medium transition-colors">
+                    ⚙️ Adjust Paces
                 </button>
-                <button id="achievementsBtn" class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition relative">
-                    🏆 Achievements
-                    <span id="newAchievementBadge" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center hidden animate-pulse">!</span>
+                <button onclick="showProgress()" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-medium transition-colors">
+                    📊 Progress
                 </button>
-                <button id="paceSettings" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition">
-                    Pace Settings
-                </button>
+           
             </div>
         </div>
+        
+        <div class="bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl p-6 mt-4 shadow-lg">
+    <h3 class="text-2xl font-bold mb-2 text-center">Total Distance Covered</h3>
+    <p id="total-distance" class="text-4xl font-extrabold text-center">0 km</p>
+</div>
 
-        <!-- Enhanced Progress Dashboard -->
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-            <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-4 rounded-lg">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="text-lg font-semibold">Experience</h3>
-                        <p id="totalXP" class="text-2xl font-bold">0 XP</p>
-                        <p class="text-xs opacity-80">+<span id="streakMultiplier">1.0</span>x multiplier</p>
-                    </div>
-                    <div class="text-3xl">⭐</div>
-                </div>
-            </div>
-            <div class="bg-gradient-to-br from-green-500 to-green-600 text-white p-4 rounded-lg">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="text-lg font-semibold">Streak</h3>
-                        <p id="currentStreak" class="text-2xl font-bold">0 days</p>
-                        <p class="text-xs opacity-80">Best: <span id="longestStreak">0</span> days</p>
-                    </div>
-                    <div id="streakIcon" class="text-3xl">🔥</div>
-                </div>
-            </div>
-            <div class="bg-gradient-to-br from-purple-500 to-purple-600 text-white p-4 rounded-lg">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="text-lg font-semibold">Distance</h3>
-                        <p id="totalDistance" class="text-2xl font-bold">0 km</p>
-                        <p class="text-xs opacity-80">Personal best: <span id="longestRun">0</span>km</p>
-                    </div>
-                    <div class="text-3xl">🏃</div>
-                </div>
-            </div>
-            <div class="bg-gradient-to-br from-orange-500 to-orange-600 text-white p-4 rounded-lg">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="text-lg font-semibold">Achievements</h3>
-                        <p id="achievementCount" class="text-2xl font-bold">0/42</p>
-                        <p class="text-xs opacity-80">Weekly streak: <span id="weeklyStreak">0</span></p>
-                    </div>
-                    <div class="text-3xl">🏆</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Daily & Weekly Challenges -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-            <div class="bg-gradient-to-r from-green-400 to-green-600 text-white p-4 rounded-lg">
-                <h3 class="font-bold mb-2 flex items-center gap-2">
-                    🎯 Daily Challenge
-                    <span id="dailyChallengeTimer" class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded"></span>
-                </h3>
-                <div id="dailyChallengeContent">
-                    <p id="dailyChallengeDesc" class="text-sm opacity-90 mb-2">Complete any workout today</p>
-                    <div class="flex justify-between items-center">
-                        <span class="text-sm">Reward: <span id="dailyChallengeReward">+50 XP</span></span>
-                        <span id="dailyChallengeStatus" class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded">Active</span>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-gradient-to-r from-purple-400 to-purple-600 text-white p-4 rounded-lg">
-                <h3 class="font-bold mb-2 flex items-center gap-2">
-                    🏆 Weekly Challenge
-                    <span id="weeklyChallengeTimer" class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded"></span>
-                </h3>
-                <div id="weeklyChallengeContent">
-                    <p id="weeklyChallengeDesc" class="text-sm opacity-90 mb-2">Complete 3 workouts this week</p>
-                    <div class="flex justify-between items-center">
-                        <span class="text-sm">Reward: <span id="weeklyChallengeReward">+200 XP</span></span>
-                        <span id="weeklyChallengeStatus" class="text-xs bg-white bg-opacity-20 px-2 py-1 rounded">
-                            <span id="weeklyProgress">0</span>/<span id="weeklyGoal">3</span>
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Week Progress -->
-        <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg mb-6">
-            <h3 class="font-semibold mb-3 flex items-center gap-2">
-                Week Progress
-                <span id="weekProgressPercent" class="text-sm text-gray-600 dark:text-gray-400">(0%)</span>
-                <span id="motivationalMessage" class="text-sm text-primary font-medium ml-auto"></span>
-            </h3>
-            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 mb-3">
-                <div id="weekProgressBar" class="bg-gradient-to-r from-primary to-purple-600 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
-            </div>
-            <div class="grid grid-cols-3 gap-4 text-sm">
-                <div class="text-center">
-                    <div class="font-semibold" id="completedWorkouts">0</div>
-                    <div class="text-gray-600 dark:text-gray-400">Completed</div>
-                </div>
-                <div class="text-center">
-                    <div class="font-semibold" id="weekDistance">0 km</div>
-                    <div class="text-gray-600 dark:text-gray-400">This Week</div>
-                </div>
-                <div class="text-center">
-                    <div class="font-semibold" id="weekXP">0 XP</div>
-                    <div class="text-gray-600 dark:text-gray-400">Experience</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Week Navigation -->
-        <div class="flex items-center justify-between mb-6 bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-            <button id="prevWeek" class="bg-gray-200 dark:bg-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition">
-                ← Previous
-            </button>
-            <div class="text-center">
-                <h2 id="weekTitle" class="text-xl font-semibold">Week 1</h2>
-                <p id="weekDates" class="text-gray-600 dark:text-gray-400 text-sm"></p>
-            </div>
-            <button id="nextWeek" class="bg-gray-200 dark:bg-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition">
-                Next →
-            </button>
-        </div>
-
-        <!-- Calendar Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-7 gap-4 mb-6">
-            <div class="lg:col-span-7">
-                <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-7 gap-4" id="calendarGrid">
-                    <!-- Calendar days will be populated by JavaScript -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Legend -->
-        <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-            <h3 class="font-semibold mb-3">Workout Types & Rewards</h3>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div class="flex items-center gap-2">
-                    <div class="w-4 h-4 bg-longRun rounded"></div>
-                    <span class="text-sm">Long Run (50 XP)</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <div class="w-4 h-4 bg-speedRun rounded"></div>
-                    <span class="text-sm">Speed/Interval (40 XP)</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <div class="w-4 h-4 bg-tempoRun rounded"></div>
-                    <span class="text-sm">Tempo Run (30 XP)</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <div class="w-4 h-4 bg-easyRun rounded"></div>
-                    <span class="text-sm">Easy Run (20 XP)</span>
-                </div>
-            </div>
-        </div>
+   <!-- Weekly Navigation -->
+  <div class="flex items-center justify-between mb-6 bg-white dark:bg-gray-800 rounded-xl p-4">
+    <button onclick="changeWeek(-1)" class="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-colors">
+        ← Previous
+    </button>
+    <div class="text-center">
+        <h2 id="week-title" class="text-2xl font-bold text-primary">Week 1</h2>
+        <div id="week-subtitle" class="text-sm text-gray-600 dark:text-gray-400">Aerobic Base & Routine Building</div>
+        <div id="week-dates" class="text-xs text-gray-500 dark:text-gray-400 mt-1">16/06 - 23/06</div> <!-- Date range -->
+        <!-- Dropdown for selecting weeks -->
+        <select id="week-dropdown" onchange="selectWeek()" class="mt-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 rounded-lg">
+            <!-- Dynamic options will be populated using JavaScript -->
+        </select>
     </div>
-
-    <!-- Challenges Modal -->
-    <div id="challengesModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-bold">🎯 Challenges & Records</h3>
-                <button id="closeChallengesModal" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
-            </div>
-            
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div>
-                    <h4 class="text-xl font-semibold mb-4">🏅 Personal Records</h4>
-                    <div class="space-y-3" id="personalRecords">
-                        <!-- Personal records will be populated here -->
-                    </div>
-                </div>
-                <div>
-                    <h4 class="text-xl font-semibold mb-4">🎖️ Progress Milestones</h4>
-                    <div class="space-y-3" id="progressMilestones">
-                        <!-- Progress milestones will be populated here -->
-                    </div>
-                </div>
-            </div>
+    <button onclick="changeWeek(1)" class="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-colors">
+        Next →
+    </button>
+</div>
+<!-- Weekly Progress Feature -->
+<div id="weekly-progress" class="flex items-center justify-between mb-6 bg-white dark:bg-gray-800 rounded-xl p-4">
+    <div class="flex flex-col">
+        <div class="text-sm text-gray-600 dark:text-gray-400 mb-2">Weekly Progress</div>
+        <div class="relative w-full bg-gray-200 dark:bg-gray-700 rounded-lg h-6">
+            <div id="weekly-progress-bar" class="absolute top-0 left-0 h-6 bg-primary rounded-lg transition-all"></div>
         </div>
+        <div id="weekly-progress-text" class="text-sm mt-1 text-right text-gray-600 dark:text-gray-400">0% workouts completed</div>
     </div>
-
-    <!-- Achievements Modal -->
-    <div id="achievementsModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-bold">🏆 Achievements & Medals</h3>
-                <button id="closeAchievementsModal" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
-            </div>
-            
-            <div class="mb-4">
-                <div class="flex gap-2 flex-wrap">
-                    <button class="achievement-filter-btn bg-primary text-white px-3 py-1 rounded text-sm" data-category="all">All</button>
-                    <button class="achievement-filter-btn bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded text-sm" data-category="progress">Progress</button>
-                    <button class="achievement-filter-btn bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded text-sm" data-category="consistency">Consistency</button>
-                    <button class="achievement-filter-btn bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded text-sm" data-category="performance">Performance</button>
-                    <button class="achievement-filter-btn bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded text-sm" data-category="special">Special</button>
-                </div>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="achievementsList">
-                <!-- Achievements will be populated here -->
-            </div>
+</div>
+        <!-- Weekly Calendar -->
+        <div id="weekly-calendar" class="grid grid-cols-1 md:grid-cols-7 gap-4 mb-8">
+            <!-- Calendar days will be populated here -->
         </div>
-    </div>
 
-    <!-- Pace Settings Modal -->
-    <div id="paceModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg max-w-md w-full mx-4">
-            <h3 class="text-xl font-semibold mb-4">Pace Settings</h3>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium mb-1">Long Run Pace (min:sec/km)</label>
-                    <input type="text" id="longRunPace" value="6:00" class="w-full px-3 py-2 text-base border rounded-lg dark:bg-gray-700 dark:border-gray-600" placeholder="6:00">
+        <!-- Workout Legend -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl p-6">
+            <h3 class="text-lg font-semibold mb-4">Workout Types</h3>
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 bg-blue-500 rounded"></div>
+                    <span>Long Run</span>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Tempo Run Pace (min:sec/km)</label>
-                    <input type="text" id="tempoRunPace" value="5:30" class="w-full px-3 py-2 text-base border rounded-lg dark:bg-gray-700 dark:border-gray-600" placeholder="5:30">
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 bg-orange-500 rounded"></div>
+                    <span>Tempo Run</span>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Speed/Interval Pace (min:sec/km)</label>
-                    <input type="text" id="speedRunPace" value="5:00" class="w-full px-3 py-2 text-base border rounded-lg dark:bg-gray-700 dark:border-gray-600" placeholder="5:00">
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 bg-red-500 rounded"></div>
+                    <span>Speed/Intervals</span>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Easy Run Pace (min:sec/km)</label>
-                    <input type="text" id="easyRunPace" value="6:30" class="w-full px-3 py-2 text-base border rounded-lg dark:bg-gray-700 dark:border-gray-600" placeholder="6:30">
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 bg-green-500 rounded"></div>
+                    <span>Easy Run</span>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Marathon Goal Pace (min:sec/km)</label>
-                    <input type="text" id="marathonPace" value="5:41" class="w-full px-3 py-2 text-base border rounded-lg dark:bg-gray-700 dark:border-gray-600" placeholder="5:41">
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 bg-purple-500 rounded"></div>
+                    <span>Race</span>
                 </div>
-            </div>
-            <div class="flex gap-3 mt-6">
-                <button id="savePaces" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition flex-1">
-                    Save
-                </button>
-                <button id="closePaceModal" class="bg-gray-300 dark:bg-gray-600 px-4 py-2 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition flex-1">
-                    Cancel
-                </button>
             </div>
         </div>
     </div>
 
     <!-- Workout Detail Modal -->
-    <div id="workoutModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <h3 id="workoutTitle" class="text-xl font-semibold mb-4">Workout Details</h3>
-            <div id="workoutContent" class="mb-6">
-                <!-- Workout details will be populated here -->
-            </div>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium mb-1">Actual Distance (km)</label>
-                    <input type="number" id="actualDistance" step="0.1" min="0" class="w-full px-3 py-2 text-base border rounded-lg dark:bg-gray-700 dark:border-gray-600">
+    <div id="workout-modal" class="hidden fixed inset-0 z-50 modal-backdrop bg-black/50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 id="modal-title" class="text-2xl font-bold"></h3>
+                    <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-2xl">×</button>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Average Pace (min:sec/km)</label>
-                    <input type="text" id="actualPace" class="w-full px-3 py-2 text-base border rounded-lg dark:bg-gray-700 dark:border-gray-600" placeholder="6:00">
+                
+                <div id="modal-content" class="space-y-4">
+                    <!-- Modal content will be populated here -->
                 </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Effort Level (1-10)</label>
-                    <div class="flex gap-2">
-                        <input type="range" id="effortLevel" min="1" max="10" value="5" class="flex-1">
-                        <span id="effortValue" class="text-sm font-medium w-8">5</span>
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Notes</label>
-                    <textarea id="workoutNotes" rows="3" class="w-full px-3 py-2 text-base border rounded-lg dark:bg-gray-700 dark:border-gray-600" placeholder="How did the workout feel?"></textarea>
+                
+                <div class="flex gap-3 mt-6">
+                    <button id="complete-btn" onclick="completeWorkout()" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-medium transition-colors">
+                        ✅ Mark Complete
+                    </button>
+                    <button onclick="closeModal()" class="px-6 py-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg font-medium transition-colors">
+                        Cancel
+                    </button>
                 </div>
             </div>
-            <div class="flex gap-3 mt-6">
-                <button id="completeWorkout" class="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-lg hover:from-green-600 hover:to-green-700 transition flex-1 font-semibold text-lg animate-pulse-glow">
-                    🎉 Complete Workout
-                </button>
-                <button id="closeWorkoutModal" class="bg-gray-300 dark:bg-gray-600 px-4 py-2 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-500 transition">
+        </div>
+    </div>
+
+    <!-- Pace Settings Modal -->
+    <div id="pace-modal" class="hidden fixed inset-0 z-50 modal-backdrop bg-black/50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl max-w-md w-full">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-2xl font-bold">Adjust Training Paces</h3>
+                    <button onclick="closePaceModal()" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-2xl">×</button>
+                </div>
+                
+                <div id="pace-settings" class="space-y-4">
+                    <!-- Pace settings will be populated here -->
+                </div>
+                
+                <div class="flex gap-3 mt-6">
+                    <button onclick="savePaceSettings()" class="flex-1 bg-primary hover:bg-primary-dark text-white py-3 px-4 rounded-lg font-medium transition-colors">
+                        Save Changes
+                    </button>
+                    <button onclick="closePaceModal()" class="px-6 py-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg font-medium transition-colors">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Modal -->
+    <div id="progress-modal" class="hidden fixed inset-0 z-50 modal-backdrop bg-black/50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-2xl font-bold">Training Progress</h3>
+                    <button onclick="closeProgressModal()" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-2xl">×</button>
+                </div>
+                
+                <div id="progress-content" class="space-y-6">
+                    <!-- Progress content will be populated here -->
+                </div>
+                
+                <button onclick="closeProgressModal()" class="w-full mt-6 bg-primary hover:bg-primary-dark text-white py-3 px-4 rounded-lg font-medium transition-colors">
                     Close
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Level Up Modal -->
-    <div id="levelUpModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-        <div class="bg-white dark:bg-gray-800 p-8 rounded-lg max-w-md w-full mx-4 text-center animate-bounce-in">
-            <div class="text-6xl mb-4 animate-level-up">🌟</div>
-            <h3 class="text-3xl font-bold mb-2 text-yellow-500 animate-level-up">LEVEL UP!</h3>
-            <h4 class="text-xl font-semibold mb-2">You reached Level <span id="newLevel">2</span>!</h4>
-            <p class="text-gray-600 dark:text-gray-400 mb-4">Your dedication is paying off!</p>
-            <div class="text-lg font-semibold text-primary mb-6">Multiplier increased to <span id="newMultiplier">1.1</span>x!</div>
-            <button id="closeLevelUpModal" class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90 transition">
-                Continue Training! 💪
-            </button>
+    <!-- Data Management Modal -->
+    <div id="data-modal" class="hidden fixed inset-0 z-50 modal-backdrop bg-black/50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl max-w-md w-full">
+            <div class="p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-2xl font-bold">Data Management</h3>
+                    <button onclick="closeDataModal()" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-2xl">×</button>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4">
+                        <h4 class="font-semibold text-blue-800 dark:text-blue-200 mb-2">Auto-Save Status</h4>
+                        <p class="text-sm text-blue-700 dark:text-blue-300">Your progress is automatically saved using browser storage (localStorage or cookies).</p>
+                        <div class="mt-2 text-xs text-blue-600 dark:text-blue-400">
+                            <div>✅ Storage Available: <span id="storage-status">Detecting...</span></div>
+                            <div>📊 Data Size: <span id="data-size">Calculating...</span></div>
+                            <div>💾 Storage Method: <span id="storage-method">Auto-detecting...</span></div>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-3">
+                        <button onclick="exportData()" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-medium transition-colors">
+                            📥 Export Progress Data
+                        </button>
+                        
+                        <div class="relative">
+                            <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(event)">
+                            <button onclick="document.getElementById('import-file').click()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-colors">
+                                📤 Import Progress Data
+                            </button>
+                        </div>
+                        
+                        <button onclick="confirmClearData()" class="w-full bg-red-600 hover:bg-red-700 text-white py-3 px-4 rounded-lg font-medium transition-colors">
+                            🗑️ Clear All Progress
+                        </button>
+                    </div>
+                </div>
+                
+                <button onclick="closeDataModal()" class="w-full mt-6 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 py-3 px-4 rounded-lg font-medium transition-colors">
+                    Close
+                </button>
+            </div>
         </div>
     </div>
-
-    <!-- Achievement Earned Modal -->
-    <div id="achievementEarnedModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-        <div class="bg-white dark:bg-gray-800 p-8 rounded-lg max-w-md w-full mx-4 text-center animate-bounce-in">
-            <div class="text-6xl mb-4 animate-medal-earn" id="earnedMedalIcon">🏆</div>
-            <h3 class="text-2xl font-bold mb-2 text-yellow-500">Achievement Unlocked!</h3>
-            <h4 id="earnedAchievementTitle" class="text-xl font-semibold mb-2"></h4>
-            <p id="earnedAchievementDesc" class="text-gray-600 dark:text-gray-400 mb-4"></p>
-            <div class="text-lg font-semibold text-primary mb-6">+<span id="earnedXP">0</span> XP!</div>
-            <button id="closeAchievementModal" class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90 transition">
-                Awesome! 🎉
-            </button>
-        </div>
-    </div>
-
-    <!-- Challenge Complete Modal -->
-    <div id="challengeCompleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden z-50">
-        <div class="bg-white dark:bg-gray-800 p-8 rounded-lg max-w-md w-full mx-4 text-center animate-bounce-in">
-            <div class="text-6xl mb-4">🎯</div>
-            <h3 class="text-2xl font-bold mb-2 text-green-500">Challenge Complete!</h3>
-            <h4 id="completedChallengeTitle" class="text-xl font-semibold mb-2"></h4>
-            <div class="text-lg font-semibold text-primary mb-6">+<span id="challengeXP">0</span> XP Bonus!</div>
-            <button id="closeChallengeModal" class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90 transition">
-                Keep Going! 🚀
-            </button>
-        </div>
-    </div>
-
-    <!-- Celebration Overlay -->
-    <div id="celebrationOverlay" class="celebration-overlay hidden"></div>
 
     <script>
         // Dark mode setup
@@ -481,1135 +265,1433 @@
             }
         });
 
-        // App State
+        // Global state
         let currentWeek = 1;
-        let trainingPlan = {};
         let completedWorkouts = new Set();
+        let totalDistance = 0;
+        let currentStreak = 0;
+        let achievements = [];
+        let currentWorkout = null;
+        let lastCompletionDate = null;
+        let weeklySchedule = {};
+
+        // Default paces (adjustable by user)
         let paces = {
-            longRun: '6:00',
-            tempoRun: '5:30',
-            speedRun: '5:00',
-            easyRun: '6:30',
-            marathon: '5:41'
-        };
-        let workoutHistory = {};
-        let gameStats = {
-            totalPoints: 0,
-            experience: 0,
-            level: 1,
-            currentStreak: 0,
-            longestStreak: 0,
-            totalDistance: 0,
-            lastWorkoutDate: null,
-            achievements: new Set(),
-            newAchievements: [],
-            weeklyGoalStreak: 0,
-            longestWeeklyStreak: 0,
-            personalRecords: {
-                fastestPace: null,
-                longestRun: 0,
-                mostXPInDay: 0,
-                mostXPInWeek: 0
-            },
-            dailyChallenge: null,
-            weeklyChallenge: null,
-            lastChallengeReset: null
+            long: '5:50',
+            tempo: '4:45',
+            speed: '4:10',
+            easy: '6:15',
+            recovery: '6:30'
         };
 
-        // Enhanced Achievements system with categories
-        const achievements = {
-            // Progress Category
-            firstWorkout: { icon: '🎯', title: 'Getting Started', desc: 'Complete your first workout', xp: 50, category: 'progress', check: () => completedWorkouts.size >= 1 },
-            earlyBird: { icon: '🌅', title: 'Early Bird', desc: 'Complete 5 workouts', xp: 100, category: 'progress', check: () => completedWorkouts.size >= 5 },
-            dedicated: { icon: '💪', title: 'Dedicated Runner', desc: 'Complete 10 workouts', xp: 200, category: 'progress', check: () => completedWorkouts.size >= 10 },
-            warrior: { icon: '🗡️', title: 'Training Warrior', desc: 'Complete 25 workouts', xp: 400, category: 'progress', check: () => completedWorkouts.size >= 25 },
-            veteran: { icon: '🎖️', title: 'Veteran Runner', desc: 'Complete 50 workouts', xp: 800, category: 'progress', check: () => completedWorkouts.size >= 50 },
-            
-            // Consistency Category  
-            consistent: { icon: '🔥', title: 'Consistency King', desc: 'Maintain a 7-day streak', xp: 300, category: 'consistency', check: () => gameStats.currentStreak >= 7 },
-            fireStarter: { icon: '🚀', title: 'Fire Starter', desc: 'Maintain a 14-day streak', xp: 500, category: 'consistency', check: () => gameStats.longestStreak >= 14 },
-            unstoppable: { icon: '⚡', title: 'Unstoppable', desc: 'Maintain a 21-day streak', xp: 750, category: 'consistency', check: () => gameStats.longestStreak >= 21 },
-            perfectWeek: { icon: '⭐', title: 'Perfect Week', desc: 'Complete all workouts in a week', xp: 400, category: 'consistency', check: () => checkPerfectWeek() },
-            weeklyChampion: { icon: '👑', title: 'Weekly Champion', desc: 'Complete 3 perfect weeks', xp: 600, category: 'consistency', check: () => gameStats.weeklyGoalStreak >= 3 },
-            
-            // Performance Category
-            centurion: { icon: '💯', title: 'Centurion', desc: 'Run 100km total', xp: 400, category: 'performance', check: () => gameStats.totalDistance >= 100 },
-            halfMarathoner: { icon: '🏃', title: 'Half Marathoner', desc: 'Run 250km total', xp: 600, category: 'performance', check: () => gameStats.totalDistance >= 250 },
-            marathoner: { icon: '🏆', title: 'Future Marathoner', desc: 'Run 500km total', xp: 1000, category: 'performance', check: () => gameStats.totalDistance >= 500 },
-            ultraRunner: { icon: '🦅', title: 'Ultra Runner', desc: 'Run 1000km total', xp: 2000, category: 'performance', check: () => gameStats.totalDistance >= 1000 },
-            speedDemon: { icon: '⚡', title: 'Speed Demon', desc: 'Complete 5 speed workouts', xp: 250, category: 'performance', check: () => Array.from(completedWorkouts).filter(id => getWorkoutById(id)?.type === 'speed').length >= 5 },
-            tempoMaster: { icon: '🎵', title: 'Tempo Master', desc: 'Complete 5 tempo runs', xp: 250, category: 'performance', check: () => Array.from(completedWorkouts).filter(id => getWorkoutById(id)?.type === 'tempo').length >= 5 },
-            longRunHero: { icon: '🦁', title: 'Long Run Hero', desc: 'Complete 5 long runs', xp: 300, category: 'performance', check: () => Array.from(completedWorkouts).filter(id => getWorkoutById(id)?.type === 'long').length >= 5 },
-            
-            // Special Category
-            pointCollector: { icon: '💰', title: 'XP Collector', desc: 'Earn 1000 XP', xp: 200, category: 'special', check: () => gameStats.experience >= 1000 },
-            pointMaster: { icon: '👑', title: 'XP Master', desc: 'Earn 5000 XP', xp: 500, category: 'special', check: () => gameStats.experience >= 5000 },
-            levelUp5: { icon: '🌟', title: 'Rising Star', desc: 'Reach level 5', xp: 300, category: 'special', check: () => gameStats.level >= 5 },
-            levelUp10: { icon: '💫', title: 'Training Master', desc: 'Reach level 10', xp: 600, category: 'special', check: () => gameStats.level >= 10 },
-            achievementHunter: { icon: '🎖️', title: 'Achievement Hunter', desc: 'Unlock 15 achievements', xp: 400, category: 'special', check: () => gameStats.achievements.size >= 15 },
-            challengeChampion: { icon: '🏅', title: 'Challenge Champion', desc: 'Complete 10 daily challenges', xp: 350, category: 'special', check: () => checkChallengeCount() },
-            perfectionist: { icon: '💎', title: 'Perfectionist', desc: 'Complete 5 perfect weeks', xp: 800, category: 'special', check: () => gameStats.weeklyGoalStreak >= 5 }
+        // Training plan data following the provided format
+        const trainingPlan = {
+            1: {
+        title: "Aerobic Base & Routine Building",
+        workouts: [
+          { id: "w1-long", type: "long", distance: 12, pace: "6:10", description: "Long Run: 12 km @ 6:10/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w1-tempo", type: "tempo", distance: 5, pace: "4:55", description: "Tempo Run: 5 km @ 4:55/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w1-speed", type: "speed", distance: 3, pace: "4:15", description: "6×400m @ 4:15/km", details: `6×400m @ 4:15/km
+• 1:00 jog recovery
+• 1km warm-up, 1km cool-down
+• Total distance: ~3km` },
+        ]
+      },
+      2: {
+        title: "Aerobic Base & Routine Building",
+        workouts: [
+          { id: "w2-long", type: "long", distance: 13, pace: "6:10", description: "Long Run: 13 km @ 6:10/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w2-tempo", type: "tempo", distance: 6, pace: "4:55", description: "Tempo Run: 6 km @ 4:55/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w2-speed", type: "speed", distance: 3, pace: "4:15", description: "6×400m @ 4:15/km", details: `6×400m @ 4:15/km
+• 1:00 jog recovery
+• 1km warm-up, 1km cool-down
+• Total distance: ~3km` },
+        ]
+      },
+      3: {
+        title: "Aerobic Base & Routine Building",
+        workouts: [
+          { id: "w3-long", type: "long", distance: 14, pace: "6:10", description: "Long Run: 14 km @ 6:10/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w3-tempo", type: "tempo", distance: 4, pace: "4:55", description: "Tempo Run: 4 km @ 4:55/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w3-speed", type: "speed", distance: 3, pace: "4:15", description: "6×400m @ 4:15/km", details: `6×400m @ 4:15/km
+• 1:00 jog recovery
+• 1km warm-up, 1km cool-down
+• Total distance: ~3km` },
+        ]
+      },
+      4: {
+        title: "Aerobic Base & Routine Building",
+        workouts: [
+          { id: "w4-long", type: "long", distance: 15, pace: "6:10", description: "Long Run: 15 km @ 6:10/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w4-tempo", type: "tempo", distance: 5, pace: "4:55", description: "Tempo Run: 5 km @ 4:55/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w4-speed", type: "speed", distance: 3, pace: "4:15", description: "6×400m @ 4:15/km", details: `6×400m @ 4:15/km
+• 1:00 jog recovery
+• 1km warm-up, 1km cool-down
+• Total distance: ~3km` },
+        ]
+      },
+      5: {
+        title: "Aerobic Base & Routine Building",
+        workouts: [
+          { id: "w5-long", type: "long", distance: 16, pace: "6:10", description: "Long Run: 16 km @ 6:10/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w5-tempo", type: "tempo", distance: 6, pace: "4:55", description: "Tempo Run: 6 km @ 4:55/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w5-speed", type: "speed", distance: 3, pace: "4:15", description: "6×400m @ 4:15/km", details: `6×400m @ 4:15/km
+• 1:00 jog recovery
+• 1km warm-up, 1km cool-down
+• Total distance: ~3km` },
+        ]
+      },
+      6: {
+        title: "Aerobic Base & Routine Building",
+        workouts: [
+          { id: "w6-long", type: "long", distance: 17, pace: "6:10", description: "Long Run: 17 km @ 6:10/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w6-tempo", type: "tempo", distance: 4, pace: "4:55", description: "Tempo Run: 4 km @ 4:55/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w6-speed", type: "speed", distance: 3, pace: "4:15", description: "6×400m @ 4:15/km", details: `6×400m @ 4:15/km
+• 1:00 jog recovery
+• 1km warm-up, 1km cool-down
+• Total distance: ~3km` },
+        ]
+      },
+      7: {
+        title: "Aerobic Base & Routine Building",
+        workouts: [
+          { id: "w7-long", type: "long", distance: 18, pace: "6:10", description: "Long Run: 18 km @ 6:10/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w7-tempo", type: "tempo", distance: 5, pace: "4:55", description: "Tempo Run: 5 km @ 4:55/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w7-speed", type: "speed", distance: 3, pace: "4:15", description: "6×400m @ 4:15/km", details: `6×400m @ 4:15/km
+• 1:00 jog recovery
+• 1km warm-up, 1km cool-down
+• Total distance: ~3km` },
+        ]
+      },
+      8: {
+        title: "Aerobic Base & Routine Building",
+        workouts: [
+          { id: "w8-long", type: "long", distance: 19, pace: "6:10", description: "Long Run: 19 km @ 6:10/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w8-tempo", type: "tempo", distance: 6, pace: "4:55", description: "Tempo Run: 6 km @ 4:55/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w8-speed", type: "speed", distance: 3, pace: "4:15", description: "6×400m @ 4:15/km", details: `6×400m @ 4:15/km
+• 1:00 jog recovery
+• 1km warm-up, 1km cool-down
+• Total distance: ~3km` },
+        ]
+      },
+      9: {
+        title: "Endurance & Threshold Development",
+        workouts: [
+          { id: "w9-long", type: "long", distance: 18.0, pace: "6:00", description: "Long Run: 18.0 km @ 6:00/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w9-tempo", type: "tempo", distance: 6, pace: "4:45", description: "Tempo Run: 6 km @ 4:45/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w9-speed", type: "speed", distance: 4, pace: "4:20", description: "5×800m @ 4:20/km", details: `5×800m @ 4:20/km
+• 400m jog recovery
+• 1km warm-up, 1km cool-down
+• Total distance: ~4km` },
+        ]
+      },
+      10: {
+        title: "Endurance & Threshold Development",
+        workouts: [
+          { id: "w10-long", type: "long", distance: 18.5, pace: "6:00", description: "Long Run: 18.5 km @ 6:00/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w10-tempo", type: "tempo", distance: 6, pace: "4:45", description: "Tempo Run: 6 km @ 4:45/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w10-speed", type: "speed", distance: 4, pace: "4:20", description: "5×800m @ 4:20/km", details: `5×800m @ 4:20/km
+• 400m jog recovery
+• 1km warm-up, 1km cool-down
+• Total distance: ~4km` },
+        ]
+      },
+      11: {
+        title: "Endurance & Threshold Development",
+        workouts: [
+          { id: "w11-long", type: "long", distance: 19.0, pace: "6:00", description: "Long Run: 19.0 km @ 6:00/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w11-tempo", type: "tempo", distance: 6, pace: "4:45", description: "Tempo Run: 6 km @ 4:45/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w11-speed", type: "speed", distance: 4, pace: "4:20", description: "5×800m @ 4:20/km", details: `5×800m @ 4:20/km
+• 400m jog recovery
+• 1km warm-up, 1km cool-down
+• Total distance: ~4km` },
+        ]
+      },
+      12: {
+        title: "Endurance & Threshold Development",
+        workouts: [
+          { id: "w12-long", type: "long", distance: 19.5, pace: "6:00", description: "Long Run: 19.5 km @ 6:00/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w12-tempo", type: "tempo", distance: 6, pace: "4:45", description: "Tempo Run: 6 km @ 4:45/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w12-speed", type: "speed", distance: 4, pace: "4:20", description: "5×800m @ 4:20/km", details: `5×800m @ 4:20/km
+• 400m jog recovery
+• 1km warm-up, 1km cool-down
+• Total distance: ~4km` },
+        ]
+      },
+      13: {
+        title: "Endurance & Threshold Development",
+        workouts: [
+          { id: "w13-long", type: "long", distance: 20.0, pace: "6:00", description: "Long Run: 20.0 km @ 6:00/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w13-tempo", type: "tempo", distance: 6, pace: "4:45", description: "Tempo Run: 6 km @ 4:45/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w13-speed", type: "speed", distance: 4, pace: "4:20", description: "5×800m @ 4:20/km", details: `5×800m @ 4:20/km
+• 400m jog recovery
+• 1km warm-up, 1km cool-down
+• Total distance: ~4km` },
+        ]
+      },
+      14: {
+        title: "Endurance & Threshold Development",
+        workouts: [
+          { id: "w14-long", type: "long", distance: 20.5, pace: "6:00", description: "Long Run: 20.5 km @ 6:00/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w14-tempo", type: "tempo", distance: 6, pace: "4:45", description: "Tempo Run: 6 km @ 4:45/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w14-speed", type: "speed", distance: 4, pace: "4:20", description: "5×800m @ 4:20/km", details: `5×800m @ 4:20/km
+• 400m jog recovery
+• 1km warm-up, 1km cool-down
+• Total distance: ~4km` },
+        ]
+      },
+      15: {
+        title: "Endurance & Threshold Development",
+        workouts: [
+          { id: "w15-long", type: "long", distance: 21.0, pace: "6:00", description: "Long Run: 21.0 km @ 6:00/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w15-tempo", type: "tempo", distance: 6, pace: "4:45", description: "Tempo Run: 6 km @ 4:45/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w15-speed", type: "speed", distance: 4, pace: "4:20", description: "5×800m @ 4:20/km", details: `5×800m @ 4:20/km
+• 400m jog recovery
+• 1km warm-up, 1km cool-down
+• Total distance: ~4km` },
+        ]
+      },
+      16: {
+        title: "Endurance & Threshold Development",
+        workouts: [
+          { id: "w16-long", type: "long", distance: 21.5, pace: "6:00", description: "Long Run: 21.5 km @ 6:00/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w16-tempo", type: "tempo", distance: 6, pace: "4:45", description: "Tempo Run: 6 km @ 4:45/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w16-speed", type: "speed", distance: 4, pace: "4:20", description: "5×800m @ 4:20/km", details: `5×800m @ 4:20/km
+• 400m jog recovery
+• 1km warm-up, 1km cool-down
+• Total distance: ~4km` },
+        ]
+      },
+      17: {
+        title: "Marathon Pace & Endurance Building",
+        workouts: [
+          { id: "w17-long", type: "long", distance: 22, pace: "5:55", description: "Long Run: 22 km @ 5:55/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w17-tempo", type: "tempo", distance: 7, pace: "4:50", description: "Tempo Run: 7 km @ 4:50/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w17-speed", type: "speed", distance: 5, pace: "4:20", description: "4×1km @ 4:20/km", details: `4×1km @ 4:20/km
+• 2:00 rest
+• 1km warm-up, 1km cool-down
+• Total distance: ~5km` },
+        ]
+      },
+      18: {
+        title: "Marathon Pace & Endurance Building",
+        workouts: [
+          { id: "w18-long", type: "long", distance: 23, pace: "5:55", description: "Long Run: 23 km @ 5:55/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w18-tempo", type: "tempo", distance: 7, pace: "4:50", description: "Tempo Run: 7 km @ 4:50/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w18-speed", type: "speed", distance: 5, pace: "4:20", description: "4×1km @ 4:20/km", details: `4×1km @ 4:20/km
+• 2:00 rest
+• 1km warm-up, 1km cool-down
+• Total distance: ~5km` },
+        ]
+      },
+      19: {
+        title: "Marathon Pace & Endurance Building",
+        workouts: [
+          { id: "w19-long", type: "long", distance: 24, pace: "5:55", description: "Long Run: 24 km @ 5:55/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w19-tempo", type: "tempo", distance: 7, pace: "4:50", description: "Tempo Run: 7 km @ 4:50/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w19-speed", type: "speed", distance: 5, pace: "4:20", description: "4×1km @ 4:20/km", details: `4×1km @ 4:20/km
+• 2:00 rest
+• 1km warm-up, 1km cool-down
+• Total distance: ~5km` },
+        ]
+      },
+      20: {
+        title: "Marathon Pace & Endurance Building",
+        workouts: [
+          { id: "w20-long", type: "long", distance: 25, pace: "5:55", description: "Long Run: 25 km @ 5:55/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w20-tempo", type: "tempo", distance: 7, pace: "4:50", description: "Tempo Run: 7 km @ 4:50/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w20-speed", type: "speed", distance: 5, pace: "4:20", description: "4×1km @ 4:20/km", details: `4×1km @ 4:20/km
+• 2:00 rest
+• 1km warm-up, 1km cool-down
+• Total distance: ~5km` },
+        ]
+      },
+      21: {
+        title: "Marathon Pace & Endurance Building",
+        workouts: [
+          { id: "w21-long", type: "long", distance: 26, pace: "5:55", description: "Long Run: 26 km @ 5:55/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w21-tempo", type: "tempo", distance: 7, pace: "4:50", description: "Tempo Run: 7 km @ 4:50/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w21-speed", type: "speed", distance: 5, pace: "4:20", description: "4×1km @ 4:20/km", details: `4×1km @ 4:20/km
+• 2:00 rest
+• 1km warm-up, 1km cool-down
+• Total distance: ~5km` },
+        ]
+      },
+      22: {
+        title: "Marathon Pace & Endurance Building",
+        workouts: [
+          { id: "w22-long", type: "long", distance: 27, pace: "5:55", description: "Long Run: 27 km @ 5:55/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w22-tempo", type: "tempo", distance: 7, pace: "4:50", description: "Tempo Run: 7 km @ 4:50/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w22-speed", type: "speed", distance: 5, pace: "4:20", description: "4×1km @ 4:20/km", details: `4×1km @ 4:20/km
+• 2:00 rest
+• 1km warm-up, 1km cool-down
+• Total distance: ~5km` },
+        ]
+      },
+      23: {
+        title: "Marathon Pace & Endurance Building",
+        workouts: [
+          { id: "w23-long", type: "long", distance: 28, pace: "5:55", description: "Long Run: 28 km @ 5:55/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w23-tempo", type: "tempo", distance: 7, pace: "4:50", description: "Tempo Run: 7 km @ 4:50/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w23-speed", type: "speed", distance: 5, pace: "4:20", description: "4×1km @ 4:20/km", details: `4×1km @ 4:20/km
+• 2:00 rest
+• 1km warm-up, 1km cool-down
+• Total distance: ~5km` },
+        ]
+      },
+      24: {
+        title: "Marathon Pace & Endurance Building",
+        workouts: [
+          { id: "w24-long", type: "long", distance: 29, pace: "5:55", description: "Long Run: 29 km @ 5:55/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w24-tempo", type: "tempo", distance: 7, pace: "4:50", description: "Tempo Run: 7 km @ 4:50/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w24-speed", type: "speed", distance: 5, pace: "4:20", description: "4×1km @ 4:20/km", details: `4×1km @ 4:20/km
+• 2:00 rest
+• 1km warm-up, 1km cool-down
+• Total distance: ~5km` },
+        ]
+      },
+      25: {
+        title: "Peak Specific Marathon Prep",
+        workouts: [
+          { id: "w25-long", type: "long", distance: 26, pace: "5:50", description: "Long Run: 26 km @ 5:50/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w25-tempo", type: "tempo", distance: 10, pace: "4:50", description: "Tempo Run: 10 km @ 4:50/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w25-speed", type: "speed", distance: 6, pace: "4:40", description: "4×2km @ 4:40/km", details: `4×2km @ 4:40/km
+• 3:00 rest
+• 1km warm-up, 1km cool-down
+• Total distance: ~6km` },
+        ]
+      },
+      26: {
+        title: "Peak Specific Marathon Prep",
+        workouts: [
+          { id: "w26-long", type: "long", distance: 27, pace: "5:50", description: "Long Run: 27 km @ 5:50/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w26-tempo", type: "tempo", distance: 10, pace: "4:50", description: "Tempo Run: 10 km @ 4:50/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w26-speed", type: "speed", distance: 6, pace: "4:40", description: "4×2km @ 4:40/km", details: `4×2km @ 4:40/km
+• 3:00 rest
+• 1km warm-up, 1km cool-down
+• Total distance: ~6km` },
+        ]
+      },
+      27: {
+        title: "Peak Specific Marathon Prep",
+        workouts: [
+          { id: "w27-long", type: "long", distance: 28, pace: "5:50", description: "Long Run: 28 km @ 5:50/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w27-tempo", type: "tempo", distance: 10, pace: "4:50", description: "Tempo Run: 10 km @ 4:50/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w27-speed", type: "speed", distance: 6, pace: "4:40", description: "4×2km @ 4:40/km", details: `4×2km @ 4:40/km
+• 3:00 rest
+• 1km warm-up, 1km cool-down
+• Total distance: ~6km` },
+        ]
+      },
+      28: {
+        title: "Peak Specific Marathon Prep",
+        workouts: [
+          { id: "w28-long", type: "long", distance: 29, pace: "5:50", description: "Long Run: 29 km @ 5:50/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w28-tempo", type: "tempo", distance: 10, pace: "4:50", description: "Tempo Run: 10 km @ 4:50/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w28-speed", type: "speed", distance: 6, pace: "4:40", description: "4×2km @ 4:40/km", details: `4×2km @ 4:40/km
+• 3:00 rest
+• 1km warm-up, 1km cool-down
+• Total distance: ~6km` },
+        ]
+      },
+      29: {
+        title: "Peak Specific Marathon Prep",
+        workouts: [
+          { id: "w29-long", type: "long", distance: 30, pace: "5:50", description: "Long Run: 30 km @ 5:50/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w29-tempo", type: "tempo", distance: 10, pace: "4:50", description: "Tempo Run: 10 km @ 4:50/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w29-speed", type: "speed", distance: 6, pace: "4:40", description: "4×2km @ 4:40/km", details: `4×2km @ 4:40/km
+• 3:00 rest
+• 1km warm-up, 1km cool-down
+• Total distance: ~6km` },
+        ]
+      },
+      30: {
+        title: "Peak Specific Marathon Prep",
+        workouts: [
+          { id: "w30-long", type: "long", distance: 31, pace: "5:50", description: "Long Run: 31 km @ 5:50/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w30-tempo", type: "tempo", distance: 10, pace: "4:50", description: "Tempo Run: 10 km @ 4:50/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w30-speed", type: "speed", distance: 6, pace: "4:40", description: "4×2km @ 4:40/km", details: `4×2km @ 4:40/km
+• 3:00 rest
+• 1km warm-up, 1km cool-down
+• Total distance: ~6km` },
+        ]
+      },
+      31: {
+        title: "Peak Specific Marathon Prep",
+        workouts: [
+          { id: "w31-long", type: "long", distance: 32, pace: "5:50", description: "Long Run: 32 km @ 5:50/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w31-tempo", type: "tempo", distance: 10, pace: "4:50", description: "Tempo Run: 10 km @ 4:50/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w31-speed", type: "speed", distance: 6, pace: "4:40", description: "4×2km @ 4:40/km", details: `4×2km @ 4:40/km
+• 3:00 rest
+• 1km warm-up, 1km cool-down
+• Total distance: ~6km` },
+        ]
+      },
+      32: {
+        title: "Peak Specific Marathon Prep",
+        workouts: [
+          { id: "w32-long", type: "long", distance: 33, pace: "5:50", description: "Long Run: 33 km @ 5:50/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w32-tempo", type: "tempo", distance: 10, pace: "4:50", description: "Tempo Run: 10 km @ 4:50/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w32-speed", type: "speed", distance: 6, pace: "4:40", description: "4×2km @ 4:40/km", details: `4×2km @ 4:40/km
+• 3:00 rest
+• 1km warm-up, 1km cool-down
+• Total distance: ~6km` },
+        ]
+      },
+      33: {
+        title: "Sharpening & Speed Maintenance",
+        workouts: [
+          { id: "w33-long", type: "long", distance: 28, pace: "6:00", description: "Long Run: 28 km @ 6:00/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w33-tempo", type: "tempo", distance: 6, pace: "4:45", description: "Tempo Run: 6 km @ 4:45/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w33-speed", type: "speed", distance: 3.5, pace: "4:00", description: "8×400m @ 4:00/km", details: `8×400m @ 4:00/km
+• 1:00 jog recovery
+• 1km warm-up, 1km cool-down
+• Total distance: ~3.5km` },
+        ]
+      },
+      34: {
+        title: "Sharpening & Speed Maintenance",
+        workouts: [
+          { id: "w34-long", type: "long", distance: 29, pace: "6:00", description: "Long Run: 29 km @ 6:00/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w34-tempo", type: "tempo", distance: 6, pace: "4:45", description: "Tempo Run: 6 km @ 4:45/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w34-speed", type: "speed", distance: 3.5, pace: "4:00", description: "8×400m @ 4:00/km", details: `8×400m @ 4:00/km
+• 1:00 jog recovery
+• 1km warm-up, 1km cool-down
+• Total distance: ~3.5km` },
+        ]
+      },
+      35: {
+        title: "Sharpening & Speed Maintenance",
+        workouts: [
+          { id: "w35-long", type: "long", distance: 30, pace: "6:00", description: "Long Run: 30 km @ 6:00/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w35-tempo", type: "tempo", distance: 6, pace: "4:45", description: "Tempo Run: 6 km @ 4:45/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w35-speed", type: "speed", distance: 3.5, pace: "4:00", description: "8×400m @ 4:00/km", details: `8×400m @ 4:00/km
+• 1:00 jog recovery
+• 1km warm-up, 1km cool-down
+• Total distance: ~3.5km` },
+        ]
+      },
+      36: {
+        title: "Sharpening & Speed Maintenance",
+        workouts: [
+          { id: "w36-long", type: "long", distance: 31, pace: "6:00", description: "Long Run: 31 km @ 6:00/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w36-tempo", type: "tempo", distance: 6, pace: "4:45", description: "Tempo Run: 6 km @ 4:45/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w36-speed", type: "speed", distance: 3.5, pace: "4:00", description: "8×400m @ 4:00/km", details: `8×400m @ 4:00/km
+• 1:00 jog recovery
+• 1km warm-up, 1km cool-down
+• Total distance: ~3.5km` },
+        ]
+      },
+      37: {
+        title: "Peak Long Run & Race Simulation",
+        workouts: [
+          { id: "w37-long", type: "long", distance: 34, pace: "5:50", description: "Long Run: 34 km @ 5:50/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w37-tempo", type: "tempo", distance: 5, pace: "5:00", description: "Tempo Run: 5 km @ 5:00/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w37-speed", type: "speed", distance: 3, pace: "4:30", description: "3×1km @ 4:30/km", details: `3×1km @ 4:30/km
+• 2:00 rest
+• 1km warm-up, 1km cool-down
+• Total distance: ~3km` },
+        ]
+      },
+      38: {
+        title: "Taper Phase Begins",
+        workouts: [
+          { id: "w38-long", type: "long", distance: 24, pace: "6:00", description: "Long Run: 24 km @ 6:00/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w38-tempo", type: "tempo", distance: 5, pace: "5:10", description: "Tempo Run: 5 km @ 5:10/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w38-speed", type: "speed", distance: 3, pace: "4:20", description: "4×400m @ 4:20/km", details: `4×400m @ 4:20/km
+• 1:00 jog recovery
+• 1km warm-up, 1km cool-down
+• Total distance: ~3km` },
+        ]
+      },
+      39: {
+        title: "Taper Week 2",
+        workouts: [
+          { id: "w39-long", type: "long", distance: 16, pace: "6:10", description: "Long Run: 16 km @ 6:10/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w39-tempo", type: "tempo", distance: 4, pace: "5:20", description: "Tempo Run: 4 km @ 5:20/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w39-speed", type: "speed", distance: 2.5, pace: "4:30", description: "3×400m @ 4:30/km", details: `3×400m @ 4:30/km
+• 90 sec jog recovery
+• 1km warm-up, 1km cool-down
+• Total distance: ~2.5km` },
+        ]
+      },
+      40: {
+        title: "Race Week & Recovery",
+        workouts: [
+          { id: "w40-long", type: "long", distance: 10, pace: "6:15", description: "Long Run: 10 km @ 6:15/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
+          { id: "w40-tempo", type: "tempo", distance: 3, pace: "5:30", description: "Tempo Run: 3 km @ 5:30/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
+          { id: "w40-speed", type: "speed", distance: 1, pace: "4:00", description: "Strides", details: `Strides
+• 4×100m strides after easy run
+• 1km warm-up, 1km cool-down
+• Total distance: ~1km` },
+        ]
+      },
+    };
+
+        const weekPhases = {
+            1: "Aerobic Base & Routine Building",
+            5: "Building Strength & Mileage", 
+            9: "Race-Pace Development",
+            13: "Endurance Peak Begins",
+            17: "Marathon Specific Work",
+            25: "Peak Marathon Training",
+            29: "Peak Specific Marathon Prep",
+            33: "Sharpening & Speed Maintenance",
+            37: "Taper and Recovery",
+            39: "Taper and Recovery",
+            40: "Race Week"
         };
 
-        // Experience and level system
-        const XP_PER_LEVEL = 100;
-        const workoutXP = {
-            'long': 50,
-            'tempo': 30,
-            'speed': 40,
-            'easy': 20
-        };
-
-        // Daily & Weekly Challenges
-        const dailyChallenges = [
-            { desc: 'Complete any workout today', xp: 50, check: () => checkDailyWorkout() },
-            { desc: 'Run at least 5km today', xp: 75, check: () => checkDailyDistance(5) },
-            { desc: 'Complete a tempo run today', xp: 60, check: () => checkDailyWorkoutType('tempo') },
-            { desc: 'Complete a speed workout today', xp: 70, check: () => checkDailyWorkoutType('speed') },
-            { desc: 'Maintain your streak today', xp: 40, check: () => checkStreakMaintained() }
-        ];
-
-        const weeklyChallenges = [
-            { desc: 'Complete 3 workouts this week', xp: 150, goal: 3, check: () => checkWeeklyWorkouts(3) },
-            { desc: 'Run 20km total this week', xp: 200, goal: 20, check: () => checkWeeklyDistance(20) },
-            { desc: 'Complete all 3 workout types', xp: 250, goal: 3, check: () => checkAllWorkoutTypes() },
-            { desc: 'Complete 4 workouts this week', xp: 300, goal: 4, check: () => checkWeeklyWorkouts(4) },
-            { desc: 'Run 30km total this week', xp: 350, goal: 30, check: () => checkWeeklyDistance(30) }
-        ];
-
-        // Motivational messages
-        const motivationalMessages = [
-            "You're doing great! 💪",
-            "Keep up the momentum! 🚀",
-            "Every step counts! 👟",
-            "You're stronger than yesterday! 💯",
-            "Excellence is a habit! ⭐",
-            "Push beyond your limits! 🔥",
-            "Your future self will thank you! 🙌"
-        ];
-
-        function getWorkoutById(workoutId) {
-            for (let week in trainingPlan) {
-                const workout = trainingPlan[week].workouts.find(w => w.id === workoutId);
-                if (workout) return workout;
-            }
-            return null;
-        }
-
-        function checkPerfectWeek() {
-            const weekPlan = trainingPlan[currentWeek];
-            if (!weekPlan) return false;
-            return weekPlan.workouts.every(workout => workout.completed);
-        }
-
-        function checkChallengeCount() {
-            // This would normally track completed challenges
-            return false; // Placeholder
-        }
-
-        // Challenge checking functions
-        function checkDailyWorkout() {
-            const today = new Date().toDateString();
-            return Array.from(completedWorkouts).some(id => {
-                const workout = workoutHistory[id];
-                return workout && new Date(workout.completedAt).toDateString() === today;
-            });
-        }
-
-        function checkDailyDistance(targetDistance) {
-            const today = new Date().toDateString();
-            let totalDistance = 0;
-            Array.from(completedWorkouts).forEach(id => {
-                const workout = workoutHistory[id];
-                if (workout && new Date(workout.completedAt).toDateString() === today) {
-                    totalDistance += workout.distance;
-                }
-            });
-            return totalDistance >= targetDistance;
-        }
-
-        function checkDailyWorkoutType(type) {
-            const today = new Date().toDateString();
-            return Array.from(completedWorkouts).some(id => {
-                const workout = workoutHistory[id];
-                const workoutData = getWorkoutById(id);
-                return workout && workoutData && 
-                       new Date(workout.completedAt).toDateString() === today &&
-                       workoutData.type === type;
-            });
-        }
-
-        function checkStreakMaintained() {
-            return gameStats.currentStreak > 0;
-        }
-
-        function checkWeeklyWorkouts(target) {
-            const weekWorkouts = getThisWeekWorkouts();
-            return weekWorkouts.length >= target;
-        }
-
-        function checkWeeklyDistance(target) {
-            const weekWorkouts = getThisWeekWorkouts();
-            const totalDistance = weekWorkouts.reduce((sum, w) => sum + w.distance, 0);
-            return totalDistance >= target;
-        }
-
-        function checkAllWorkoutTypes() {
-            const weekWorkouts = getThisWeekWorkouts();
-            const types = new Set(weekWorkouts.map(w => getWorkoutById(w.id)?.type));
-            return types.size >= 3;
-        }
-
-        function getThisWeekWorkouts() {
-            const startOfWeek = new Date();
-            startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay() + 1);
-            startOfWeek.setHours(0, 0, 0, 0);
-            
-            return Array.from(completedWorkouts).map(id => workoutHistory[id])
-                .filter(w => w && new Date(w.completedAt) >= startOfWeek);
-        }
-
-        function getStreakMultiplier() {
-            if (gameStats.currentStreak >= 21) return 2.0;
-            if (gameStats.currentStreak >= 14) return 1.5;
-            if (gameStats.currentStreak >= 7) return 1.2;
-            return 1.0;
-        }
-
-        function calculateLevel(xp) {
-            return Math.floor(xp / XP_PER_LEVEL) + 1;
-        }
-
-        function getXPForNextLevel(level) {
-            return level * XP_PER_LEVEL;
-        }
-
-        function getCurrentLevelXP(xp, level) {
-            return xp - ((level - 1) * XP_PER_LEVEL);
-        }
-
-        function generateDailyChallenge() {
-            const today = new Date().toDateString();
-            if (!gameStats.lastChallengeReset || gameStats.lastChallengeReset !== today) {
-                gameStats.dailyChallenge = dailyChallenges[Math.floor(Math.random() * dailyChallenges.length)];
-                gameStats.dailyChallenge.completed = false;
-                gameStats.lastChallengeReset = today;
-            }
-        }
-
-        function generateWeeklyChallenge() {
-            const startOfWeek = new Date();
-            startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay() + 1);
-            const weekKey = startOfWeek.toISOString().split('T')[0];
-            
-            if (!gameStats.weeklyChallenge || gameStats.weeklyChallenge.week !== weekKey) {
-                gameStats.weeklyChallenge = {
-                    ...weeklyChallenges[Math.floor(Math.random() * weeklyChallenges.length)],
-                    completed: false,
-                    week: weekKey
-                };
-            }
-        }
-
-        function updateStats() {
-            // Update XP and level
-            const newLevel = calculateLevel(gameStats.experience);
-            if (newLevel > gameStats.level) {
-                showLevelUp(newLevel);
-                gameStats.level = newLevel;
-            }
-            
-            const currentLevelXP = getCurrentLevelXP(gameStats.experience, gameStats.level);
-            const nextLevelXP = XP_PER_LEVEL;
-            const xpProgress = (currentLevelXP / nextLevelXP) * 100;
-            
-            document.getElementById('currentLevel').textContent = gameStats.level;
-            document.getElementById('currentXP').textContent = currentLevelXP;
-            document.getElementById('nextLevelXP').textContent = nextLevelXP;
-            document.getElementById('xpBar').style.width = `${xpProgress}%`;
-            document.getElementById('totalXP').textContent = `${gameStats.experience} XP`;
-            
-            // Update multiplier
-            const multiplier = getStreakMultiplier();
-            document.getElementById('streakMultiplier').textContent = multiplier.toFixed(1);
-            
-            // Update streak with fire animation
-            document.getElementById('currentStreak').textContent = `${gameStats.currentStreak} days`;
-            document.getElementById('longestStreak').textContent = gameStats.longestStreak;
-            const streakIcon = document.getElementById('streakIcon');
-            if (gameStats.currentStreak >= 7) {
-                streakIcon.className = 'text-3xl animate-streak-fire';
-                streakIcon.textContent = '🔥';
-            } else {
-                streakIcon.className = 'text-3xl';
-                streakIcon.textContent = '🔥';
-            }
-            
-            // Update distance and records
-            document.getElementById('totalDistance').textContent = `${gameStats.totalDistance.toFixed(1)} km`;
-            document.getElementById('longestRun').textContent = gameStats.personalRecords.longestRun.toFixed(1);
-            
-            // Update achievements count
-            document.getElementById('achievementCount').textContent = `${gameStats.achievements.size}/${Object.keys(achievements).length}`;
-            document.getElementById('weeklyStreak').textContent = gameStats.weeklyGoalStreak;
-            
-            // Update motivational message
-            const messages = motivationalMessages;
-            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
-            document.getElementById('motivationalMessage').textContent = randomMessage;
-            
-            // Update week progress
-            updateWeekProgress();
-            
-            // Update challenges
-            updateChallenges();
-        }
-
-        function updateWeekProgress() {
-            const weekPlan = trainingPlan[currentWeek];
-            if (!weekPlan) return;
-            
-            const totalWorkouts = weekPlan.workouts.length;
-            const completedCount = weekPlan.workouts.filter(w => w.completed).length;
-            const progressPercent = totalWorkouts > 0 ? (completedCount / totalWorkouts) * 100 : 0;
-            
-            document.getElementById('weekProgressBar').style.width = `${progressPercent}%`;
-            document.getElementById('weekProgressPercent').textContent = `(${Math.round(progressPercent)}%)`;
-            document.getElementById('completedWorkouts').textContent = `${completedCount}/${totalWorkouts}`;
-            
-            // Calculate week distance and XP
-            let weekDistance = 0;
-            let weekXP = 0;
-            weekPlan.workouts.forEach(workout => {
-                if (workout.completed) {
-                    const history = workoutHistory[workout.id];
-                    weekDistance += history ? history.distance : workout.distance;
-                    const baseXP = workoutXP[workout.type] || 0;
-                    weekXP += Math.floor(baseXP * getStreakMultiplier());
-                }
-            });
-            
-            document.getElementById('weekDistance').textContent = `${weekDistance.toFixed(1)} km`;
-            document.getElementById('weekXP').textContent = `${weekXP} XP`;
-        }
-
-        function updateChallenges() {
-            generateDailyChallenge();
-            generateWeeklyChallenge();
-            
-            // Update daily challenge
-            const dailyChallenge = gameStats.dailyChallenge;
-            if (dailyChallenge) {
-                document.getElementById('dailyChallengeDesc').textContent = dailyChallenge.desc;
-                document.getElementById('dailyChallengeReward').textContent = `+${dailyChallenge.xp} XP`;
-                
-                const completed = dailyChallenge.check();
-                if (completed && !dailyChallenge.completed) {
-                    dailyChallenge.completed = true;
-                    showChallengeComplete('Daily Challenge', dailyChallenge.xp);
-                    gameStats.experience += dailyChallenge.xp;
-                }
-                
-                document.getElementById('dailyChallengeStatus').textContent = completed ? 'Complete!' : 'Active';
-                document.getElementById('dailyChallengeStatus').className = `text-xs px-2 py-1 rounded ${completed ? 'bg-green-500 bg-opacity-30' : 'bg-white bg-opacity-20'}`;
-            }
-            
-            // Update weekly challenge
-            const weeklyChallenge = gameStats.weeklyChallenge;
-            if (weeklyChallenge) {
-                document.getElementById('weeklyChallengeDesc').textContent = weeklyChallenge.desc;
-                document.getElementById('weeklyChallengeReward').textContent = `+${weeklyChallenge.xp} XP`;
-                
-                const completed = weeklyChallenge.check();
-                if (completed && !weeklyChallenge.completed) {
-                    weeklyChallenge.completed = true;
-                    showChallengeComplete('Weekly Challenge', weeklyChallenge.xp);
-                    gameStats.experience += weeklyChallenge.xp;
-                }
-                
-                if (weeklyChallenge.goal) {
-                    const progress = getWeeklyProgress(weeklyChallenge);
-                    document.getElementById('weeklyProgress').textContent = progress;
-                    document.getElementById('weeklyGoal').textContent = weeklyChallenge.goal;
-                } else {
-                    document.getElementById('weeklyChallengeStatus').textContent = completed ? 'Complete!' : 'Active';
-                }
-            }
-            
-            // Update timers
-            updateChallengeTimers();
-        }
-
-        function getWeeklyProgress(challenge) {
-            if (challenge.desc.includes('workouts')) {
-                return getThisWeekWorkouts().length;
-            } else if (challenge.desc.includes('km')) {
-                return Math.floor(getThisWeekWorkouts().reduce((sum, w) => sum + w.distance, 0));
-            } else if (challenge.desc.includes('types')) {
-                const types = new Set(getThisWeekWorkouts().map(w => getWorkoutById(w.id)?.type));
-                return types.size;
-            }
-            return 0;
-        }
-
-        function updateChallengeTimers() {
-            // Daily timer
-            const now = new Date();
-            const tomorrow = new Date(now);
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            tomorrow.setHours(0, 0, 0, 0);
-            const timeToTomorrow = tomorrow - now;
-            const hoursLeft = Math.floor(timeToTomorrow / (1000 * 60 * 60));
-            const minutesLeft = Math.floor((timeToTomorrow % (1000 * 60 * 60)) / (1000 * 60));
-            document.getElementById('dailyChallengeTimer').textContent = `${hoursLeft}h ${minutesLeft}m left`;
-            
-            // Weekly timer
-            const nextWeek = new Date(now);
-            nextWeek.setDate(nextWeek.getDate() + (7 - nextWeek.getDay() + 1));
-            nextWeek.setHours(0, 0, 0, 0);
-            const timeToNextWeek = nextWeek - now;
-            const daysLeft = Math.floor(timeToNextWeek / (1000 * 60 * 60 * 24));
-            const weekHoursLeft = Math.floor((timeToNextWeek % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            document.getElementById('weeklyChallengeTimer').textContent = `${daysLeft}d ${weekHoursLeft}h left`;
-        }
-
-        function checkAchievements() {
-            const newAchievements = [];
-            
-            Object.entries(achievements).forEach(([key, achievement]) => {
-                if (!gameStats.achievements.has(key) && achievement.check()) {
-                    gameStats.achievements.add(key);
-                    gameStats.experience += achievement.xp;
-                    newAchievements.push({ key, ...achievement });
-                }
-            });
-            
-            if (newAchievements.length > 0) {
-                gameStats.newAchievements = newAchievements;
-                document.getElementById('newAchievementBadge').classList.remove('hidden');
-                showAchievementEarned(newAchievements[0]);
-            }
-            
-            updateStats();
-        }
-
-        function updatePersonalRecords(workout, actualDistance, actualPace) {
-            // Update longest run
-            if (actualDistance > gameStats.personalRecords.longestRun) {
-                gameStats.personalRecords.longestRun = actualDistance;
-            }
-            
-            // Update fastest pace (convert pace string to seconds for comparison)
-            const paceInSeconds = paceToSeconds(actualPace);
-            if (!gameStats.personalRecords.fastestPace || paceInSeconds < paceToSeconds(gameStats.personalRecords.fastestPace)) {
-                gameStats.personalRecords.fastestPace = actualPace;
-            }
-            
-            // Update daily XP record
-            const today = new Date().toDateString();
-            const todayWorkouts = Array.from(completedWorkouts).filter(id => {
-                const w = workoutHistory[id];
-                return w && new Date(w.completedAt).toDateString() === today;
-            });
-            const todayXP = todayWorkouts.reduce((sum, id) => {
-                const w = getWorkoutById(id);
-                return sum + (workoutXP[w?.type] || 0);
-            }, 0);
-            
-            if (todayXP > gameStats.personalRecords.mostXPInDay) {
-                gameStats.personalRecords.mostXPInDay = todayXP;
-            }
-        }
-
-        function paceToSeconds(paceString) {
-            const [minutes, seconds] = paceString.split(':').map(Number);
-            return minutes * 60 + seconds;
-        }
-
-        function showLevelUp(newLevel) {
-            document.getElementById('newLevel').textContent = newLevel;
-            document.getElementById('newMultiplier').textContent = getStreakMultiplier().toFixed(1);
-            document.getElementById('levelUpModal').classList.remove('hidden');
-            createConfetti();
-        }
-
-        function showAchievementEarned(achievement) {
-            document.getElementById('earnedMedalIcon').textContent = achievement.icon;
-            document.getElementById('earnedAchievementTitle').textContent = achievement.title;
-            document.getElementById('earnedAchievementDesc').textContent = achievement.desc;
-            document.getElementById('earnedXP').textContent = achievement.xp;
-            
-            document.getElementById('achievementEarnedModal').classList.remove('hidden');
-            createConfetti();
-        }
-
-        function showChallengeComplete(challengeType, xp) {
-            document.getElementById('completedChallengeTitle').textContent = challengeType;
-            document.getElementById('challengeXP').textContent = xp;
-            document.getElementById('challengeCompleteModal').classList.remove('hidden');
-        }
-
-        function createConfetti() {
-            const overlay = document.getElementById('celebrationOverlay');
-            overlay.classList.remove('hidden');
-            overlay.innerHTML = '';
-            
-            const colors = ['#5D5CDE', '#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#FFD700'];
-            
-            for (let i = 0; i < 50; i++) {
-                setTimeout(() => {
-                    const confetti = document.createElement('div');
-                    confetti.className = 'confetti-piece';
-                    confetti.style.left = Math.random() * 100 + '%';
-                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                    confetti.style.animationDelay = Math.random() * 3 + 's';
-                    overlay.appendChild(confetti);
-                    
-                    setTimeout(() => confetti.remove(), 3000);
-                }, i * 50);
-            }
-            
-            setTimeout(() => overlay.classList.add('hidden'), 4000);
-        }
-
-        function renderAchievements(filterCategory = 'all') {
-            const container = document.getElementById('achievementsList');
-            container.innerHTML = '';
-            
-            Object.entries(achievements).forEach(([key, achievement]) => {
-                if (filterCategory !== 'all' && achievement.category !== filterCategory) return;
-                
-                const earned = gameStats.achievements.has(key);
-                const div = document.createElement('div');
-                div.className = `p-4 rounded-lg border-2 transition-all ${earned ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-300 dark:border-yellow-700' : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 opacity-60'}`;
-                
-                div.innerHTML = `
-                    <div class="text-center">
-                        <div class="text-3xl mb-2 ${earned ? 'animate-pulse' : 'grayscale'}">${achievement.icon}</div>
-                        <h4 class="font-semibold mb-1">${achievement.title}</h4>
-                        <p class="text-xs text-gray-600 dark:text-gray-400 mb-2">${achievement.desc}</p>
-                        <div class="text-xs mb-1">
-                            <span class="bg-${achievement.category === 'progress' ? 'blue' : achievement.category === 'consistency' ? 'green' : achievement.category === 'performance' ? 'purple' : 'orange'}-100 dark:bg-${achievement.category === 'progress' ? 'blue' : achievement.category === 'consistency' ? 'green' : achievement.category === 'performance' ? 'purple' : 'orange'}-900/20 text-${achievement.category === 'progress' ? 'blue' : achievement.category === 'consistency' ? 'green' : achievement.category === 'performance' ? 'purple' : 'orange'}-600 dark:text-${achievement.category === 'progress' ? 'blue' : achievement.category === 'consistency' ? 'green' : achievement.category === 'performance' ? 'purple' : 'orange'}-400 px-2 py-1 rounded text-xs">${achievement.category}</span>
-                        </div>
-                        <div class="text-sm font-medium ${earned ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-500'}">
-                            ${earned ? '✓ Earned!' : `${achievement.xp} XP`}
-                        </div>
-                    </div>
-                `;
-                
-                container.appendChild(div);
-            });
-        }
-
-        function renderPersonalRecords() {
-            const container = document.getElementById('personalRecords');
-            const records = [
-                { icon: '🏃‍♂️', title: 'Longest Run', value: `${gameStats.personalRecords.longestRun.toFixed(1)} km` },
-                { icon: '⚡', title: 'Fastest Pace', value: gameStats.personalRecords.fastestPace || 'N/A' },
-                { icon: '🔥', title: 'Best Daily XP', value: `${gameStats.personalRecords.mostXPInDay} XP` },
-                { icon: '🏆', title: 'Longest Streak', value: `${gameStats.longestStreak} days` },
-                { icon: '💪', title: 'Current Level', value: `Level ${gameStats.level}` },
-                { icon: '⭐', title: 'Total XP', value: `${gameStats.experience} XP` }
-            ];
-            
-            container.innerHTML = records.map(record => `
-                <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg flex items-center gap-3">
-                    <div class="text-2xl">${record.icon}</div>
-                    <div>
-                        <div class="font-semibold text-sm">${record.title}</div>
-                        <div class="text-primary font-bold record-badge">${record.value}</div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function renderProgressMilestones() {
-            const container = document.getElementById('progressMilestones');
-            const milestones = [
-                { title: 'Total Distance', current: gameStats.totalDistance, target: 100, unit: 'km' },
-                { title: 'Workouts Completed', current: completedWorkouts.size, target: 50, unit: '' },
-                { title: 'Current Streak', current: gameStats.currentStreak, target: 30, unit: ' days' },
-                { title: 'Experience Points', current: gameStats.experience, target: 5000, unit: ' XP' }
-            ];
-            
-            container.innerHTML = milestones.map(milestone => {
-                const progress = Math.min((milestone.current / milestone.target) * 100, 100);
-                return `
-                    <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="font-semibold text-sm">${milestone.title}</span>
-                            <span class="text-xs text-gray-600 dark:text-gray-400">${milestone.current.toFixed(1)}${milestone.unit} / ${milestone.target}${milestone.unit}</span>
-                        </div>
-                        <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2">
-                            <div class="bg-gradient-to-r from-primary to-purple-600 h-2 rounded-full transition-all duration-500" style="width: ${progress}%"></div>
-                        </div>
-                        <div class="text-xs text-gray-600 dark:text-gray-400 mt-1">${progress.toFixed(1)}% complete</div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function updateStreak(completedDate) {
-            const today = new Date();
-            const completed = new Date(completedDate);
-            
-            if (gameStats.lastWorkoutDate) {
-                const lastDate = new Date(gameStats.lastWorkoutDate);
-                const daysDiff = Math.floor((completed - lastDate) / (1000 * 60 * 60 * 24));
-                
-                if (daysDiff === 1) {
-                    gameStats.currentStreak++;
-                } else if (daysDiff > 1) {
-                    gameStats.currentStreak = 1;
-                }
-            } else {
-                gameStats.currentStreak = 1;
-            }
-            
-            gameStats.longestStreak = Math.max(gameStats.longestStreak, gameStats.currentStreak);
-            gameStats.lastWorkoutDate = completedDate;
-        }
-
-        // Training plan generation (unchanged)
-        function generateTrainingPlan(weeks = 40) {
-            const plan = {};
-            const startingLongRun = 10;
-            
-            for (let week = 1; week <= weeks; week++) {
-                plan[week] = generateWeekPlan(week, weeks, startingLongRun);
-            }
-            
-            return plan;
-        }
-
-        function generateWeekPlan(weekNum, totalWeeks, startingLongRun) {
-            const phase = getTrainingPhase(weekNum, totalWeeks);
-            const isRecoveryWeek = weekNum % 4 === 0;
-            const isTaperWeek = weekNum > totalWeeks - 3;
-            
-            let longRunDistance = calculateLongRunDistance(weekNum, totalWeeks, startingLongRun, isRecoveryWeek, isTaperWeek);
-            let tempoDistance = calculateTempoDistance(weekNum, totalWeeks, isRecoveryWeek, isTaperWeek);
-            let speedWorkout = generateSpeedWorkout(weekNum, totalWeeks, isRecoveryWeek, isTaperWeek);
-
-            return {
-                phase: phase,
-                workouts: [
-                    {
-                        id: `${weekNum}-1`,
-                        type: 'tempo',
-                        name: 'Tempo Run',
-                        distance: tempoDistance,
-                        pace: 'tempoRun',
-                        details: `${tempoDistance}km at tempo pace`,
-                        day: 'tuesday',
-                        completed: false
-                    },
-                    {
-                        id: `${weekNum}-2`,
-                        type: 'speed',
-                        name: 'Speed/Interval',
-                        distance: speedWorkout.distance,
-                        pace: 'speedRun',
-                        details: speedWorkout.details,
-                        day: 'thursday',
-                        completed: false
-                    },
-                    {
-                        id: `${weekNum}-3`,
-                        type: 'long',
-                        name: 'Long Run',
-                        distance: longRunDistance,
-                        pace: 'longRun',
-                        details: `${longRunDistance}km at steady pace`,
-                        day: 'sunday',
-                        completed: false
-                    }
-                ]
-            };
-        }
-
-        function getTrainingPhase(weekNum, totalWeeks) {
-            if (weekNum <= totalWeeks * 0.3) return 'Base Building';
-            if (weekNum <= totalWeeks * 0.6) return 'Strength Building';
-            if (weekNum <= totalWeeks * 0.85) return 'Peak Training';
-            return 'Taper';
-        }
-
-        function calculateLongRunDistance(weekNum, totalWeeks, startingDistance, isRecoveryWeek, isTaperWeek) {
-            if (isTaperWeek) {
-                const weeksFromEnd = totalWeeks - weekNum + 1;
-                return Math.max(8, startingDistance - (3 - weeksFromEnd) * 3);
-            }
-            
-            if (isRecoveryWeek) {
-                return Math.max(startingDistance, startingDistance + Math.floor(weekNum / 4) * 2 - 3);
-            }
-            
-            const progression = Math.min(33, startingDistance + Math.floor(weekNum / 2) * 1.5);
-            return Math.round(progression);
-        }
-
-        function calculateTempoDistance(weekNum, totalWeeks, isRecoveryWeek, isTaperWeek) {
-            if (isTaperWeek) return Math.max(3, 8 - weekNum + totalWeeks - 3);
-            if (isRecoveryWeek) return Math.max(4, 6 + Math.floor(weekNum / 8));
-            return Math.min(10, 4 + Math.floor(weekNum / 3));
-        }
-
-        function generateSpeedWorkout(weekNum, totalWeeks, isRecoveryWeek, isTaperWeek) {
-            const workouts = [
-                { distance: 3, details: '6x400m @ speed pace (1:00 recovery)' },
-                { distance: 4, details: '4x800m @ speed pace (90s recovery)' },
-                { distance: 5, details: '5x600m @ speed pace (75s recovery)' },
-                { distance: 4, details: '5km fartlek (1:00 hard / 2:00 easy)' },
-                { distance: 5, details: '6x800m @ speed pace (90s recovery)' },
-                { distance: 6, details: '6km progression (last 2km @ speed pace)' },
-                { distance: 5, details: '5x1000m @ speed pace (2:00 recovery)' },
-                { distance: 4, details: '4x1km @ speed pace (2:00 recovery)' },
-                { distance: 4, details: '6x600m @ speed pace (75s recovery)' },
-                { distance: 3, details: '3x1.5km @ speed pace (2:30 recovery)' }
-            ];
-            
-            if (isTaperWeek) {
-                return { distance: 3, details: 'Light strides and drills' };
-            }
-            
-            return workouts[weekNum % workouts.length];
-        }
-
-        // Calendar functions (unchanged)
-        function getWeekDates(weekNum) {
-            const startDate = new Date();
-            startDate.setDate(startDate.getDate() + (weekNum - 1) * 7);
-            const endDate = new Date(startDate);
-            endDate.setDate(endDate.getDate() + 6);
-            
-            return {
-                start: startDate,
-                end: endDate,
-                formatted: `${formatDate(startDate)}-${formatDate(endDate)}`
-            };
-        }
-
-        function formatDate(date) {
-            return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}`;
-        }
-
-        function getDayOfWeek(day) {
-            const days = {
-                'monday': 0, 'tuesday': 1, 'wednesday': 2, 'thursday': 3,
-                'friday': 4, 'saturday': 5, 'sunday': 6
-            };
-            return days[day] || 0;
-        }
-
-        // Rendering functions
-        function renderCalendar() {
-            const weekDates = getWeekDates(currentWeek);
-            document.getElementById('weekTitle').textContent = `Week ${currentWeek}`;
-            document.getElementById('weekDates').textContent = weekDates.formatted;
-            
-            const grid = document.getElementById('calendarGrid');
-            grid.innerHTML = '';
-            
-            const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-            
-            days.forEach((day, index) => {
-                const dayDiv = document.createElement('div');
-                dayDiv.className = 'min-h-32 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-3';
-                dayDiv.dataset.day = day.toLowerCase();
-                
-                const dayHeader = document.createElement('h4');
-                dayHeader.className = 'font-semibold text-sm mb-2 text-center';
-                dayHeader.textContent = day;
-                dayDiv.appendChild(dayHeader);
-                
-                const workoutContainer = document.createElement('div');
-                workoutContainer.className = 'space-y-2 workout-container';
-                dayDiv.appendChild(workoutContainer);
-                
-                grid.appendChild(dayDiv);
-                
-                // Make containers sortable
-                new Sortable(workoutContainer, {
-                    group: 'workouts',
-                    animation: 150,
-                    ghostClass: 'sortable-ghost',
-                    chosenClass: 'sortable-chosen',
-                    onEnd: function(evt) {
-                        updateWorkoutDay(evt.item.dataset.workoutId, evt.to.parentElement.dataset.day);
-                    }
-                });
-            });
-            
-            renderWorkouts();
-            updateStats();
-        }
-
-        function renderWorkouts() {
-            const weekPlan = trainingPlan[currentWeek];
-            if (!weekPlan) return;
-            
-            // Clear all containers
-            document.querySelectorAll('.workout-container').forEach(container => {
-                container.innerHTML = '';
-            });
-            
-            weekPlan.workouts.forEach(workout => {
-                const workoutElement = createWorkoutElement(workout);
-                const dayContainer = document.querySelector(`[data-day="${workout.day}"] .workout-container`);
-                if (dayContainer) {
-                    dayContainer.appendChild(workoutElement);
-                }
-            });
-        }
-
-        function createWorkoutElement(workout) {
-            const div = document.createElement('div');
-            const xp = workoutXP[workout.type] || 0;
-            const multiplier = getStreakMultiplier();
-            const totalXP = Math.floor(xp * multiplier);
-            
-            div.className = `workout-card bg-white dark:bg-gray-900 border-2 border-l-4 rounded-lg p-3 cursor-pointer ${getWorkoutBorderColor(workout.type)} ${workout.completed ? 'opacity-70 bg-green-50 dark:bg-green-900/20' : 'hover:shadow-lg'}`;
-            div.dataset.workoutId = workout.id;
-            
-            const currentPace = paces[workout.pace] || workout.pace;
-            
-            div.innerHTML = `
-                <div class="flex items-center justify-between mb-1">
-                    <h5 class="font-semibold text-sm">${workout.name}</h5>
-                    ${workout.completed ? '<span class="text-green-600 text-xs">✓ Done</span>' : `<span class="text-primary text-xs font-medium">${totalXP} XP</span>`}
-                </div>
-                <p class="text-xs text-gray-600 dark:text-gray-400">${workout.distance}km @ ${currentPace}/km</p>
-                <p class="text-xs text-gray-500 dark:text-gray-500 mt-1">${workout.details}</p>
-                ${multiplier > 1.0 && !workout.completed ? `<p class="text-xs text-orange-500 font-medium mt-1">🔥 ${multiplier}x streak bonus!</p>` : ''}
-            `;
-            
-            div.addEventListener('click', () => openWorkoutModal(workout));
-            
-            return div;
-        }
-
-        function getWorkoutBorderColor(type) {
-            const colors = {
-                'long': 'border-l-longRun border-longRun/20',
-                'tempo': 'border-l-tempoRun border-tempoRun/20',
-                'speed': 'border-l-speedRun border-speedRun/20',
-                'easy': 'border-l-easyRun border-easyRun/20'
-            };
-            return colors[type] || 'border-l-gray-400 border-gray-200';
-        }
-
-        // Modal functions
-        function openPaceModal() {
-            document.getElementById('paceModal').classList.remove('hidden');
-            
-            // Populate current paces
-            document.getElementById('longRunPace').value = paces.longRun;
-            document.getElementById('tempoRunPace').value = paces.tempoRun;
-            document.getElementById('speedRunPace').value = paces.speedRun;
-            document.getElementById('easyRunPace').value = paces.easyRun;
-            document.getElementById('marathonPace').value = paces.marathon;
-        }
-
-        function closePaceModal() {
-            document.getElementById('paceModal').classList.add('hidden');
-        }
-
-        function savePaces() {
-            paces.longRun = document.getElementById('longRunPace').value;
-            paces.tempoRun = document.getElementById('tempoRunPace').value;
-            paces.speedRun = document.getElementById('speedRunPace').value;
-            paces.easyRun = document.getElementById('easyRunPace').value;
-            paces.marathon = document.getElementById('marathonPace').value;
-            
-            renderWorkouts();
-            closePaceModal();
-            saveToLocalStorage();
-        }
-
-        function openAchievementsModal() {
-            document.getElementById('achievementsModal').classList.remove('hidden');
-            document.getElementById('newAchievementBadge').classList.add('hidden');
-            gameStats.newAchievements = [];
-            renderAchievements();
-        }
-
-        function closeAchievementsModal() {
-            document.getElementById('achievementsModal').classList.add('hidden');
-        }
-
-        function openChallengesModal() {
-            document.getElementById('challengesModal').classList.remove('hidden');
-            renderPersonalRecords();
-            renderProgressMilestones();
-        }
-
-        function closeChallengesModal() {
-            document.getElementById('challengesModal').classList.add('hidden');
-        }
-
-        function openWorkoutModal(workout) {
-            const modal = document.getElementById('workoutModal');
-            const currentPace = paces[workout.pace] || workout.pace;
-            const baseXP = workoutXP[workout.type] || 0;
-            const multiplier = getStreakMultiplier();
-            const totalXP = Math.floor(baseXP * multiplier);
-            
-            document.getElementById('workoutTitle').textContent = workout.name;
-            document.getElementById('workoutContent').innerHTML = `
-                <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg mb-4">
-                    <h4 class="font-semibold mb-2">Planned Workout</h4>
-                    <p><strong>Distance:</strong> ${workout.distance}km</p>
-                    <p><strong>Pace:</strong> ${currentPace}/km</p>
-                    <p><strong>Details:</strong> ${workout.details}</p>
-                    <p class="text-primary font-semibold mt-2">🏆 Worth ${totalXP} XP!</p>
-                    ${multiplier > 1.0 ? `<p class="text-orange-500 font-medium mt-1">🔥 Includes ${multiplier}x streak bonus!</p>` : ''}
-                </div>
-            `;
-            
-            // Pre-fill with planned values
-            document.getElementById('actualDistance').value = workout.distance;
-            document.getElementById('actualPace').value = currentPace;
-            document.getElementById('effortLevel').value = 5;
-            document.getElementById('effortValue').textContent = '5';
-            
-            // Load saved data if exists
-            const savedData = workoutHistory[workout.id];
-            if (savedData) {
-                document.getElementById('actualDistance').value = savedData.distance || workout.distance;
-                document.getElementById('actualPace').value = savedData.pace || currentPace;
-                document.getElementById('effortLevel').value = savedData.effort || 5;
-                document.getElementById('effortValue').textContent = savedData.effort || '5';
-                document.getElementById('workoutNotes').value = savedData.notes || '';
-            } else {
-                document.getElementById('workoutNotes').value = '';
-            }
-            
-            modal.dataset.workoutId = workout.id;
-            modal.classList.remove('hidden');
-        }
-
-        function closeWorkoutModal() {
-            document.getElementById('workoutModal').classList.add('hidden');
-        }
-
-        function completeWorkout() {
-            const workoutId = document.getElementById('workoutModal').dataset.workoutId;
-            const distance = parseFloat(document.getElementById('actualDistance').value);
-            const pace = document.getElementById('actualPace').value;
-            const effort = parseInt(document.getElementById('effortLevel').value);
-            const notes = document.getElementById('workoutNotes').value;
-            const completedAt = new Date().toISOString();
-            
-            // Save workout data
-            workoutHistory[workoutId] = {
-                distance: distance,
-                pace: pace,
-                effort: effort,
-                notes: notes,
-                completedAt: completedAt
-            };
-            
-            // Mark as completed
-            completedWorkouts.add(workoutId);
-            
-            // Update the workout in the plan
-            const weekPlan = trainingPlan[currentWeek];
-            const workout = weekPlan.workouts.find(w => w.id === workoutId);
-            if (workout) {
-                workout.completed = true;
-                
-                // Update game stats with XP and multiplier
-                const baseXP = workoutXP[workout.type] || 0;
-                const multiplier = getStreakMultiplier();
-                const totalXP = Math.floor(baseXP * multiplier);
-                gameStats.experience += totalXP;
-                gameStats.totalDistance += distance;
-                
-                // Update personal records
-                updatePersonalRecords(workout, distance, pace);
-                
-                // Update streak
-                updateStreak(completedAt);
-                
-                // Check for achievements
-                checkAchievements();
-                
-                // Show XP gain animation
-                showXPGain(totalXP);
-            }
-            
-            renderWorkouts();
-            closeWorkoutModal();
-            saveToLocalStorage();
-            
-            // Show completion celebration
-            createConfetti();
-        }
-
-        function showXPGain(xp) {
-            // Create floating XP text
-            const xpElement = document.createElement('div');
-            xpElement.className = 'fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-2xl font-bold text-yellow-500 pointer-events-none z-50 animate-xp-gain';
-            xpElement.textContent = `+${xp} XP`;
-            document.body.appendChild(xpElement);
-            
-            setTimeout(() => xpElement.remove(), 1000);
-        }
-
-        function updateWorkoutDay(workoutId, newDay) {
-            const weekPlan = trainingPlan[currentWeek];
-            const workout = weekPlan.workouts.find(w => w.id === workoutId);
-            if (workout) {
-                workout.day = newDay;
-            }
-            saveToLocalStorage();
-        }
-
-        // Navigation
-        function changeWeek(direction) {
-            const totalWeeks = parseInt(document.getElementById('planDuration').value);
-            if (direction === 'next' && currentWeek < totalWeeks) {
-                currentWeek++;
-            } else if (direction === 'prev' && currentWeek > 1) {
-                currentWeek--;
-            }
-            renderCalendar();
-            saveToLocalStorage();
-        }
-
-        // Local Storage
-        const LS_KEY = 'marathonTrainingAppV2';
-
-        function saveToLocalStorage() {
-            const data = {
-                currentWeek,
-                trainingPlan,
-                completedWorkouts: Array.from(completedWorkouts),
-                paces,
-                workoutHistory,
-                gameStats: {
-                    ...gameStats,
-                    achievements: Array.from(gameStats.achievements),
-                    newAchievements: []
-                }
-            };
+        const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+        // Save/Load functions for data persistence (localStorage + cookie fallback)
+        let saveAttempts = 0;
+        let maxSaveAttempts = 3;
+        let lastSaveTime = 0;
+        let saveErrorCount = 0;
+        let storageMethod = 'none'; // 'localStorage', 'cookies', or 'none'
+
+        function setCookie(name, value, days = 365) {
             try {
-                localStorage.setItem(LS_KEY, JSON.stringify(data));
-            } catch (e) {
-                console.warn('Failed to save to localStorage:', e);
-            }
-        }
-
-        function loadFromLocalStorage() {
-            try {
-                const raw = localStorage.getItem(LS_KEY);
-                if (!raw) return false;
-                
-                const data = JSON.parse(raw);
-                currentWeek = data.currentWeek || 1;
-                trainingPlan = data.trainingPlan || {};
-                completedWorkouts = new Set(data.completedWorkouts || []);
-                paces = data.paces || {
-                    longRun: '6:00',
-                    tempoRun: '5:30',
-                    speedRun: '5:00',
-                    easyRun: '6:30',
-                    marathon: '5:41'
-                };
-                workoutHistory = data.workoutHistory || {};
-                gameStats = {
-                    ...gameStats,
-                    ...data.gameStats,
-                    achievements: new Set(data.gameStats?.achievements || []),
-                    newAchievements: []
-                };
-                
-                // Hydrate .completed property for UI
-                for (let week in trainingPlan) {
-                    if (trainingPlan[week] && Array.isArray(trainingPlan[week].workouts)) {
-                        trainingPlan[week].workouts.forEach(w => {
-                            w.completed = completedWorkouts.has(w.id);
-                        });
-                    }
-                }
+                const expires = new Date();
+                expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+                document.cookie = `${name}=${encodeURIComponent(value)};expires=${expires.toUTCString()};path=/;SameSite=Strict`;
                 return true;
             } catch (e) {
-                console.warn('Failed to load data from localStorage:', e);
                 return false;
             }
         }
 
-        // Event listeners
-        document.getElementById('paceSettings').addEventListener('click', openPaceModal);
-        document.getElementById('closePaceModal').addEventListener('click', closePaceModal);
-        document.getElementById('savePaces').addEventListener('click', savePaces);
-        document.getElementById('achievementsBtn').addEventListener('click', openAchievementsModal);
-        document.getElementById('closeAchievementsModal').addEventListener('click', closeAchievementsModal);
-        document.getElementById('challengesBtn').addEventListener('click', openChallengesModal);
-        document.getElementById('closeChallengesModal').addEventListener('click', closeChallengesModal);
-        document.getElementById('closeWorkoutModal').addEventListener('click', closeWorkoutModal);
-        document.getElementById('completeWorkout').addEventListener('click', completeWorkout);
-        document.getElementById('closeAchievementModal').addEventListener('click', () => {
-            document.getElementById('achievementEarnedModal').classList.add('hidden');
-        });
-        document.getElementById('closeLevelUpModal').addEventListener('click', () => {
-            document.getElementById('levelUpModal').classList.add('hidden');
-        });
-        document.getElementById('closeChallengeModal').addEventListener('click', () => {
-            document.getElementById('challengeCompleteModal').classList.add('hidden');
-        });
-        document.getElementById('nextWeek').addEventListener('click', () => changeWeek('next'));
-        document.getElementById('prevWeek').addEventListener('click', () => changeWeek('prev'));
-
-        // Achievement filter buttons
-        document.querySelectorAll('.achievement-filter-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                document.querySelectorAll('.achievement-filter-btn').forEach(b => {
-                    b.className = 'achievement-filter-btn bg-gray-200 dark:bg-gray-700 px-3 py-1 rounded text-sm';
-                });
-                e.target.className = 'achievement-filter-btn bg-primary text-white px-3 py-1 rounded text-sm';
-                renderAchievements(e.target.dataset.category);
-            });
-        });
-
-        // Effort level slider
-        document.getElementById('effortLevel').addEventListener('input', (e) => {
-            document.getElementById('effortValue').textContent = e.target.value;
-        });
-
-        document.getElementById('planDuration').addEventListener('change', (e) => {
-            const weeks = parseInt(e.target.value);
-            trainingPlan = generateTrainingPlan(weeks);
-            currentWeek = 1;
-            renderCalendar();
-            saveToLocalStorage();
-        });
-
-        // Auto-save periodically
-        setInterval(saveToLocalStorage, 30000); // Save every 30 seconds
-
-        // Update challenge timers every minute
-        setInterval(updateChallengeTimers, 60000);
-
-        // Initialize app
-        function initApp() {
-            const loaded = loadFromLocalStorage();
-            if (!loaded) {
-                trainingPlan = generateTrainingPlan(40);
+        function getCookie(name) {
+            try {
+                const nameEQ = name + "=";
+                const ca = document.cookie.split(';');
+                for (let i = 0; i < ca.length; i++) {
+                    let c = ca[i];
+                    while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+                    if (c.indexOf(nameEQ) === 0) {
+                        return decodeURIComponent(c.substring(nameEQ.length, c.length));
+                    }
+                }
+                return null;
+            } catch (e) {
+                return null;
             }
-            renderCalendar();
-            updateStats();
-            
-            // Set up daily challenge reset check
-            setInterval(() => {
-                generateDailyChallenge();
-                generateWeeklyChallenge();
-                updateChallenges();
-            }, 60000); // Check every minute
         }
 
-        initApp();
+        function deleteCookie(name) {
+            try {
+                document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        function detectStorageMethod() {
+            // Try localStorage first
+            try {
+                const test = '__storage_test__';
+                localStorage.setItem(test, test);
+                localStorage.removeItem(test);
+                storageMethod = 'localStorage';
+                return 'localStorage';
+            } catch (e) {
+                // Try cookies as fallback
+                try {
+                    const test = '__cookie_test__';
+                    setCookie(test, 'test');
+                    const result = getCookie(test) === 'test';
+                    deleteCookie(test);
+                    if (result) {
+                        storageMethod = 'cookies';
+                        return 'cookies';
+                    }
+                } catch (e) {
+                    // Neither works
+                    storageMethod = 'none';
+                    return 'none';
+                }
+            }
+            storageMethod = 'none';
+            return 'none';
+        }
+
+        function isStorageAvailable() {
+            return storageMethod !== 'none';
+        }
+
+        function setStorageItem(key, value) {
+            if (storageMethod === 'localStorage') {
+                localStorage.setItem(key, value);
+                return true;
+            } else if (storageMethod === 'cookies') {
+                return setCookie(key, value);
+            }
+            return false;
+        }
+
+        function getStorageItem(key) {
+            if (storageMethod === 'localStorage') {
+                return localStorage.getItem(key);
+            } else if (storageMethod === 'cookies') {
+                return getCookie(key);
+            }
+            return null;
+        }
+
+        function removeStorageItem(key) {
+            if (storageMethod === 'localStorage') {
+                localStorage.removeItem(key);
+                return true;
+            } else if (storageMethod === 'cookies') {
+                return deleteCookie(key);
+            }
+            return false;
+        }
+
+        function saveProgress(showNotification = false) {
+            // Prevent excessive save attempts
+            const now = Date.now();
+            if (now - lastSaveTime < 1000) { // Minimum 1 second between saves
+                return true;
+            }
+            lastSaveTime = now;
+
+            if (!isStorageAvailable()) {
+                if (showNotification) {
+                    showSaveNotification(`Storage not available (${storageMethod}) - progress cannot be saved`, 'error');
+                }
+                return false;
+            }
+
+            try {
+                const progressData = {
+                    currentWeek,
+                    completedWorkouts: Array.from(completedWorkouts),
+                    totalDistance,
+                    currentStreak,
+                    achievements,
+                    lastCompletionDate,
+                    weeklySchedule,
+                    paces,
+                    savedAt: now,
+                    storageMethod: storageMethod
+                };
+                
+                const dataString = JSON.stringify(progressData);
+                
+                // Check data size limits based on storage method
+                const sizeLimit = storageMethod === 'localStorage' ? 4000000 : 3000; // 4MB for localStorage, 3KB for cookies
+                if (dataString.length > sizeLimit) {
+                    throw new Error(`Data too large for ${storageMethod}`);
+                }
+                
+                setStorageItem('marathonTrainingProgress', dataString);
+                
+                // Reset error count on successful save
+                saveErrorCount = 0;
+                saveAttempts = 0;
+                
+                if (showNotification) {
+                    showSaveNotification(`Progress saved successfully (${storageMethod})`, 'success');
+                }
+                return true;
+            } catch (error) {
+                console.error('Failed to save progress:', error);
+                saveErrorCount++;
+                saveAttempts++;
+                
+                // Only show error notification after multiple failures or if explicitly requested
+                if (showNotification || saveErrorCount >= 3) {
+                    let errorMessage = 'Failed to save progress';
+                    
+                    if (error.name === 'QuotaExceededError' || error.message.includes('quota')) {
+                        errorMessage = 'Storage quota exceeded - please clear browser data or export your progress';
+                    } else if (error.message.includes('too large')) {
+                        errorMessage = `Training data too large for ${storageMethod} - please export your progress`;
+                    } else if (!isStorageAvailable()) {
+                        errorMessage = `${storageMethod} storage disabled - check browser settings`;
+                    }
+                    
+                    showSaveNotification(errorMessage, 'error');
+                }
+                
+                return false;
+            }
+        }
+
+        function loadProgress() {
+            if (!isStorageAvailable()) {
+                initializeSchedule();
+                showSaveNotification(`${storageMethod} storage not available - progress will not be saved`, 'error');
+                return false;
+            }
+
+            try {
+                const savedData = getStorageItem('marathonTrainingProgress');
+                if (savedData) {
+                    const progressData = JSON.parse(savedData);
+                    
+                    // Validate data structure
+                    if (typeof progressData !== 'object' || progressData === null) {
+                        throw new Error('Invalid data format');
+                    }
+                    
+                    // Restore all state with fallbacks
+                    currentWeek = Math.max(1, Math.min(40, progressData.currentWeek || 1));
+                    completedWorkouts = new Set(Array.isArray(progressData.completedWorkouts) ? progressData.completedWorkouts : []);
+                    totalDistance = Math.max(0, progressData.totalDistance || 0);
+                    currentStreak = Math.max(0, progressData.currentStreak || 0);
+                    achievements = Array.isArray(progressData.achievements) ? progressData.achievements : [];
+                    lastCompletionDate = progressData.lastCompletionDate || null;
+                    
+                    // Restore custom paces if they exist
+                    if (progressData.paces && typeof progressData.paces === 'object') {
+                        Object.assign(paces, progressData.paces);
+                        updateAllWorkoutPaces();
+                    }
+                    
+                    // Restore weekly schedule if it exists
+                    if (progressData.weeklySchedule && typeof progressData.weeklySchedule === 'object') {
+                        weeklySchedule = progressData.weeklySchedule;
+                    } else {
+                        initializeSchedule();
+                    }
+                    
+                    // Only show success notification if we have meaningful data
+                    if (completedWorkouts.size > 0 || currentWeek > 1) {
+                        const method = progressData.storageMethod || storageMethod;
+                        showSaveNotification(`Previous progress restored (${method})`, 'success');
+                    }
+                    return true;
+                }
+            } catch (error) {
+                console.error('Failed to load progress:', error);
+                // Don't show error for normal "no data" case
+                if (getStorageItem('marathonTrainingProgress')) {
+                    showSaveNotification('Previous progress corrupted - starting fresh', 'error');
+                }
+            }
+            
+            // Initialize if no saved data or loading failed
+            initializeSchedule();
+            return false;
+        }
+
+        function clearProgress() {
+            try {
+                removeStorageItem('marathonTrainingProgress');
+                
+                // Reset all state
+                currentWeek = 1;
+                completedWorkouts.clear();
+                totalDistance = 0;
+                currentStreak = 0;
+                achievements = [];
+                lastCompletionDate = null;
+                
+                // Reset paces to defaults
+                paces = {
+                    long: '5:50',
+                    tempo: '4:45',
+                    speed: '4:10',
+                    easy: '6:15',
+                    recovery: '6:30'
+                };
+                
+                initializeSchedule();
+                renderWeeklyCalendar();
+                showSaveNotification(`Progress cleared successfully (${storageMethod})`, 'success');
+                return true;
+            } catch (error) {
+                console.error('Failed to clear progress:', error);
+                showSaveNotification('Failed to clear progress', 'error');
+                return false;
+            }
+        }
+
+        function showSaveNotification(message, type = 'info') {
+            // Don't show too many notifications
+            const existingNotifications = document.querySelectorAll('.save-notification');
+            if (existingNotifications.length >= 2) {
+                existingNotifications[0].remove();
+            }
+            
+            const notification = document.createElement('div');
+            notification.className = `save-notification fixed top-4 right-4 z-50 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 transform translate-x-full shadow-lg ${
+                type === 'success' ? 'bg-green-500 text-white' : 
+                type === 'error' ? 'bg-red-500 text-white' : 
+                'bg-blue-500 text-white'
+            }`;
+            notification.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <span>${type === 'success' ? '✅' : type === 'error' ? '⚠️' : 'ℹ️'}</span>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            // Auto-remove after delay (longer for errors)
+            const delay = type === 'error' ? 7000 : 2000;
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.style.transform = 'translateX(100%)';
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.remove();
+                        }
+                    }, 300);
+                }
+            }, delay);
+        }
+
+        function updateAllWorkoutPaces() {
+            // Update training plan with current paces
+            for (let week = 1; week <= 40; week++) {
+                const weekData = trainingPlan[week];
+                if (weekData) {
+                    weekData.workouts.forEach(workout => {
+                        // Update pace based on workout type
+                        if (workout.type === 'long' && paces.long) {
+                            workout.pace = paces.long;
+                        } else if (workout.type === 'tempo' && paces.tempo) {
+                            workout.pace = paces.tempo;
+                        } else if (workout.type === 'speed' && paces.speed) {
+                            workout.pace = paces.speed;
+                        } else if (workout.type === 'easy' && paces.easy) {
+                            workout.pace = paces.easy;
+                        } else if (workout.type === 'recovery' && paces.recovery) {
+                            workout.pace = paces.recovery;
+                        }
+                        
+                        // Update description to reflect new pace
+                        if (workout.pace !== 'varied' && workout.pace !== 'strides' && workout.pace !== 'progression') {
+                            if (workout.type === 'long') {
+                                workout.description = `Long Run: ${workout.distance} km @ ${workout.pace}/km`;
+                            } else if (workout.type === 'tempo') {
+                                workout.description = `Tempo Run: ${workout.distance} km @ ${workout.pace}/km`;
+                            } else if (workout.type === 'speed' && workout.description.includes('x')) {
+                                // Keep interval descriptions but update pace references
+                                const intervalMatch = workout.description.match(/(\d+x\d+m)/);
+                                if (intervalMatch) {
+                                    workout.description = workout.description.replace(/@\s*[\d:]+\/km/, `@ ${workout.pace}/km`);
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
+        function initializeSchedule() {
+            for (let week = 1; week <= 40; week++) {
+                weeklySchedule[week] = {
+                    Monday: [],
+                    Tuesday: [],
+                    Wednesday: [],
+                    Thursday: [],
+                    Friday: [],
+                    Saturday: [],
+                    Sunday: []
+                };
+
+                const weekData = trainingPlan[week];
+                if (weekData) {
+                    // Default assignment: Long run on Sunday, Tempo on Tuesday, Speed on Thursday
+                    const workouts = weekData.workouts;
+                    if (workouts[0]) weeklySchedule[week].Sunday.push(workouts[0]); // Long run
+                    if (workouts[1]) weeklySchedule[week].Tuesday.push(workouts[1]); // Tempo
+                    if (workouts[2]) weeklySchedule[week].Thursday.push(workouts[2]); // Speed
+                }
+            }
+        }
+
+        function renderWeeklyCalendar() {
+            const calendar = document.getElementById('weekly-calendar');
+            const weekData = weeklySchedule[currentWeek] || {};
+            
+            calendar.innerHTML = dayNames.map(day => `
+                <div class="day-column">
+                    <div class="day-header bg-white dark:bg-gray-800 rounded-t-xl p-3 border-b border-gray-200 dark:border-gray-700">
+                        <h4 class="font-semibold text-center">${day}</h4>
+                    </div>
+                    <div class="day-slot bg-gray-50 dark:bg-gray-800 rounded-b-xl p-3 min-h-[120px]" 
+                         data-day="${day}" 
+                         ondragover="allowDrop(event)" 
+                         ondrop="drop(event)">
+                        ${(weekData[day] || []).map(workout => renderWorkoutCard(workout)).join('')}
+                    </div>
+                </div>
+            `).join('');
+            
+            updateWeekInfo();
+            updateWeeklyProgress(); // Update weekly progress bar after rendering the calendar
+        }
+
+        function renderWorkoutCard(workout) {
+            const isCompleted = completedWorkouts.has(workout.id);
+            const typeColors = {
+                long: 'border-blue-500',
+                tempo: 'border-orange-500', 
+                speed: 'border-red-500',
+                easy: 'border-green-500',
+                race: 'border-purple-500'
+            };
+
+            return `
+                <div class="workout-card ${isCompleted ? 'completed-workout' : ''} bg-white dark:bg-gray-700 rounded-lg p-3 mb-2 border-l-4 ${typeColors[workout.type] || 'border-gray-500'} cursor-pointer shadow-sm hover:shadow-md transition-all"
+                     draggable="true" 
+                     ondragstart="dragStart(event)" 
+                     data-workout-id="${workout.id}"
+                     onclick="showWorkoutDetails('${workout.id}')">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="font-medium text-sm capitalize">${workout.type}</span>
+                        <span class="text-xs text-gray-500">${workout.distance}km</span>
+                    </div>
+                    <div class="text-xs text-gray-600 dark:text-gray-400 truncate">
+                        ${workout.description}
+                    </div>
+                    <div class="text-xs text-primary font-medium mt-1">
+                        @ ${workout.pace}/km
+                    </div>
+                    ${isCompleted ? '<div class="text-xs text-green-600 dark:text-green-400 mt-1">✅ Completed</div>' : ''}
+                </div>
+            `;
+        }
+
+        function getWeekDateRange(weekNumber) {
+            // Start from June 16, 2025 (which is a Monday)
+            const baseDate = new Date('2025-06-16');
+            const startDate = new Date(baseDate);
+            startDate.setDate(baseDate.getDate() + (weekNumber - 1) * 7);
+            
+            const endDate = new Date(startDate);
+            endDate.setDate(startDate.getDate() + 6);
+            
+            const formatDate = (date) => {
+                const day = date.getDate().toString().padStart(2, '0');
+                const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                return `${day}/${month}`;
+            };
+            
+            return `${formatDate(startDate)} - ${formatDate(endDate)}`;
+        }
+
+        function updateWeekInfo() {
+            const weekTitle = document.getElementById('week-title');
+            const weekSubtitle = document.getElementById('week-subtitle');
+            
+            const dateRange = getWeekDateRange(currentWeek);
+            weekTitle.innerHTML = `Week ${currentWeek}<br><span class="text-lg font-normal text-gray-600 dark:text-gray-400">${dateRange}</span>`;
+            
+            // Find the current phase
+            let currentPhase = "Aerobic Base & Routine Building";
+            for (let phase in weekPhases) {
+                if (currentWeek >= parseInt(phase)) {
+                    currentPhase = weekPhases[phase];
+                }
+            }
+            weekSubtitle.textContent = currentPhase;
+        }
+
+        function changeWeek(direction) {
+            const newWeek = currentWeek + direction;
+            if (newWeek >= 1 && newWeek <= 40) {
+                currentWeek = newWeek;
+                renderWeeklyCalendar();
+                
+                // Save progress after changing week
+                saveProgress();
+            }
+        }
+
+        // Drag and drop functions
+        function allowDrop(ev) {
+            ev.preventDefault();
+            ev.target.closest('.day-slot').classList.add('drag-over');
+        }
+
+        function dragStart(ev) {
+            ev.dataTransfer.setData("text", ev.target.dataset.workoutId);
+            ev.target.classList.add('dragging');
+        }
+
+        function drop(ev) {
+            ev.preventDefault();
+            const workoutId = ev.dataTransfer.getData("text");
+            const targetDay = ev.target.closest('.day-slot').dataset.day;
+            const sourceElement = document.querySelector(`[data-workout-id="${workoutId}"]`);
+            
+            if (sourceElement) {
+                // Find source day and remove workout
+                let sourceDay = null;
+                for (let day in weeklySchedule[currentWeek]) {
+                    const dayWorkouts = weeklySchedule[currentWeek][day];
+                    const workoutIndex = dayWorkouts.findIndex(w => w.id === workoutId);
+                    if (workoutIndex !== -1) {
+                        sourceDay = day;
+                        dayWorkouts.splice(workoutIndex, 1);
+                        break;
+                    }
+                }
+                
+                // Add workout to target day
+                if (sourceDay) {
+                    const workout = trainingPlan[currentWeek].workouts.find(w => w.id === workoutId);
+                    if (workout) {
+                        weeklySchedule[currentWeek][targetDay].push(workout);
+                    }
+                }
+            }
+            
+            // Clean up drag state
+            document.querySelectorAll('.day-slot').forEach(slot => {
+                slot.classList.remove('drag-over');
+            });
+            document.querySelectorAll('.workout-card').forEach(card => {
+                card.classList.remove('dragging');
+            });
+            
+            renderWeeklyCalendar();
+            
+            // Save progress after moving workout
+            saveProgress();
+        }
+
+        function showWorkoutDetails(workoutId) {
+            const workout = findWorkoutById(workoutId);
+            if (!workout) return;
+            
+            currentWorkout = workout;
+            const modal = document.getElementById('workout-modal');
+            const title = document.getElementById('modal-title');
+            const content = document.getElementById('modal-content');
+            const completeBtn = document.getElementById('complete-btn');
+            
+            title.textContent = `${workout.type.charAt(0).toUpperCase() + workout.type.slice(1)} Run`;
+            
+            const isCompleted = completedWorkouts.has(workoutId);
+            completeBtn.textContent = isCompleted ? '✅ Completed' : '✅ Mark Complete';
+            completeBtn.disabled = isCompleted;
+            completeBtn.className = isCompleted ? 
+                'flex-1 bg-gray-400 text-white py-3 px-4 rounded-lg font-medium cursor-not-allowed' :
+                'flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-medium transition-colors cursor-pointer';
+            
+            content.innerHTML = `
+                <div class="space-y-4">
+                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                        <h4 class="font-semibold mb-2">Workout Overview</h4>
+                        <p class="text-gray-700 dark:text-gray-300">${workout.description}</p>
+                    </div>
+                    
+                    <div class="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4">
+                        <h4 class="font-semibold mb-2">Detailed Instructions</h4>
+                        <pre class="whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300">${workout.details}</pre>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-primary">${workout.distance}km</div>
+                            <div class="text-sm text-gray-500">Distance</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-primary">${workout.pace === 'varied' || workout.pace === 'strides' || workout.pace === 'progression' ? 'Varied' : workout.pace + '/km'}</div>
+                            <div class="text-sm text-gray-500">Target Pace</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+        }
+
+        function findWorkoutById(workoutId) {
+            for (let week = 1; week <= 40; week++) {
+                const weekData = trainingPlan[week];
+                if (weekData) {
+                    const workout = weekData.workouts.find(w => w.id === workoutId);
+                    if (workout) return workout;
+                }
+            }
+            return null;
+        }
+
+        function completeWorkout() {
+            if (!currentWorkout || completedWorkouts.has(currentWorkout.id)) return;
+            
+            completedWorkouts.add(currentWorkout.id);
+            totalDistance += currentWorkout.distance;
+            
+            // Update streak logic
+            const today = new Date().toDateString();
+            if (lastCompletionDate === today) {
+                // Same day, no streak change
+            } else if (lastCompletionDate === new Date(Date.now() - 86400000).toDateString()) {
+                // Yesterday, continue streak
+                currentStreak++;
+            } else {
+                // Start new streak
+                currentStreak = 1;
+            }
+            lastCompletionDate = today;
+            
+            showCelebration(currentWorkout);
+            closeModal();
+            renderWeeklyCalendar();
+            updateWeeklyProgress();
+updateTotalDistance(); // Ensure total distance is updated
+saveProgress(true);
+            
+            // Save progress after completing workout
+            updateWeeklyProgress();
+updateTotalDistance();
+saveProgress(true);
+        }
+
+        function showCelebration(workout) {
+            const celebration = document.createElement('div');
+            celebration.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/20';
+            celebration.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 text-center max-w-sm mx-4 transform scale-0 transition-transform duration-500">
+                    <div class="text-6xl mb-4">🎉</div>
+                    <h3 class="text-2xl font-bold text-primary mb-2">Workout Complete!</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-2">${workout.distance}km ${workout.type} run</p>
+                    <p class="text-sm text-primary font-medium">+${workout.distance * 10} XP</p>
+                </div>
+            `;
+            
+            document.body.appendChild(celebration);
+            
+            setTimeout(() => {
+                celebration.querySelector('div').style.transform = 'scale(1)';
+            }, 100);
+            
+            setTimeout(() => {
+                celebration.remove();
+            }, 3000);
+        }
+
+        function closeModal() {
+            document.getElementById('workout-modal').classList.add('hidden');
+            currentWorkout = null;
+        }
+
+        function showPaceSettings() {
+            const modal = document.getElementById('pace-modal');
+            const settings = document.getElementById('pace-settings');
+            
+            settings.innerHTML = Object.entries(paces).map(([type, pace]) => `
+                <div>
+                    <label class="block text-sm font-medium mb-2 capitalize">${type} Pace</label>
+                    <input type="text" 
+                           id="pace-${type}" 
+                           value="${pace}" 
+                           placeholder="e.g. 5:30"
+                           class="w-full text-base px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent">
+                </div>
+            `).join('');
+            
+            modal.classList.remove('hidden');
+        }
+
+        function savePaceSettings() {
+            // Update paces object
+            Object.keys(paces).forEach(type => {
+                const input = document.getElementById(`pace-${type}`);
+                if (input && input.value) {
+                    paces[type] = input.value;
+                }
+            });
+            
+            updateAllWorkoutPaces();
+            renderWeeklyCalendar();
+            closePaceModal();
+            
+            // Save progress after updating paces
+            saveProgress(true);
+        }
+
+        function closePaceModal() {
+            document.getElementById('pace-modal').classList.add('hidden');
+        }
+
+        function showProgress() {
+            const modal = document.getElementById('progress-modal');
+            const content = document.getElementById('progress-content');
+            
+            const totalWorkouts = Object.values(trainingPlan).reduce((sum, week) => sum + week.workouts.length, 0);
+            const completed = completedWorkouts.size;
+            const percentage = Math.round((completed / totalWorkouts) * 100);
+            
+            content.innerHTML = `
+                <div class="bg-gradient-to-r from-primary/10 to-primary/5 dark:from-primary/20 dark:to-primary/10 rounded-xl p-6">
+                    <h4 class="text-xl font-semibold mb-4">Overall Progress</h4>
+                    <div class="bg-gray-200 dark:bg-gray-700 rounded-full h-4 mb-4">
+                        <div class="bg-gradient-to-r from-primary to-purple-500 rounded-full h-4 transition-all duration-500" style="width: ${percentage}%"></div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-4 text-center">
+                        <div>
+                            <div class="text-2xl font-bold text-primary">${completed}</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">Completed</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold text-green-600">${Math.round(totalDistance)}</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">Total km</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold text-orange-500">${currentStreak}</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">Streak</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-6">
+                    <h4 class="text-lg font-semibold mb-4">Weekly Breakdown</h4>
+                    <div class="space-y-2">
+                        ${Array.from({length: 40}, (_, i) => {
+                            const week = i + 1;
+                            const weekWorkouts = trainingPlan[week].workouts;
+                            const weekCompleted = weekWorkouts.filter(w => completedWorkouts.has(w.id)).length;
+                            const weekPercentage = Math.round((weekCompleted / weekWorkouts.length) * 100);
+                            
+                            return `
+                                <div class="flex items-center justify-between py-2">
+                                    <span class="text-sm">Week ${week}</span>
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-20 bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                                            <div class="bg-primary rounded-full h-2" style="width: ${weekPercentage}%"></div>
+                                        </div>
+                                        <span class="text-xs text-gray-500 w-8">${weekCompleted}/${weekWorkouts.length}</span>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+        }
+
+        function closeProgressModal() {
+            document.getElementById('progress-modal').classList.add('hidden');
+        }
+
+        function showDataManagement() {
+            // Update storage status
+            const storageAvailable = isStorageAvailable();
+            document.getElementById('storage-status').textContent = storageAvailable ? `Yes (${storageMethod})` : 'No';
+            document.getElementById('storage-method').textContent = storageMethod;
+            
+            // Calculate data size
+            try {
+                const savedData = getStorageItem('marathonTrainingProgress');
+                const dataSize = savedData ? (savedData.length / 1024).toFixed(1) + ' KB' : '0 KB';
+                document.getElementById('data-size').textContent = dataSize;
+            } catch (e) {
+                document.getElementById('data-size').textContent = 'Unknown';
+            }
+            
+            document.getElementById('data-modal').classList.remove('hidden');
+        }
+
+        function closeDataModal() {
+            document.getElementById('data-modal').classList.add('hidden');
+        }
+
+        function exportData() {
+            try {
+                const progressData = {
+                    currentWeek,
+                    completedWorkouts: Array.from(completedWorkouts),
+                    totalDistance,
+                    currentStreak,
+                    achievements,
+                    lastCompletionDate,
+                    weeklySchedule,
+                    paces,
+                    exportedAt: new Date().toISOString(),
+                    appVersion: '1.0'
+                };
+                
+                const dataStr = JSON.stringify(progressData, null, 2);
+                const dataBlob = new Blob([dataStr], {type: 'application/json'});
+                const url = URL.createObjectURL(dataBlob);
+                
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `marathon-training-progress-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                
+                showSaveNotification('Progress data exported successfully', 'success');
+            } catch (error) {
+                console.error('Export failed:', error);
+                showSaveNotification('Failed to export progress data', 'error');
+            }
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const progressData = JSON.parse(e.target.result);
+                    
+                    // Validate the data structure
+                    if (!progressData.completedWorkouts || !Array.isArray(progressData.completedWorkouts)) {
+                        throw new Error('Invalid data format');
+                    }
+                    
+                    // Restore the data
+                    currentWeek = progressData.currentWeek || 1;
+                    completedWorkouts = new Set(progressData.completedWorkouts);
+                    totalDistance = progressData.totalDistance || 0;
+                    currentStreak = progressData.currentStreak || 0;
+                    achievements = progressData.achievements || [];
+                    lastCompletionDate = progressData.lastCompletionDate || null;
+                    
+                    if (progressData.paces) {
+                        Object.assign(paces, progressData.paces);
+                        updateAllWorkoutPaces();
+                    }
+                    
+                    if (progressData.weeklySchedule) {
+                        weeklySchedule = progressData.weeklySchedule;
+                    } else {
+                        initializeSchedule();
+                    }
+                    
+                    // Save the imported data
+                    saveProgress(true);
+                    
+                    // Update the UI
+                    renderWeeklyCalendar();
+                    closeDataModal();
+                    
+                    showSaveNotification('Progress data imported successfully', 'success');
+                } catch (error) {
+                    console.error('Import failed:', error);
+                    showSaveNotification('Failed to import progress data - invalid file format', 'error');
+                }
+            };
+            
+            reader.readAsText(file);
+            // Reset the file input
+            event.target.value = '';
+        }
+
+        function confirmClearData() {
+            if (confirm('Are you sure you want to clear all progress? This action cannot be undone.')) {
+                clearProgress();
+                closeDataModal();
+            }
+        }
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            // Detect and initialize storage method first
+            detectStorageMethod();
+            console.log(`Storage method detected: ${storageMethod}`);
+            
+            // Load saved progress first, then render
+            loadProgress();
+            renderWeeklyCalendar();
+        });
+
+        // Close modals when clicking outside
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal-backdrop')) {
+                closeModal();
+                closePaceModal();
+                closeProgressModal();
+                closeDataModal();
+            }
+        });
+
+        // Auto-save progress periodically (every 2 minutes to reduce frequency)
+        setInterval(() => {
+            saveProgress();
+        }, 120000);
+
+        // Save before page unload
+        window.addEventListener('beforeunload', () => {
+            saveProgress();
+        });
+        document.addEventListener('DOMContentLoaded', () => {
+    // Populate the week dropdown with options dynamically
+    populateWeekDropdown();
+});
+
+function populateWeekDropdown() {
+    const weekDropdown = document.getElementById('week-dropdown');
+    weekDropdown.innerHTML = ''; // Clear existing options
+
+    for (let week = 1; week <= 40; week++) {
+        const option = document.createElement('option');
+        option.value = week;
+        option.textContent = `Week ${week}`;
+        weekDropdown.appendChild(option);
+    }
+
+    // Set the default selected week based on currentWeek
+    weekDropdown.value = currentWeek;
+}
+
+function selectWeek() {
+    const selectedWeek = document.getElementById('week-dropdown').value;
+    currentWeek = parseInt(selectedWeek);
+    renderWeeklyCalendar(); // Re-render the calendar for the selected function updateWeeklyProgress() {
+    const weekData = trainingPlan[currentWeek];
+    if (!weekData || !weekData.workouts) return;
+
+    const totalWorkouts = weekData.workouts.length;
+    const completedWorkouts = weekData.workouts.filter(workout => completedWorkouts.has(workout.id)).length;
+
+    const progressPercentage = Math.round((completedWorkouts / totalWorkouts) * 100);
+
+    // Update progress bar and text
+    const progressBar = document.getElementById('weekly-progress-bar');
+    const progressText = document.getElementById('weekly-progress-text');
+    progressBar.style.width = `${progressPercentage}%`;
+    progressText.textContent = `${progressPercentage}% workouts completed`;
+}
+
+function updateTotalDistance() {
+    // Calculate total distance from completed workouts
+    const totalDistanceCovered = Object.values(trainingPlan)
+        .flatMap(week => week.workouts)
+        .filter(workout => completedWorkouts.has(workout.id))
+        .reduce((sum, workout) => sum + workout.distance, 0);
+
+    // Update the global total distance variable
+    totalDistance = totalDistanceCovered;
+
+    // Update the displayed total distance
+    const totalDistanceElement = document.getElementById('total-distance');
+    if (totalDistanceElement) {
+        totalDistanceElement.textContent = `${totalDistance} km`;
+    }
+}
+        
+        
+        
+        
+        
+        
+        
+        
     </script>
 </body>
 </html>
