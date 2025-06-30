@@ -74,9 +74,6 @@
                
             </div>
             <div class="flex gap-3">
-                <button onclick="showCustomWorkoutModal()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
-                    ➕ Add Workout
-                </button>
                 <button onclick="showPaceSettings()" class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 px-4 py-2 rounded-lg font-medium transition-colors">
                     ⚙️ Adjust Paces
                 </button>
@@ -124,6 +121,13 @@
                 <div class="bg-gradient-to-r from-green-400 to-green-600 rounded-full h-3 transition-all duration-500" 
                      id="weekly-progress-bar" style="width: 0%"></div>
             </div>
+        </div>
+
+        <!-- Add Custom Workout Button -->
+        <div class="mb-6 text-center">
+            <button onclick="showCustomWorkoutModal()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-colors shadow-md hover:shadow-lg">
+                ➕ Add Custom Workout
+            </button>
         </div>
 
         <!-- Weekly Navigation -->
