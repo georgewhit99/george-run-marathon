@@ -1605,7 +1605,6 @@
     const today = new Date().toDateString();
     const yesterday = new Date(Date.now() - 86400000).toDateString();
 
-    // Determine if there were workouts on skipped days
     const skippedDaysWorkouts = checkSkippedDaysWorkouts(lastCompletionDate, today);
     console.log("Skipped Days Workouts:", skippedDaysWorkouts);
 
@@ -1621,8 +1620,17 @@
 
     lastCompletionDate = today;
 
+    // Update UI
+    const workoutElement = document.getElementById(currentWorkout.id);
+    if (workoutElement) {
+        workoutElement.classList.add("completed-workout");
+        console.log("Workout marked as complete in the UI.");
+    }
+
     console.log("Saving progress...");
-    saveProgress(true);
+    if (!saveProgress(true)) {
+        alert("Failed to save progress. Please try again.");
+    }
 }
 
 function checkSkippedDaysWorkouts(startDate, endDate) {
