@@ -1,6 +1,4 @@
-28-09
-
-Code working 26-06 New plan 2
+Updated app 30-06
 
 <!DOCTYPE html>
 <html lang="en">
@@ -71,25 +69,63 @@ Code working 26-06 New plan 2
             </div>
         </div>
 
+        <!-- Total Distance Gamified View -->
+        <div class="mb-6 bg-gradient-to-r from-purple-600 via-blue-600 to-green-500 rounded-2xl p-6 text-white shadow-lg transform hover:scale-105 transition-all duration-300">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg font-semibold mb-2 flex items-center gap-2">
+                        🏃‍♂️ Total Distance Covered
+                    </h3>
+                    <div class="text-4xl font-bold mb-2" id="total-distance">
+                        0 km
+                    </div>
+                    <div class="text-sm opacity-90">
+                        Keep pushing forward! 💪
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-6xl animate-pulse">🎯</div>
+                    <div class="text-sm mt-2 opacity-90">
+                        Target: 842 km
+                    </div>
+                    <div class="w-24 bg-white/30 rounded-full h-2 mt-1">
+                        <div class="bg-yellow-300 rounded-full h-2 transition-all duration-500" 
+                             id="total-distance-progress" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-   <!-- Weekly Navigation -->
-  <div class="flex items-center justify-between mb-6 bg-white dark:bg-gray-800 rounded-xl p-4">
-    <button onclick="changeWeek(-1)" class="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-colors">
-        ← Previous
-    </button>
-    <div class="text-center">
-        <h2 id="week-title" class="text-2xl font-bold text-primary">Week 1</h2>
-        <div id="week-subtitle" class="text-sm text-gray-600 dark:text-gray-400">Aerobic Base & Routine Building</div>
-       <!-- Date range -->
-        <!-- Dropdown for selecting weeks -->
-        <select id="week-dropdown" onchange="selectWeek()" class="mt-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 rounded-lg">
-            <!-- Dynamic options will be populated using JavaScript -->
-        </select>
-    </div>
-    <button onclick="changeWeek(1)" class="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-colors">
-        Next →
-    </button>
-</div>
+        <!-- Weekly Progress Bar -->
+        <div class="mb-6 bg-white dark:bg-gray-800 rounded-xl p-4 shadow-md">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Weekly Progress</span>
+                <span class="text-sm text-gray-500 dark:text-gray-400" id="weekly-progress-text">0% workouts completed</span>
+            </div>
+            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+                <div class="bg-gradient-to-r from-green-400 to-green-600 rounded-full h-3 transition-all duration-500" 
+                     id="weekly-progress-bar" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Weekly Navigation -->
+        <div class="flex items-center justify-between mb-6 bg-white dark:bg-gray-800 rounded-xl p-4">
+            <button onclick="changeWeek(-1)" class="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-colors">
+                ← Previous
+            </button>
+            <div class="text-center">
+                <h2 id="week-title" class="text-2xl font-bold text-primary">Week 1</h2>
+                <div id="week-subtitle" class="text-sm text-gray-600 dark:text-gray-400">Aerobic Base & Routine Building</div>
+               <!-- Date range -->
+                <!-- Dropdown for selecting weeks -->
+                <select id="week-dropdown" onchange="selectWeek()" class="mt-2 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 rounded-lg">
+                    <!-- Dynamic options will be populated using JavaScript -->
+                </select>
+            </div>
+            <button onclick="changeWeek(1)" class="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 px-3 py-2 rounded-lg transition-colors">
+                Next →
+            </button>
+        </div>
 
         <!-- Weekly Calendar -->
         <div id="weekly-calendar" class="grid grid-cols-1 md:grid-cols-7 gap-4 mb-8">
@@ -1119,7 +1155,8 @@ Code working 26-06 New plan 2
             `).join('');
             
             updateWeekInfo();
-            updateWeeklyProgress(); // Update weekly progress bar after rendering the calendar
+            updateWeeklyProgress();
+            updateTotalDistance();
         }
 
         function renderWorkoutCard(workout) {
@@ -1193,6 +1230,12 @@ Code working 26-06 New plan 2
             if (newWeek >= 1 && newWeek <= 40) {
                 currentWeek = newWeek;
                 renderWeeklyCalendar();
+                
+                // Update dropdown selection
+                const dropdown = document.getElementById('week-dropdown');
+                if (dropdown) {
+                    dropdown.value = currentWeek;
+                }
                 
                 // Save progress after changing week
                 saveProgress();
@@ -1332,14 +1375,9 @@ Code working 26-06 New plan 2
             showCelebration(currentWorkout);
             closeModal();
             renderWeeklyCalendar();
-            updateWeeklyProgress();
-updateTotalDistance(); // Ensure total distance is updated
-saveProgress(true);
             
             // Save progress after completing workout
-            updateWeeklyProgress();
-updateTotalDistance();
-saveProgress(true);
+            saveProgress(true);
         }
 
         function showCelebration(workout) {
@@ -1586,6 +1624,74 @@ saveProgress(true);
             }
         }
 
+        function updateTotalDistance() {
+            // Calculate total distance from completed workouts
+            const totalDistanceCovered = Object.values(trainingPlan)
+                .flatMap(week => week.workouts)
+                .filter(workout => completedWorkouts.has(workout.id))
+                .reduce((sum, workout) => sum + workout.distance, 0);
+
+            // Update the global total distance variable
+            totalDistance = totalDistanceCovered;
+
+            // Update the displayed total distance
+            const totalDistanceElement = document.getElementById('total-distance');
+            if (totalDistanceElement) {
+                totalDistanceElement.textContent = `${Math.round(totalDistance)} km`;
+            }
+
+            // Update the progress bar for total distance (target: 842km)
+            const totalDistanceProgress = document.getElementById('total-distance-progress');
+            if (totalDistanceProgress) {
+                const progressPercentage = Math.min(100, (totalDistance / 842) * 100);
+                totalDistanceProgress.style.width = `${progressPercentage}%`;
+            }
+        }
+
+        function updateWeeklyProgress() {
+            const weekData = trainingPlan[currentWeek];
+            if (!weekData || !weekData.workouts) return;
+
+            const totalWorkouts = weekData.workouts.length;
+            const completedWorkoutsInWeek = weekData.workouts.filter(workout => completedWorkouts.has(workout.id)).length;
+
+            const progressPercentage = Math.round((completedWorkoutsInWeek / totalWorkouts) * 100);
+
+            // Update progress bar and text
+            const progressBar = document.getElementById('weekly-progress-bar');
+            const progressText = document.getElementById('weekly-progress-text');
+            
+            if (progressBar) {
+                progressBar.style.width = `${progressPercentage}%`;
+            }
+            
+            if (progressText) {
+                progressText.textContent = `${completedWorkoutsInWeek}/${totalWorkouts} workouts completed (${progressPercentage}%)`;
+            }
+        }
+
+        function populateWeekDropdown() {
+            const weekDropdown = document.getElementById('week-dropdown');
+            weekDropdown.innerHTML = ''; // Clear existing options
+
+            for (let week = 1; week <= 40; week++) {
+                const option = document.createElement('option');
+                option.value = week;
+                option.textContent = `Week ${week}`;
+                weekDropdown.appendChild(option);
+            }
+
+            // Set the default selected week based on currentWeek
+            weekDropdown.value = currentWeek;
+        }
+
+        function selectWeek() {
+            const selectedWeek = document.getElementById('week-dropdown').value;
+            currentWeek = parseInt(selectedWeek);
+            renderWeeklyCalendar();
+            saveProgress();
+        }
+
         // Initialize the app
         document.addEventListener('DOMContentLoaded', function() {
             // Detect and initialize storage method first
@@ -1594,6 +1700,7 @@ saveProgress(true);
             
             // Load saved progress first, then render
             loadProgress();
+            populateWeekDropdown();
             renderWeeklyCalendar();
         });
 
@@ -1616,69 +1723,6 @@ saveProgress(true);
         window.addEventListener('beforeunload', () => {
             saveProgress();
         });
-        document.addEventListener('DOMContentLoaded', () => {
-    // Populate the week dropdown with options dynamically
-    populateWeekDropdown();
-});
-
-function populateWeekDropdown() {
-    const weekDropdown = document.getElementById('week-dropdown');
-    weekDropdown.innerHTML = ''; // Clear existing options
-
-    for (let week = 1; week <= 40; week++) {
-        const option = document.createElement('option');
-        option.value = week;
-        option.textContent = `Week ${week}`;
-        weekDropdown.appendChild(option);
-    }
-
-    // Set the default selected week based on currentWeek
-    weekDropdown.value = currentWeek;
-}
-
-function selectWeek() {
-    const selectedWeek = document.getElementById('week-dropdown').value;
-    currentWeek = parseInt(selectedWeek);
-    renderWeeklyCalendar(); // Re-render the calendar for the selected function updateWeeklyProgress() {
-    const weekData = trainingPlan[currentWeek];
-    if (!weekData || !weekData.workouts) return;
-
-    const totalWorkouts = weekData.workouts.length;
-    const completedWorkouts = weekData.workouts.filter(workout => completedWorkouts.has(workout.id)).length;
-
-    const progressPercentage = Math.round((completedWorkouts / totalWorkouts) * 100);
-
-    // Update progress bar and text
-    const progressBar = document.getElementById('weekly-progress-bar');
-    const progressText = document.getElementById('weekly-progress-text');
-    progressBar.style.width = `${progressPercentage}%`;
-    progressText.textContent = `${progressPercentage}% workouts completed`;
-}
-
-function updateTotalDistance() {
-    // Calculate total distance from completed workouts
-    const totalDistanceCovered = Object.values(trainingPlan)
-        .flatMap(week => week.workouts)
-        .filter(workout => completedWorkouts.has(workout.id))
-        .reduce((sum, workout) => sum + workout.distance, 0);
-
-    // Update the global total distance variable
-    totalDistance = totalDistanceCovered;
-
-    // Update the displayed total distance
-    const totalDistanceElement = document.getElementById('total-distance');
-    if (totalDistanceElement) {
-        totalDistanceElement.textContent = `${totalDistance} km`;
-    }
-}
-        
-        
-        
-        
-        
-        
-        
-        
     </script>
 </body>
 </html>
