@@ -1590,31 +1590,46 @@
         }
 
         function completeWorkout() {
-            if (!currentWorkout || completedWorkouts.has(currentWorkout.id)) return;
-            
-            completedWorkouts.add(currentWorkout.id);
-            totalDistance += currentWorkout.distance;
-            
-            // Update streak logic
-            const today = new Date().toDateString();
-            if (lastCompletionDate === today) {
-                // Same day, no streak change
-            } else if (lastCompletionDate === new Date(Date.now() - 86400000).toDateString()) {
-                // Yesterday, continue streak
-                currentStreak++;
-            } else {
-                // Start new streak
-                currentStreak = 1;
-            }
-            lastCompletionDate = today;
-            
-            showCelebration(currentWorkout);
-            closeModal();
-            renderWeeklyCalendar();
-            
-            // Save progress after completing workout
-            saveProgress(true);
-        }
+    if (!currentWorkout || completedWorkouts.has(currentWorkout.id)) return;
+
+    completedWorkouts.add(currentWorkout.id);
+    totalDistance += currentWorkout.distance;
+
+    const today = new Date().toDateString();
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+
+    // Determine if there were workouts on skipped days
+    const skippedDaysWorkouts = checkSkippedDaysWorkouts(lastCompletionDate, today);
+
+    if (lastCompletionDate === today) {
+        // Same day, no streak change
+    } else if (lastCompletionDate === yesterday || skippedDaysWorkouts === false) {
+        // Continue streak if skipped days had no workouts
+        currentStreak++;
+    } else {
+        // Start new streak
+        currentStreak = 1;
+    }
+
+    lastCompletionDate = today;
+
+    saveProgress(true);
+}
+
+function checkSkippedDaysWorkouts(startDate, endDate) {
+    let date = new Date(startDate);
+    const end = new Date(endDate);
+
+    while (date <= end) {
+        const formattedDate = date.toDateString();
+        const hasWorkouts = trainingPlan.some(week => 
+            week.workouts.some(workout => workout.date === formattedDate)
+        );
+        if (hasWorkouts) return true;
+        date.setDate(date.getDate() + 1);
+    }
+    return false;
+}
 
         function showCelebration(workout) {
             const celebration = document.createElement('div');
