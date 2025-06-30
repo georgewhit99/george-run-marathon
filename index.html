@@ -1589,8 +1589,13 @@
             return null;
         }
 
-        function completeWorkout() {
-    if (!currentWorkout || completedWorkouts.has(currentWorkout.id)) return;
+       function completeWorkout() {
+    if (!currentWorkout || completedWorkouts.has(currentWorkout.id)) {
+        console.warn("Workout already completed or invalid:", currentWorkout);
+        return;
+    }
+
+    console.log("Marking workout as complete:", currentWorkout);
 
     completedWorkouts.add(currentWorkout.id);
     totalDistance += currentWorkout.distance;
@@ -1600,19 +1605,21 @@
 
     // Determine if there were workouts on skipped days
     const skippedDaysWorkouts = checkSkippedDaysWorkouts(lastCompletionDate, today);
+    console.log("Skipped Days Workouts:", skippedDaysWorkouts);
 
     if (lastCompletionDate === today) {
-        // Same day, no streak change
+        console.log("Workout completed on the same day.");
     } else if (lastCompletionDate === yesterday || skippedDaysWorkouts === false) {
-        // Continue streak if skipped days had no workouts
         currentStreak++;
+        console.log("Continuing streak:", currentStreak);
     } else {
-        // Start new streak
         currentStreak = 1;
+        console.log("Starting new streak.");
     }
 
     lastCompletionDate = today;
 
+    console.log("Saving progress...");
     saveProgress(true);
 }
 
