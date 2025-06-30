@@ -1,5 +1,7 @@
 Updated app 30-06
 
+Updated app 30-06
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -48,6 +50,20 @@ Updated app 30-06
         .modal-backdrop {
             backdrop-filter: blur(4px);
         }
+        <style>
+    #workout-modal {
+        box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.5);
+    }
+    #modal-title {
+        text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    #complete-btn:hover {
+        transform: scale(1.05);
+    }
+    .modal-backdrop {
+        backdrop-filter: blur(10px);
+    }
+</style>
     </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
@@ -161,29 +177,27 @@ Updated app 30-06
     </div>
 
     <!-- Workout Detail Modal -->
-    <div id="workout-modal" class="hidden fixed inset-0 z-50 modal-backdrop bg-black/50 flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <div class="p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 id="modal-title" class="text-2xl font-bold"></h3>
-                    <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-2xl">×</button>
-                </div>
-                
-                <div id="modal-content" class="space-y-4">
-                    <!-- Modal content will be populated here -->
-                </div>
-                
-                <div class="flex gap-3 mt-6">
-                    <button id="complete-btn" onclick="completeWorkout()" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-medium transition-colors">
-                        ✅ Mark Complete
-                    </button>
-                    <button onclick="closeModal()" class="px-6 py-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg font-medium transition-colors">
-                        Cancel
-                    </button>
-                </div>
+   <div id="workout-modal" class="hidden fixed inset-0 z-50 modal-backdrop bg-black/50 flex items-center justify-center p-4">
+    <div class="bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 text-white rounded-xl max-w-lg w-full shadow-2xl transform hover:scale-105 transition-transform duration-300">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h3 id="modal-title" class="text-3xl font-extrabold">Workout Details</h3>
+                <button onclick="closeModal()" class="text-white hover:text-gray-300 text-2xl">×</button>
+            </div>
+            <div id="modal-content" class="space-y-6">
+                <!-- Workout details dynamically added here -->
+            </div>
+            <div class="grid grid-cols-2 gap-4 mt-6">
+                <button id="complete-btn" onclick="completeWorkout()" class="bg-green-500 hover:bg-green-600 text-white py-3 px-4 rounded-lg font-bold transition-colors">
+                    ✅ Mark Complete
+                </button>
+                <button onclick="closeModal()" class="bg-gray-300 text-gray-800 hover:bg-gray-400 py-3 px-4 rounded-lg font-bold transition-colors">
+                    Cancel
+                </button>
             </div>
         </div>
     </div>
+</div>
 
     <!-- Pace Settings Modal -->
     <div id="pace-modal" class="hidden fixed inset-0 z-50 modal-backdrop bg-black/50 flex items-center justify-center p-4">
@@ -1296,52 +1310,27 @@ Updated app 30-06
         }
 
         function showWorkoutDetails(workoutId) {
-            const workout = findWorkoutById(workoutId);
-            if (!workout) return;
-            
-            currentWorkout = workout;
-            const modal = document.getElementById('workout-modal');
-            const title = document.getElementById('modal-title');
-            const content = document.getElementById('modal-content');
-            const completeBtn = document.getElementById('complete-btn');
-            
-            title.textContent = `${workout.type.charAt(0).toUpperCase() + workout.type.slice(1)} Run`;
-            
-            const isCompleted = completedWorkouts.has(workoutId);
-            completeBtn.textContent = isCompleted ? '✅ Completed' : '✅ Mark Complete';
-            completeBtn.disabled = isCompleted;
-            completeBtn.className = isCompleted ? 
-                'flex-1 bg-gray-400 text-white py-3 px-4 rounded-lg font-medium cursor-not-allowed' :
-                'flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-medium transition-colors cursor-pointer';
-            
-            content.innerHTML = `
-                <div class="space-y-4">
-                    <div class="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                        <h4 class="font-semibold mb-2">Workout Overview</h4>
-                        <p class="text-gray-700 dark:text-gray-300">${workout.description}</p>
-                    </div>
-                    
-                    <div class="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4">
-                        <h4 class="font-semibold mb-2">Detailed Instructions</h4>
-                        <pre class="whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300">${workout.details}</pre>
-                    </div>
-                    
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="text-center">
-                            <div class="text-2xl font-bold text-primary">${workout.distance}km</div>
-                            <div class="text-sm text-gray-500">Distance</div>
-                        </div>
-                        <div class="text-center">
-                            <div class="text-2xl font-bold text-primary">${workout.pace === 'varied' || workout.pace === 'strides' || workout.pace === 'progression' ? 'Varied' : workout.pace + '/km'}</div>
-                            <div class="text-sm text-gray-500">Target Pace</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            modal.classList.remove('hidden');
-        }
+    const workout = findWorkoutById(workoutId);
+    if (!workout) return;
 
+    currentWorkout = workout;
+    const modal = document.getElementById('workout-modal');
+    const title = document.getElementById('modal-title');
+    const content = document.getElementById('modal-content');
+    const completeBtn = document.getElementById('complete-btn');
+
+    title.textContent = workout.title || `${workout.type.charAt(0).toUpperCase() + workout.type.slice(1)} Run`;
+
+    content.innerHTML = `
+        <div class="text-lg">
+            <p><strong>Distance:</strong> ${workout.distance} km</p>
+            <p><strong>Pace:</strong> ${workout.pace}</p>
+            <p><strong>Description:</strong> ${workout.details}</p>
+        </div>
+    `;
+
+    modal.classList.remove('hidden');
+}
         function findWorkoutById(workoutId) {
             for (let week = 1; week <= 40; week++) {
                 const weekData = trainingPlan[week];
