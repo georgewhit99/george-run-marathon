@@ -1,4 +1,4 @@
-30-06-25
+01-07
 
 <!DOCTYPE html>
 <html lang="en">
@@ -1591,47 +1591,32 @@
             return null;
         }
 
-       function completeWorkout() {
-    if (!currentWorkout || completedWorkouts.has(currentWorkout.id)) {
-        console.warn("Workout already completed or invalid:", currentWorkout);
-        return;
-    }
-
-    console.log("Marking workout as complete:", currentWorkout);
-
-    completedWorkouts.add(currentWorkout.id);
-    totalDistance += currentWorkout.distance;
-
-    const today = new Date().toDateString();
-    const yesterday = new Date(Date.now() - 86400000).toDateString();
-
-    const skippedDaysWorkouts = checkSkippedDaysWorkouts(lastCompletionDate, today);
-    console.log("Skipped Days Workouts:", skippedDaysWorkouts);
-
-    if (lastCompletionDate === today) {
-        console.log("Workout completed on the same day.");
-    } else if (lastCompletionDate === yesterday || skippedDaysWorkouts === false) {
-        currentStreak++;
-        console.log("Continuing streak:", currentStreak);
-    } else {
-        currentStreak = 1;
-        console.log("Starting new streak.");
-    }
-
-    lastCompletionDate = today;
-
-    // Update UI
-    const workoutElement = document.getElementById(currentWorkout.id);
-    if (workoutElement) {
-        workoutElement.classList.add("completed-workout");
-        console.log("Workout marked as complete in the UI.");
-    }
-
-    console.log("Saving progress...");
-    if (!saveProgress(true)) {
-        alert("Failed to save progress. Please try again.");
-    }
-}
+            function completeWorkout() {
+            if (!currentWorkout || completedWorkouts.has(currentWorkout.id)) return;
+            
+            completedWorkouts.add(currentWorkout.id);
+            totalDistance += currentWorkout.distance;
+            
+            // Update streak logic
+            const today = new Date().toDateString();
+            if (lastCompletionDate === today) {
+                // Same day, no streak change
+            } else if (lastCompletionDate === new Date(Date.now() - 86400000).toDateString()) {
+                // Yesterday, continue streak
+                currentStreak++;
+            } else {
+                // Start new streak
+                currentStreak = 1;
+            }
+            lastCompletionDate = today;
+            
+            showCelebration(currentWorkout);
+            closeModal();
+            renderWeeklyCalendar();
+            
+            // Save progress after completing workout
+            saveProgress(true);
+        }
 
 function checkSkippedDaysWorkouts(startDate, endDate) {
     let date = new Date(startDate);
