@@ -1,4 +1,4 @@
-01-07 added HM
+01-07 added race
 
 <!DOCTYPE html>
 <html lang="en">
@@ -1303,27 +1303,37 @@
         }
 
         function initializeSchedule() {
-            for (let week = 1; week <= 40; week++) {
-                weeklySchedule[week] = {
-                    Monday: [],
-                    Tuesday: [],
-                    Wednesday: [],
-                    Thursday: [],
-                    Friday: [],
-                    Saturday: [],
-                    Sunday: []
-                };
+    for (let week = 1; week <= 40; week++) {
+        weeklySchedule[week] = {
+            Monday: [],
+            Tuesday: [],
+            Wednesday: [],
+            Thursday: [],
+            Friday: [],
+            Saturday: [],
+            Sunday: []
+        };
 
-                const weekData = trainingPlan[week];
-                if (weekData) {
-                    // Default assignment: Long run on Sunday, Tempo on Tuesday, Speed on Thursday
-                    const workouts = weekData.workouts;
-                    if (workouts[0]) weeklySchedule[week].Sunday.push(workouts[0]); // Long run
-                    if (workouts[1]) weeklySchedule[week].Tuesday.push(workouts[1]); // Tempo
-                    if (workouts[2]) weeklySchedule[week].Thursday.push(workouts[2]); // Speed
+        const weekData = trainingPlan[week];
+        if (weekData) {
+            const workouts = weekData.workouts;
+            workouts.forEach(workout => {
+                // Assign workouts to days based on type
+                if (workout.type === 'long') {
+                    weeklySchedule[week].Sunday.push(workout);
+                } else if (workout.type === 'tempo') {
+                    weeklySchedule[week].Tuesday.push(workout);
+                } else if (workout.type === 'speed') {
+                    weeklySchedule[week].Thursday.push(workout);
+                } else if (workout.type === 'race') {
+                    weeklySchedule[week].Saturday.push(workout); // Example: Assign races to Saturday
+                } else {
+                    weeklySchedule[week].Monday.push(workout); // Default fallback
                 }
-            }
+            });
         }
+    }
+}
 
         // Custom workout functions
         function showCustomWorkoutModal() {
