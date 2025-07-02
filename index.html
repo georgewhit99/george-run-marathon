@@ -489,448 +489,353 @@
         };
 
         // Training plan data following the provided format
-        const trainingPlan = {
-            1: {
-        title: "Aerobic Base & Routine Building",
-        workouts: [
-          { id: "w1-long", type: "long", distance: 12, pace: "6:10", description: "Long Run: 12 km @ 6:10/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
-          { id: "w1-tempo", type: "tempo", distance: 5, pace: "4:55", description: "Tempo Run: 5 km @ 4:55/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w1-speed", type: "speed", distance: 3, pace: "4:15", description: "6×400m @ 4:15/km", details: `6×400m @ 4:15/km
-• 1:00 jog recovery
-• 1km warm-up, 1km cool-down
-• Total distance: ~3km` },
-        ]
-      },
-      2: {
-        title: "Aerobic Base & Routine Building",
-        workouts: [
-          { id: "w2-long", type: "long", distance: 13, pace: "6:10", description: "Long Run: 13 km @ 6:10/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
-          { id: "w2-tempo", type: "tempo", distance: 6, pace: "4:55", description: "Tempo Run: 6 km @ 4:55/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w2-speed", type: "speed", distance: 3, pace: "4:15", description: "6×400m @ 4:15/km", details: `6×400m @ 4:15/km
-• 1:00 jog recovery
-• 1km warm-up, 1km cool-down
-• Total distance: ~3km` },
-        ]
-      },
-      3: {
-        title: "Aerobic Base & Routine Building",
-        workouts: [
-          { id: "w3-long", type: "long", distance: 14, pace: "6:10", description: "Long Run: 14 km @ 6:10/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
-          { id: "w3-tempo", type: "tempo", distance: 4, pace: "4:55", description: "Tempo Run: 4 km @ 4:55/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w3-speed", type: "speed", distance: 3, pace: "4:15", description: "6×400m @ 4:15/km", details: `6×400m @ 4:15/km
-• 1:00 jog recovery
-• 1km warm-up, 1km cool-down
-• Total distance: ~3km` },
-        ]
-      },
-      4: {
-        title: "Aerobic Base & Routine Building",
-        workouts: [
-          { id: "w4-long", type: "long", distance: 15, pace: "6:10", description: "Long Run: 15 km @ 6:10/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
-          { id: "w4-tempo", type: "tempo", distance: 5, pace: "4:55", description: "Tempo Run: 5 km @ 4:55/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w4-speed", type: "speed", distance: 3, pace: "4:15", description: "6×400m @ 4:15/km", details: `6×400m @ 4:15/km
-• 1:00 jog recovery
-• 1km warm-up, 1km cool-down
-• Total distance: ~3km` },
-        ]
-      },
-      5: {
-        title: "Aerobic Base & Routine Building",
-        workouts: [
-          { id: "w5-long", type: "long", distance: 16, pace: "6:10", description: "Long Run: 16 km @ 6:10/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
-          { id: "w5-tempo", type: "tempo", distance: 6, pace: "4:55", description: "Tempo Run: 6 km @ 4:55/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w5-speed", type: "speed", distance: 3, pace: "4:15", description: "6×400m @ 4:15/km", details: `6×400m @ 4:15/km
-• 1:00 jog recovery
-• 1km warm-up, 1km cool-down
-• Total distance: ~3km` },
-        ]
-      },
-      6: {
-        title: "Aerobic Base & Routine Building",
-        workouts: [
-          { id: "w6-long", type: "long", distance: 17, pace: "6:10", description: "Long Run: 17 km @ 6:10/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
-          { id: "w6-tempo", type: "tempo", distance: 4, pace: "4:55", description: "Tempo Run: 4 km @ 4:55/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w6-speed", type: "speed", distance: 3, pace: "4:15", description: "6×400m @ 4:15/km", details: `6×400m @ 4:15/km
-• 1:00 jog recovery
-• 1km warm-up, 1km cool-down
-• Total distance: ~3km` },
-        ]
-      },
-      7: {
-        title: "Aerobic Base & Routine Building",
-        workouts: [
-          { id: "w7-long", type: "long", distance: 18, pace: "6:10", description: "Long Run: 18 km @ 6:10/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
-          { id: "w7-tempo", type: "tempo", distance: 5, pace: "4:55", description: "Tempo Run: 5 km @ 4:55/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w7-speed", type: "speed", distance: 3, pace: "4:15", description: "6×400m @ 4:15/km", details: `6×400m @ 4:15/km
-• 1:00 jog recovery
-• 1km warm-up, 1km cool-down
-• Total distance: ~3km` },
-        ]
-      },
-      8: {
-        title: "Aerobic Base & Routine Building",
-        workouts: [
-          { id: "w8-long", type: "long", distance: 19, pace: "6:10", description: "Long Run: 19 km @ 6:10/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
-          { id: "w8-tempo", type: "tempo", distance: 6, pace: "4:55", description: "Tempo Run: 6 km @ 4:55/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w8-speed", type: "speed", distance: 3, pace: "4:15", description: "6×400m @ 4:15/km", details: `6×400m @ 4:15/km
-• 1:00 jog recovery
-• 1km warm-up, 1km cool-down
-• Total distance: ~3km` },
-        ]
-      },
-      9: {
-        title: "Endurance & Threshold Development",
-        workouts: [
-          { id: "w9-long", type: "long", distance: 18.0, pace: "6:00", description: "Long Run: 18.0 km @ 6:00/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
-          { id: "w9-tempo", type: "tempo", distance: 6, pace: "4:45", description: "Tempo Run: 6 km @ 4:45/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w9-speed", type: "speed", distance: 4, pace: "4:20", description: "5×800m @ 4:20/km", details: `5×800m @ 4:20/km
-• 400m jog recovery
-• 1km warm-up, 1km cool-down
-• Total distance: ~4km` },
-        ]
-      },
-      10: {
-        title: "Endurance & Threshold Development",
-        workouts: [
-          { id: "w10-long", type: "long", distance: 18.5, pace: "6:00", description: "Long Run: 18.5 km @ 6:00/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
-          { id: "w10-tempo", type: "tempo", distance: 6, pace: "4:45", description: "Tempo Run: 6 km @ 4:45/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w10-speed", type: "speed", distance: 4, pace: "4:20", description: "5×800m @ 4:20/km", details: `5×800m @ 4:20/km
-• 400m jog recovery
-• 1km warm-up, 1km cool-down
-• Total distance: ~4km` },
-        ]
-      },
-      11: {
-        title: "Endurance & Threshold Development",
-        workouts: [
-          { id: "w11-long", type: "long", distance: 19.0, pace: "6:00", description: "Long Run: 19.0 km @ 6:00/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
-          { id: "w11-tempo", type: "tempo", distance: 6, pace: "4:45", description: "Tempo Run: 6 km @ 4:45/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w11-speed", type: "speed", distance: 4, pace: "4:20", description: "5×800m @ 4:20/km", details: `5×800m @ 4:20/km
-• 400m jog recovery
-• 1km warm-up, 1km cool-down
-• Total distance: ~4km` },
-        ]
-      },
-      12: {
-        title: "Endurance & Threshold Development",
-        workouts: [
-          { id: "w12-long", type: "long", distance: 19.5, pace: "6:00", description: "Long Run: 19.5 km @ 6:00/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
-          { id: "w12-tempo", type: "tempo", distance: 6, pace: "4:45", description: "Tempo Run: 6 km @ 4:45/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w12-speed", type: "speed", distance: 4, pace: "4:20", description: "5×800m @ 4:20/km", details: `5×800m @ 4:20/km
-• 400m jog recovery
-• 1km warm-up, 1km cool-down
-• Total distance: ~4km` },
-        ]
-      },
-      13: {
-        title: "Endurance & Threshold Development",
-        workouts: [
-          { id: "w13-long", type: "long", distance: 20.0, pace: "6:00", description: "Long Run: 20.0 km @ 6:00/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
-          { id: "w13-tempo", type: "tempo", distance: 6, pace: "4:45", description: "Tempo Run: 6 km @ 4:45/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w13-speed", type: "speed", distance: 4, pace: "4:20", description: "5×800m @ 4:20/km", details: `5×800m @ 4:20/km
-• 400m jog recovery
-• 1km warm-up, 1km cool-down
-• Total distance: ~4km` },
-        ]
-      },
-      14: {
-        title: "Endurance & Threshold Development",
-        workouts: [
-          { id: "w14-long", type: "long", distance: 20.5, pace: "6:00", description: "Long Run: 20.5 km @ 6:00/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
-          { id: "w14-tempo", type: "tempo", distance: 6, pace: "4:45", description: "Tempo Run: 6 km @ 4:45/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w14-speed", type: "speed", distance: 4, pace: "4:20", description: "5×800m @ 4:20/km", details: `5×800m @ 4:20/km
-• 400m jog recovery
-• 1km warm-up, 1km cool-down
-• Total distance: ~4km` },
-        ]
-      },
-      15: {
-        title: "Endurance & Threshold Development",
-        workouts: [
-          { id: "w15-long", type: "long", distance: 21.0, pace: "6:00", description: "Long Run: 21.0 km @ 6:00/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
-          { id: "w15-tempo", type: "tempo", distance: 6, pace: "4:45", description: "Tempo Run: 6 km @ 4:45/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w15-speed", type: "speed", distance: 4, pace: "4:20", description: "5×800m @ 4:20/km", details: `5×800m @ 4:20/km
-• 400m jog recovery
-• 1km warm-up, 1km cool-down
-• Total distance: ~4km` },
-        ]
-      },
-      16: {
-        title: "Endurance & Threshold Development",
-        workouts: [
-          { id: "w16-long", type: "long", distance: 21.5, pace: "6:00", description: "Long Run: 21.5 km @ 6:00/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
-          { id: "w16-tempo", type: "tempo", distance: 6, pace: "4:45", description: "Tempo Run: 6 km @ 4:45/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w16-speed", type: "speed", distance: 4, pace: "4:20", description: "5×800m @ 4:20/km", details: `5×800m @ 4:20/km
-• 400m jog recovery
-• 1km warm-up, 1km cool-down
-• Total distance: ~4km` },
-        ]
-      },
-      17: {
-        title: "Marathon Pace & Endurance Building",
-        workouts: [
-          { id: "w17-long", type: "long", distance: 22, pace: "5:55", description: "Long Run: 22 km @ 5:55/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
-          { id: "w17-tempo", type: "tempo", distance: 7, pace: "4:50", description: "Tempo Run: 7 km @ 4:50/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w17-speed", type: "speed", distance: 5, pace: "4:20", description: "4×1km @ 4:20/km", details: `4×1km @ 4:20/km
-• 2:00 rest
-• 1km warm-up, 1km cool-down
-• Total distance: ~5km` },
-        ]
-      },
-      18: {
-        title: "Marathon Pace & Endurance Building",
-        workouts: [
-          { id: "w18-long", type: "long", distance: 23, pace: "5:55", description: "Long Run: 23 km @ 5:55/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
-          { id: "w18-tempo", type: "tempo", distance: 7, pace: "4:50", description: "Tempo Run: 7 km @ 4:50/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w18-speed", type: "speed", distance: 5, pace: "4:20", description: "4×1km @ 4:20/km", details: `4×1km @ 4:20/km
-• 2:00 rest
-• 1km warm-up, 1km cool-down
-• Total distance: ~5km` },
-        ]
-      },
-      19: {
-        title: "Marathon Pace & Endurance Building",
-        workouts: [
-          { id: "w19-long", type: "long", distance: 24, pace: "5:55", description: "Long Run: 24 km @ 5:55/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
-          { id: "w19-tempo", type: "tempo", distance: 7, pace: "4:50", description: "Tempo Run: 7 km @ 4:50/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w19-speed", type: "speed", distance: 5, pace: "4:20", description: "4×1km @ 4:20/km", details: `4×1km @ 4:20/km
-• 2:00 rest
-• 1km warm-up, 1km cool-down
-• Total distance: ~5km` },
-        ]
-      },
-      20: {
-        title: "Marathon Pace & Endurance Building",
-        workouts: [
-          { id: "w20-long", type: "long", distance: 25, pace: "5:55", description: "Long Run: 25 km @ 5:55/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
-          { id: "w20-tempo", type: "tempo", distance: 7, pace: "4:50", description: "Tempo Run: 7 km @ 4:50/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w20-speed", type: "speed", distance: 5, pace: "4:20", description: "4×1km @ 4:20/km", details: `4×1km @ 4:20/km
-• 2:00 rest
-• 1km warm-up, 1km cool-down
-• Total distance: ~5km` },
-        ]
-      },
-      21: {
-        title: "Marathon Pace & Endurance Building",
-        workouts: [
-          { id: "w21-long", type: "long", distance: 26, pace: "5:55", description: "Long Run: 26 km @ 5:55/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
-          { id: "w21-tempo", type: "tempo", distance: 7, pace: "4:50", description: "Tempo Run: 7 km @ 4:50/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w21-speed", type: "speed", distance: 5, pace: "4:20", description: "4×1km @ 4:20/km", details: `4×1km @ 4:20/km
-• 2:00 rest
-• 1km warm-up, 1km cool-down
-• Total distance: ~5km` },
-        ]
-      },
-      22: {
-        title: "Marathon Pace & Endurance Building",
-        workouts: [
-          { id: "w22-long", type: "long", distance: 27, pace: "5:55", description: "Long Run: 27 km @ 5:55/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
-          { id: "w22-tempo", type: "tempo", distance: 7, pace: "4:50", description: "Tempo Run: 7 km @ 4:50/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w22-speed", type: "speed", distance: 5, pace: "4:20", description: "4×1km @ 4:20/km", details: `4×1km @ 4:20/km
-• 2:00 rest
-• 1km warm-up, 1km cool-down
-• Total distance: ~5km` },
-        ]
-      },
-      23: {
-        title: "Marathon Pace & Endurance Building",
-        workouts: [
-          { id: "w23-long", type: "long", distance: 28, pace: "5:55", description: "Long Run: 28 km @ 5:55/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
-          { id: "w23-tempo", type: "tempo", distance: 7, pace: "4:50", description: "Tempo Run: 7 km @ 4:50/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w23-speed", type: "speed", distance: 5, pace: "4:20", description: "4×1km @ 4:20/km", details: `4×1km @ 4:20/km
-• 2:00 rest
-• 1km warm-up, 1km cool-down
-• Total distance: ~5km` },
-        ]
-      },
-      24: {
-        title: "Marathon Pace & Endurance Building",
-        workouts: [
-          { id: "w24-long", type: "long", distance: 29, pace: "5:55", description: "Long Run: 29 km @ 5:55/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
-          { id: "w24-tempo", type: "tempo", distance: 7, pace: "4:50", description: "Tempo Run: 7 km @ 4:50/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w24-speed", type: "speed", distance: 5, pace: "4:20", description: "4×1km @ 4:20/km", details: `4×1km @ 4:20/km
-• 2:00 rest
-• 1km warm-up, 1km cool-down
-• Total distance: ~5km` },
-        ]
-      },
-      25: {
-        title: "Peak Specific Marathon Prep",
-        workouts: [
-          { id: "w25-long", type: "long", distance: 26, pace: "5:50", description: "Long Run: 26 km @ 5:50/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
-          { id: "w25-tempo", type: "tempo", distance: 10, pace: "4:50", description: "Tempo Run: 10 km @ 4:50/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w25-speed", type: "speed", distance: 6, pace: "4:40", description: "4×2km @ 4:40/km", details: `4×2km @ 4:40/km
-• 3:00 rest
-• 1km warm-up, 1km cool-down
-• Total distance: ~6km` },
-        ]
-      },
-      26: {
-        title: "Peak Specific Marathon Prep",
-        workouts: [
-          { id: "w26-long", type: "long", distance: 27, pace: "5:50", description: "Long Run: 27 km @ 5:50/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
-          { id: "w26-tempo", type: "tempo", distance: 10, pace: "4:50", description: "Tempo Run: 10 km @ 4:50/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w26-speed", type: "speed", distance: 6, pace: "4:40", description: "4×2km @ 4:40/km", details: `4×2km @ 4:40/km
-• 3:00 rest
-• 1km warm-up, 1km cool-down
-• Total distance: ~6km` },
-        ]
-      },
-      27: {
-        title: "Peak Specific Marathon Prep",
-        workouts: [
-          { id: "w27-long", type: "long", distance: 28, pace: "5:50", description: "Long Run: 28 km @ 5:50/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
-          { id: "w27-tempo", type: "tempo", distance: 10, pace: "4:50", description: "Tempo Run: 10 km @ 4:50/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w27-speed", type: "speed", distance: 6, pace: "4:40", description: "4×2km @ 4:40/km", details: `4×2km @ 4:40/km
-• 3:00 rest
-• 1km warm-up, 1km cool-down
-• Total distance: ~6km` },
-        ]
-      },
-      28: {
-        title: "Peak Specific Marathon Prep",
-        workouts: [
-          { id: "w28-long", type: "long", distance: 29, pace: "5:50", description: "Long Run: 29 km @ 5:50/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
-          { id: "w28-tempo", type: "tempo", distance: 10, pace: "4:50", description: "Tempo Run: 10 km @ 4:50/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w28-speed", type: "speed", distance: 6, pace: "4:40", description: "4×2km @ 4:40/km", details: `4×2km @ 4:40/km
-• 3:00 rest
-• 1km warm-up, 1km cool-down
-• Total distance: ~6km` },
-        ]
-      },
-      29: {
-        title: "Peak Specific Marathon Prep",
-        workouts: [
-          { id: "w29-long", type: "long", distance: 30, pace: "5:50", description: "Long Run: 30 km @ 5:50/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
-          { id: "w29-tempo", type: "tempo", distance: 10, pace: "4:50", description: "Tempo Run: 10 km @ 4:50/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w29-speed", type: "speed", distance: 6, pace: "4:40", description: "4×2km @ 4:40/km", details: `4×2km @ 4:40/km
-• 3:00 rest
-• 1km warm-up, 1km cool-down
-• Total distance: ~6km` },
-        ]
-      },
-      30: {
-        title: "Peak Specific Marathon Prep",
-        workouts: [
-          { id: "w30-long", type: "long", distance: 31, pace: "5:50", description: "Long Run: 31 km @ 5:50/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
-          { id: "w30-tempo", type: "tempo", distance: 10, pace: "4:50", description: "Tempo Run: 10 km @ 4:50/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w30-speed", type: "speed", distance: 6, pace: "4:40", description: "4×2km @ 4:40/km", details: `4×2km @ 4:40/km
-• 3:00 rest
-• 1km warm-up, 1km cool-down
-• Total distance: ~6km` },
-        ]
-      },
-      31: {
-        title: "Peak Specific Marathon Prep",
-        workouts: [
-          { id: "w31-long", type: "long", distance: 32, pace: "5:50", description: "Long Run: 32 km @ 5:50/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
-          { id: "w31-tempo", type: "tempo", distance: 10, pace: "4:50", description: "Tempo Run: 10 km @ 4:50/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w31-speed", type: "speed", distance: 6, pace: "4:40", description: "4×2km @ 4:40/km", details: `4×2km @ 4:40/km
-• 3:00 rest
-• 1km warm-up, 1km cool-down
-• Total distance: ~6km` },
-        ]
-      },
-      32: {
-        title: "Peak Specific Marathon Prep",
-        workouts: [
-          { id: "w32-long", type: "long", distance: 33, pace: "5:50", description: "Long Run: 33 km @ 5:50/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
-          { id: "w32-tempo", type: "tempo", distance: 10, pace: "4:50", description: "Tempo Run: 10 km @ 4:50/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w32-speed", type: "speed", distance: 6, pace: "4:40", description: "4×2km @ 4:40/km", details: `4×2km @ 4:40/km
-• 3:00 rest
-• 1km warm-up, 1km cool-down
-• Total distance: ~6km` },
-        ]
-      },
-      33: {
-        title: "Sharpening & Speed Maintenance",
-        workouts: [
-          { id: "w33-long", type: "long", distance: 28, pace: "6:00", description: "Long Run: 28 km @ 6:00/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
-          { id: "w33-tempo", type: "tempo", distance: 6, pace: "4:45", description: "Tempo Run: 6 km @ 4:45/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w33-speed", type: "speed", distance: 3.5, pace: "4:00", description: "8×400m @ 4:00/km", details: `8×400m @ 4:00/km
-• 1:00 jog recovery
-• 1km warm-up, 1km cool-down
-• Total distance: ~3.5km` },
-        ]
-      },
-      34: {
-        title: "Sharpening & Speed Maintenance",
-        workouts: [
-          { id: "w34-long", type: "long", distance: 29, pace: "6:00", description: "Long Run: 29 km @ 6:00/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
-          { id: "w34-tempo", type: "tempo", distance: 6, pace: "4:45", description: "Tempo Run: 6 km @ 4:45/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w34-speed", type: "speed", distance: 3.5, pace: "4:00", description: "8×400m @ 4:00/km", details: `8×400m @ 4:00/km
-• 1:00 jog recovery
-• 1km warm-up, 1km cool-down
-• Total distance: ~3.5km` },
-        ]
-      },
-      35: {
-        title: "Sharpening & Speed Maintenance",
-        workouts: [
-          { id: "w35-long", type: "long", distance: 30, pace: "6:00", description: "Long Run: 30 km @ 6:00/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
-          { id: "w35-tempo", type: "tempo", distance: 6, pace: "4:45", description: "Tempo Run: 6 km @ 4:45/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w35-speed", type: "speed", distance: 3.5, pace: "4:00", description: "8×400m @ 4:00/km", details: `8×400m @ 4:00/km
-• 1:00 jog recovery
-• 1km warm-up, 1km cool-down
-• Total distance: ~3.5km` },
-        ]
-      },
-      36: {
-        title: "Sharpening & Speed Maintenance",
-        workouts: [
-          { id: "w36-long", type: "long", distance: 31, pace: "6:00", description: "Long Run: 31 km @ 6:00/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
-          { id: "w36-tempo", type: "tempo", distance: 6, pace: "4:45", description: "Tempo Run: 6 km @ 4:45/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w36-speed", type: "speed", distance: 3.5, pace: "4:00", description: "8×400m @ 4:00/km", details: `8×400m @ 4:00/km
-• 1:00 jog recovery
-• 1km warm-up, 1km cool-down
-• Total distance: ~3.5km` },
-        ]
-      },
-      37: {
-        title: "Peak Long Run & Race Simulation",
-        workouts: [
-          { id: "w37-long", type: "race", distance: 22, pace: "5:40", description: "Brighton Half Marathon: 22km @ 5:40/km", details: `Half Marathon Race Day.`, preferredDay: "Sunday" },
-          { id: "w37-tempo", type: "tempo", distance: 5, pace: "5:00", description: "Tempo Run: 5 km @ 5:00/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w37-speed", type: "speed", distance: 3, pace: "4:30", description: "3×1km @ 4:30/km", details: `3×1km @ 4:30/km
-• 2:00 rest
-• 1km warm-up, 1km cool-down
-• Total distance: ~3km` },
-        ]
-      },
-      38: {
-        title: "Taper Phase Begins",
-        workouts: [
-          { id: "w38-long", type: "long", distance: 24, pace: "6:00", description: "Long Run: 24 km @ 6:00/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
-          { id: "w38-tempo", type: "tempo", distance: 5, pace: "5:10", description: "Tempo Run: 5 km @ 5:10/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w38-speed", type: "speed", distance: 3, pace: "4:20", description: "4×400m @ 4:20/km", details: `4×400m @ 4:20/km
-• 1:00 jog recovery
-• 1km warm-up, 1km cool-down
-• Total distance: ~3km` },
-        ]
-      },
-      39: {
-        title: "Taper Week 2",
-        workouts: [
-          { id: "w39-long", type: "long", distance: 16, pace: "6:10", description: "Long Run: 16 km @ 6:10/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
-          { id: "w39-tempo", type: "tempo", distance: 4, pace: "5:20", description: "Tempo Run: 4 km @ 5:20/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w39-speed", type: "speed", distance: 2.5, pace: "4:30", description: "3×400m @ 4:30/km", details: `3×400m @ 4:30/km
-• 90 sec jog recovery
-• 1km warm-up, 1km cool-down
-• Total distance: ~2.5km` },
-        ]
-      },
-      40: {
-        title: "Race Week & Recovery",
-        workouts: [
-          { id: "w40-long", type: "long", distance: 10, pace: "6:15", description: "Long Run: 10 km @ 6:15/km", details: `Build endurance with a steady aerobic effort. Focus on fueling and form.` },
-          { id: "w40-tempo", type: "tempo", distance: 3, pace: "5:30", description: "Tempo Run: 3 km @ 5:30/km", details: `Comfortably hard effort. Focus on controlled breathing and sustainable pace.` },
-          { id: "w40-speed", type: "speed", distance: 1, pace: "4:00", description: "Strides", details: `Strides
-• 4×100m strides after easy run
-• 1km warm-up, 1km cool-down
-• Total distance: ~1km` },
-        ]
-      },
-    };
+        
+      
+
+          1: {
+    title: "Aerobic Base & Routine Building",
+    workouts: [
+        { id: 'w1-long', type: 'long', distance: 11, pace: '6:10', description: 'Long Run: 11 km @ 6:10/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w1-tempo', type: 'tempo', distance: 5, pace: '4:55', description: 'Tempo Run: 5 km @ 4:55/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w1-speed', type: 'speed', distance: 3, pace: '4:15/km', description: '6×400m @ 4:15/km', details: '• 1:00 jog recovery • 1km warm-up, 1km cool-down' },
+    ]
+},
+2: {
+    title: "Aerobic Base & Routine Building",
+    workouts: [
+        { id: 'w2-long', type: 'long', distance: 12, pace: '6:10', description: 'Long Run: 12 km @ 6:10/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w2-tempo', type: 'tempo', distance: 6, pace: '4:55', description: 'Tempo Run: 6 km @ 4:55/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w2-speed', type: 'speed', distance: 3, pace: '4:15/km', description: '6×400m @ 4:15/km', details: '• 1:00 jog recovery • 1km warm-up, 1km cool-down' },
+    ]
+},
+3: {
+    title: "Aerobic Base & Routine Building",
+    workouts: [
+        { id: 'w3-long', type: 'long', distance: 13, pace: '6:10', description: 'Long Run: 13 km @ 6:10/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w3-tempo', type: 'tempo', distance: 4, pace: '4:55', description: 'Tempo Run: 4 km @ 4:55/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w3-speed', type: 'speed', distance: 3, pace: '4:15/km', description: '6×400m @ 4:15/km', details: '• 1:00 jog recovery • 1km warm-up, 1km cool-down' },
+    ]
+},
+4: {
+    title: "Aerobic Base & Routine Building",
+    workouts: [
+        { id: 'w4-long', type: 'long', distance: 14, pace: '6:10', description: 'Long Run: 14 km @ 6:10/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w4-tempo', type: 'tempo', distance: 5, pace: '4:55', description: 'Tempo Run: 5 km @ 4:55/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w4-speed', type: 'speed', distance: 3, pace: '4:15/km', description: '6×400m @ 4:15/km', details: '• 1:00 jog recovery • 1km warm-up, 1km cool-down' },
+    ]
+},
+5: {
+    title: "Aerobic Base & Routine Building",
+    workouts: [
+        { id: 'w5-long', type: 'long', distance: 15, pace: '6:10', description: 'Long Run: 15 km @ 6:10/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w5-tempo', type: 'tempo', distance: 6, pace: '4:55', description: 'Tempo Run: 6 km @ 4:55/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w5-speed', type: 'speed', distance: 3, pace: '4:15/km', description: '6×400m @ 4:15/km', details: '• 1:00 jog recovery • 1km warm-up, 1km cool-down' },
+    ]
+},
+6: {
+    title: "Aerobic Base & Routine Building",
+    workouts: [
+        { id: 'w6-long', type: 'long', distance: 16, pace: '6:10', description: 'Long Run: 16 km @ 6:10/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w6-tempo', type: 'tempo', distance: 4, pace: '4:55', description: 'Tempo Run: 4 km @ 4:55/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w6-speed', type: 'speed', distance: 3, pace: '4:15/km', description: '6×400m @ 4:15/km', details: '• 1:00 jog recovery • 1km warm-up, 1km cool-down' },
+    ]
+},
+7: {
+    title: "Aerobic Base & Routine Building",
+    workouts: [
+        { id: 'w7-long', type: 'long', distance: 17, pace: '6:10', description: 'Long Run: 17 km @ 6:10/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w7-tempo', type: 'tempo', distance: 5, pace: '4:55', description: 'Tempo Run: 5 km @ 4:55/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w7-speed', type: 'speed', distance: 3, pace: '4:15/km', description: '6×400m @ 4:15/km', details: '• 1:00 jog recovery • 1km warm-up, 1km cool-down' },
+    ]
+},
+8: {
+    title: "Aerobic Base & Routine Building",
+    workouts: [
+        { id: 'w8-long', type: 'long', distance: 18, pace: '6:10', description: 'Long Run: 18 km @ 6:10/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w8-tempo', type: 'tempo', distance: 6, pace: '4:55', description: 'Tempo Run: 6 km @ 4:55/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w8-speed', type: 'speed', distance: 3, pace: '4:15/km', description: '6×400m @ 4:15/km', details: '• 1:00 jog recovery • 1km warm-up, 1km cool-down' },
+    ]
+},
+9: {
+    title: "Aerobic Base & Routine Building",
+    workouts: [
+        { id: 'w9-long', type: 'long', distance: 19, pace: '6:10', description: 'Long Run: 19 km @ 6:10/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w9-tempo', type: 'tempo', distance: 4, pace: '4:55', description: 'Tempo Run: 4 km @ 4:55/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w9-speed', type: 'speed', distance: 3, pace: '4:15/km', description: '6×400m @ 4:15/km', details: '• 1:00 jog recovery • 1km warm-up, 1km cool-down' },
+    ]
+},
+10: {
+    title: "Aerobic Base & Routine Building",
+    workouts: [
+        { id: 'w10-long', type: 'long', distance: 20, pace: '6:10', description: 'Long Run: 20 km @ 6:10/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w10-tempo', type: 'tempo', distance: 5, pace: '4:55', description: 'Tempo Run: 5 km @ 4:55/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w10-speed', type: 'speed', distance: 3, pace: '4:15/km', description: '6×400m @ 4:15/km', details: '• 1:00 jog recovery • 1km warm-up, 1km cool-down' },
+    ]
+},
+11: {
+    title: "Endurance & Threshold Development",
+    workouts: [
+        { id: 'w11-long', type: 'long', distance: 18.0, pace: '6:00', description: 'Long Run: 18.0 km @ 6:00/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w11-tempo', type: 'tempo', distance: 6, pace: '4:45', description: 'Tempo Run: 6 km @ 4:45/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w11-speed', type: 'speed', distance: 4, pace: '4:20/km', description: '5×800m @ 4:20/km', details: '• 400m jog recovery • 1km warm-up, 1km cool-down' },
+    ]
+},
+12: {
+    title: "Endurance & Threshold Development",
+    workouts: [
+        { id: 'w12-long', type: 'long', distance: 18.5, pace: '6:00', description: 'Long Run: 18.5 km @ 6:00/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w12-tempo', type: 'tempo', distance: 6, pace: '4:45', description: 'Tempo Run: 6 km @ 4:45/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w12-speed', type: 'speed', distance: 4, pace: '4:20/km', description: '5×800m @ 4:20/km', details: '• 400m jog recovery • 1km warm-up, 1km cool-down' },
+    ]
+},
+13: {
+    title: "Endurance & Threshold Development",
+    workouts: [
+        { id: 'w13-long', type: 'long', distance: 19.0, pace: '6:00', description: 'Long Run: 19.0 km @ 6:00/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w13-tempo', type: 'tempo', distance: 6, pace: '4:45', description: 'Tempo Run: 6 km @ 4:45/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w13-speed', type: 'speed', distance: 4, pace: '4:20/km', description: '5×800m @ 4:20/km', details: '• 400m jog recovery • 1km warm-up, 1km cool-down' },
+    ]
+},
+14: {
+    title: "Endurance & Threshold Development",
+    workouts: [
+        { id: 'w14-long', type: 'long', distance: 19.5, pace: '6:00', description: 'Long Run: 19.5 km @ 6:00/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w14-tempo', type: 'tempo', distance: 6, pace: '4:45', description: 'Tempo Run: 6 km @ 4:45/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w14-speed', type: 'speed', distance: 4, pace: '4:20/km', description: '5×800m @ 4:20/km', details: '• 400m jog recovery • 1km warm-up, 1km cool-down' },
+    ]
+},
+15: {
+    title: "Endurance & Threshold Development",
+    workouts: [
+        { id: 'w15-long', type: 'long', distance: 20.0, pace: '6:00', description: 'Long Run: 20.0 km @ 6:00/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w15-tempo', type: 'tempo', distance: 6, pace: '4:45', description: 'Tempo Run: 6 km @ 4:45/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w15-speed', type: 'speed', distance: 4, pace: '4:20/km', description: '5×800m @ 4:20/km', details: '• 400m jog recovery • 1km warm-up, 1km cool-down' },
+    ]
+},
+16: {
+    title: "Endurance & Threshold Development",
+    workouts: [
+        { id: 'w16-long', type: 'long', distance: 20.5, pace: '6:00', description: 'Long Run: 20.5 km @ 6:00/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w16-tempo', type: 'tempo', distance: 6, pace: '4:45', description: 'Tempo Run: 6 km @ 4:45/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w16-speed', type: 'speed', distance: 4, pace: '4:20/km', description: '5×800m @ 4:20/km', details: '• 400m jog recovery • 1km warm-up, 1km cool-down' },
+    ]
+},
+17: {
+    title: "Endurance & Threshold Development",
+    workouts: [
+        { id: 'w17-long', type: 'long', distance: 21.0, pace: '6:00', description: 'Long Run: 21.0 km @ 6:00/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w17-tempo', type: 'tempo', distance: 6, pace: '4:45', description: 'Tempo Run: 6 km @ 4:45/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w17-speed', type: 'speed', distance: 4, pace: '4:20/km', description: '5×800m @ 4:20/km', details: '• 400m jog recovery • 1km warm-up, 1km cool-down' },
+    ]
+},
+18: {
+    title: "Endurance & Threshold Development",
+    workouts: [
+        { id: 'w18-long', type: 'long', distance: 21.5, pace: '6:00', description: 'Long Run: 21.5 km @ 6:00/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w18-tempo', type: 'tempo', distance: 6, pace: '4:45', description: 'Tempo Run: 6 km @ 4:45/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w18-speed', type: 'speed', distance: 4, pace: '4:20/km', description: '5×800m @ 4:20/km', details: '• 400m jog recovery • 1km warm-up, 1km cool-down' },
+    ]
+},
+19: {
+    title: "Marathon Pace & Endurance Building",
+    workouts: [
+        { id: 'w19-long', type: 'long', distance: 22, pace: '5:55', description: 'Long Run: 22 km @ 5:55/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w19-tempo', type: 'tempo', distance: 7, pace: '4:50', description: 'Tempo Run: 7 km @ 4:50/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w19-speed', type: 'speed', distance: 5, pace: '4:20/km', description: '4×1km @ 4:20/km', details: '• 2:00 rest • 1km warm-up, 1km cool-down' },
+    ]
+},
+20: {
+    title: "Marathon Pace & Endurance Building",
+    workouts: [
+        { id: 'w20-long', type: 'long', distance: 23, pace: '5:55', description: 'Long Run: 23 km @ 5:55/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w20-tempo', type: 'tempo', distance: 7, pace: '4:50', description: 'Tempo Run: 7 km @ 4:50/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w20-speed', type: 'speed', distance: 5, pace: '4:20/km', description: '4×1km @ 4:20/km', details: '• 2:00 rest • 1km warm-up, 1km cool-down' },
+    ]
+},
+21: {
+    title: "Marathon Pace & Endurance Building",
+    workouts: [
+        { id: 'w21-long', type: 'long', distance: 24, pace: '5:55', description: 'Long Run: 24 km @ 5:55/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w21-tempo', type: 'tempo', distance: 7, pace: '4:50', description: 'Tempo Run: 7 km @ 4:50/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w21-speed', type: 'speed', distance: 5, pace: '4:20/km', description: '4×1km @ 4:20/km', details: '• 2:00 rest • 1km warm-up, 1km cool-down' },
+    ]
+},
+22: {
+    title: "Marathon Pace & Endurance Building",
+    workouts: [
+        { id: 'w22-long', type: 'long', distance: 25, pace: '5:55', description: 'Long Run: 25 km @ 5:55/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w22-tempo', type: 'tempo', distance: 7, pace: '4:50', description: 'Tempo Run: 7 km @ 4:50/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w22-speed', type: 'speed', distance: 5, pace: '4:20/km', description: '4×1km @ 4:20/km', details: '• 2:00 rest • 1km warm-up, 1km cool-down' },
+    ]
+},
+23: {
+    title: "Marathon Pace & Endurance Building",
+    workouts: [
+        { id: 'w23-long', type: 'long', distance: 26, pace: '5:55', description: 'Long Run: 26 km @ 5:55/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w23-tempo', type: 'tempo', distance: 7, pace: '4:50', description: 'Tempo Run: 7 km @ 4:50/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w23-speed', type: 'speed', distance: 5, pace: '4:20/km', description: '4×1km @ 4:20/km', details: '• 2:00 rest • 1km warm-up, 1km cool-down' },
+    ]
+},
+24: {
+    title: "Marathon Pace & Endurance Building",
+    workouts: [
+        { id: 'w24-long', type: 'long', distance: 27, pace: '5:55', description: 'Long Run: 27 km @ 5:55/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w24-tempo', type: 'tempo', distance: 7, pace: '4:50', description: 'Tempo Run: 7 km @ 4:50/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w24-speed', type: 'speed', distance: 5, pace: '4:20/km', description: '4×1km @ 4:20/km', details: '• 2:00 rest • 1km warm-up, 1km cool-down' },
+    ]
+},
+25: {
+    title: "Marathon Pace & Endurance Building",
+    workouts: [
+        { id: 'w25-long', type: 'long', distance: 28, pace: '5:55', description: 'Long Run: 28 km @ 5:55/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w25-tempo', type: 'tempo', distance: 7, pace: '4:50', description: 'Tempo Run: 7 km @ 4:50/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w25-speed', type: 'speed', distance: 5, pace: '4:20/km', description: '4×1km @ 4:20/km', details: '• 2:00 rest • 1km warm-up, 1km cool-down' },
+    ]
+},
+26: {
+    title: "Marathon Pace & Endurance Building",
+    workouts: [
+        { id: 'w26-long', type: 'long', distance: 29, pace: '5:55', description: 'Long Run: 29 km @ 5:55/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w26-tempo', type: 'tempo', distance: 7, pace: '4:50', description: 'Tempo Run: 7 km @ 4:50/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w26-speed', type: 'speed', distance: 5, pace: '4:20/km', description: '4×1km @ 4:20/km', details: '• 2:00 rest • 1km warm-up, 1km cool-down' },
+    ]
+},
+27: {
+    title: "Marathon Pace & Endurance Building",
+    workouts: [
+        { id: 'w27-long', type: 'long', distance: 30, pace: '5:55', description: 'Long Run: 30 km @ 5:55/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w27-tempo', type: 'tempo', distance: 7, pace: '4:50', description: 'Tempo Run: 7 km @ 4:50/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w27-speed', type: 'speed', distance: 5, pace: '4:20/km', description: '4×1km @ 4:20/km', details: '• 2:00 rest • 1km warm-up, 1km cool-down' },
+    ]
+},
+28: {
+    title: "Marathon Pace & Endurance Building",
+    workouts: [
+        { id: 'w28-long', type: 'long', distance: 31, pace: '5:55', description: 'Long Run: 31 km @ 5:55/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w28-tempo', type: 'tempo', distance: 7, pace: '4:50', description: 'Tempo Run: 7 km @ 4:50/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w28-speed', type: 'speed', distance: 5, pace: '4:20/km', description: '4×1km @ 4:20/km', details: '• 2:00 rest • 1km warm-up, 1km cool-down' },
+    ]
+},
+29: {
+    title: "Marathon Pace & Endurance Building",
+    workouts: [
+        { id: 'w29-long', type: 'long', distance: 32, pace: '5:55', description: 'Long Run: 32 km @ 5:55/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w29-tempo', type: 'tempo', distance: 7, pace: '4:50', description: 'Tempo Run: 7 km @ 4:50/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w29-speed', type: 'speed', distance: 5, pace: '4:20/km', description: '4×1km @ 4:20/km', details: '• 2:00 rest • 1km warm-up, 1km cool-down' },
+    ]
+},
+30: {
+    title: "Peak Specific Marathon Prep",
+    workouts: [
+        { id: 'w30-long', type: 'long', distance: 30, pace: '5:50', description: 'Long Run: 30 km @ 5:50/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w30-tempo', type: 'tempo', distance: 10, pace: '4:50', description: 'Tempo Run: 10 km @ 4:50/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w30-speed', type: 'speed', distance: 6, pace: '4:40/km', description: '4×2km @ 4:40/km', details: '• 3:00 rest • 1km warm-up, 1km cool-down' },
+    ]
+},
+31: {
+    title: "Peak Specific Marathon Prep",
+    workouts: [
+        { id: 'w31-long', type: 'long', distance: 31, pace: '5:50', description: 'Long Run: 31 km @ 5:50/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w31-tempo', type: 'tempo', distance: 10, pace: '4:50', description: 'Tempo Run: 10 km @ 4:50/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w31-speed', type: 'speed', distance: 6, pace: '4:40/km', description: '4×2km @ 4:40/km', details: '• 3:00 rest • 1km warm-up, 1km cool-down' },
+    ]
+},
+32: {
+    title: "Peak Specific Marathon Prep",
+    workouts: [
+        { id: 'w32-long', type: 'long', distance: 32, pace: '5:50', description: 'Long Run: 32 km @ 5:50/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w32-tempo', type: 'tempo', distance: 10, pace: '4:50', description: 'Tempo Run: 10 km @ 4:50/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w32-speed', type: 'speed', distance: 6, pace: '4:40/km', description: '4×2km @ 4:40/km', details: '• 3:00 rest • 1km warm-up, 1km cool-down' },
+    ]
+},
+33: {
+    title: "Peak Specific Marathon Prep",
+    workouts: [
+        { id: 'w33-long', type: 'long', distance: 33, pace: '5:50', description: 'Long Run: 33 km @ 5:50/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w33-tempo', type: 'tempo', distance: 10, pace: '4:50', description: 'Tempo Run: 10 km @ 4:50/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w33-speed', type: 'speed', distance: 6, pace: '4:40/km', description: '4×2km @ 4:40/km', details: '• 3:00 rest • 1km warm-up, 1km cool-down' },
+    ]
+},
+34: {
+    title: "Peak Specific Marathon Prep",
+    workouts: [
+        { id: 'w34-long', type: 'long', distance: 34, pace: '5:50', description: 'Long Run: 34 km @ 5:50/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w34-tempo', type: 'tempo', distance: 10, pace: '4:50', description: 'Tempo Run: 10 km @ 4:50/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w34-speed', type: 'speed', distance: 6, pace: '4:40/km', description: '4×2km @ 4:40/km', details: '• 3:00 rest • 1km warm-up, 1km cool-down' },
+    ]
+},
+35: {
+    title: "Peak Specific Marathon Prep",
+    workouts: [
+        { id: 'w35-long', type: 'long', distance: 35, pace: '5:50', description: 'Long Run: 35 km @ 5:50/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w35-tempo', type: 'tempo', distance: 10, pace: '4:50', description: 'Tempo Run: 10 km @ 4:50/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w35-speed', type: 'speed', distance: 6, pace: '4:40/km', description: '4×2km @ 4:40/km', details: '• 3:00 rest • 1km warm-up, 1km cool-down' },
+    ]
+},
+36: {
+    title: "Peak Specific Marathon Prep",
+    workouts: [
+        { id: 'w36-long', type: 'long', distance: 36, pace: '5:50', description: 'Long Run: 36 km @ 5:50/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w36-tempo', type: 'tempo', distance: 10, pace: '4:50', description: 'Tempo Run: 10 km @ 4:50/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w36-speed', type: 'speed', distance: 6, pace: '4:40/km', description: '4×2km @ 4:40/km', details: '• 3:00 rest • 1km warm-up, 1km cool-down' },
+    ]
+},
+37: {
+    title: "Sharpening & Speed Maintenance",
+    workouts: [
+        { id: 'w37-long', type: 'long', distance: 34, pace: '5:50', description: 'Long Run: 34 km @ 5:50/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w37-tempo', type: 'tempo', distance: 6, pace: '4:45', description: 'Tempo Run: 6 km @ 4:45/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w37-speed', type: 'speed', distance: 3, pace: '4:30/km', description: '3×1km @ 4:30/km', details: '• 2:00 rest • 1km warm-up, 1km cool-down' },
+    ]
+},
+38: {
+    title: "Sharpening & Speed Maintenance",
+    workouts: [
+        { id: 'w38-long', type: 'long', distance: 28, pace: '6:00', description: 'Long Run: 28 km @ 6:00/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w38-tempo', type: 'tempo', distance: 6, pace: '4:50', description: 'Tempo Run: 6 km @ 4:50/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w38-speed', type: 'speed', distance: 3.5, pace: '4:10/km', description: '6×400m @ 4:10/km', details: '• 1:00 jog recovery • 1km warm-up, 1km cool-down' },
+    ]
+},
+39: {
+    title: "Sharpening & Speed Maintenance",
+    workouts: [
+        { id: 'w39-long', type: 'long', distance: 24, pace: '6:00', description: 'Long Run: 24 km @ 6:00/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w39-tempo', type: 'tempo', distance: 5, pace: '4:55', description: 'Tempo Run: 5 km @ 4:55/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w39-speed', type: 'speed', distance: 3, pace: '4:20/km', description: '4×800m @ 4:20/km', details: '• 90 sec jog recovery • 1km warm-up, 1km cool-down' },
+    ]
+},
+40: {
+    title: "Taper Phase Begins",
+    workouts: [
+        { id: 'w40-long', type: 'long', distance: 18, pace: '6:10', description: 'Long Run: 18 km @ 6:10/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w40-tempo', type: 'tempo', distance: 4, pace: '5:10', description: 'Tempo Run: 4 km @ 5:10/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w40-speed', type: 'speed', distance: 2.5, pace: '4:30/km', description: '3×400m @ 4:30/km', details: '• 1:00 jog recovery • 1km warm-up, 1km cool-down' },
+    ]
+},
+41: {
+    title: "Taper Week 2",
+    workouts: [
+        { id: 'w41-long', type: 'long', distance: 12, pace: '6:15', description: 'Long Run: 12 km @ 6:15/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w41-tempo', type: 'tempo', distance: 3, pace: '5:20', description: 'Tempo Run: 3 km @ 5:20/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w41-speed', type: 'speed', distance: 1, pace: '-', description: '4×100m strides', details: '• After easy run • 1km warm-up, 1km cool-down' },
+    ]
+},
+42: {
+    title: "Taper Week 3",
+    workouts: [
+        { id: 'w42-long', type: 'long', distance: 8, pace: '6:20', description: 'Long Run: 8 km @ 6:20/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w42-tempo', type: 'tempo', distance: 2, pace: '5:25', description: 'Tempo Run: 2 km @ 5:25/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w42-speed', type: 'speed', distance: 1, pace: '-', description: 'Strides', details: '• 3×100m strides • 1km warm-up, 1km cool-down' },
+    ]
+},
+43: {
+    title: "Race Week – Marathon Day",
+    workouts: [
+        { id: 'w43-long', type: 'long', distance: 42.2, pace: '5:20', description: 'Long Run: 42.2 km @ 5:20/km', details: 'Build endurance with steady aerobic effort.' },
+        { id: 'w43-tempo', type: 'tempo', distance: 0, pace: '-', description: 'Tempo Run: 0 km @ -/km', details: 'Sustain a comfortably hard effort.' },
+        { id: 'w43-speed', type: 'speed', distance: 0, pace: '-', description: '-', details: 'Enjoy your race. You've earned it!' },
+    ]
+},
 
         const weekPhases = {
             1: "Aerobic Base & Routine Building",
@@ -941,9 +846,9 @@
             25: "Peak Marathon Training",
             29: "Peak Specific Marathon Prep",
             33: "Sharpening & Speed Maintenance",
-            37: "Taper and Recovery",
-            39: "Taper and Recovery",
-            40: "Race Week"
+            37: "Last Push",
+            40: "Taper and Recovery",
+            43: "Race Week"
         };
 
         const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
