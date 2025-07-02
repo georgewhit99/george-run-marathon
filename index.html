@@ -1,4 +1,4 @@
-02-07 43
+02-07 43 2
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2321,16 +2321,46 @@ function checkSkippedDaysWorkouts(startDate, endDate) {
         }
 
         // Initialize the app
-        document.addEventListener('DOMContentLoaded', function() {
-            // Detect and initialize storage method first
-            detectStorageMethod();
-            console.log(`Storage method detected: ${storageMethod}`);
-            
-            // Load saved progress first, then render
-            loadProgress();
-            populateWeekDropdown();
-            renderWeeklyCalendar();
-        });
+        document.addEventListener('DOMContentLoaded', function () {
+    // Initialize storage method (if applicable)
+    detectStorageMethod();
+
+    // Ensure dropdown options are populated
+    populateWeekDropdown();
+
+    // Log for debugging
+    console.log('Dropdown initialized:', document.getElementById('week-dropdown').innerHTML);
+});
+
+// Function to populate the dropdown with weeks
+function populateWeekDropdown() {
+    const weekDropdown = document.getElementById('week-dropdown');
+    weekDropdown.innerHTML = ''; // Clear existing options
+
+    // Add options for 43 weeks
+    for (let week = 1; week <= 43; week++) {
+        const option = document.createElement('option');
+        option.value = week; // Set option value
+        option.textContent = `Week ${week}`; // Display text
+        weekDropdown.appendChild(option); // Append to dropdown
+    }
+
+    // Set default selected week
+    weekDropdown.value = currentWeek;
+}
+
+// Function to handle week selection
+function selectWeek() {
+    const weekDropdown = document.getElementById('week-dropdown');
+    const selectedWeek = weekDropdown.value;
+
+    // Update currentWeek variable
+    currentWeek = parseInt(selectedWeek);
+
+    // Refresh the calendar and save progress
+    renderWeeklyCalendar();
+    saveProgress();
+}
 
         // Close modals when clicking outside
         document.addEventListener('click', function(e) {
