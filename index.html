@@ -1,3 +1,4 @@
+02-07
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1257,28 +1258,37 @@
         }
 
         function initializeSchedule() {
-            for (let week = 1; week <= 43; week++) {
-                weeklySchedule[week] = {
-                    Monday: [],
-                    Tuesday: [],
-                    Wednesday: [],
-                    Thursday: [],
-                    Friday: [],
-                    Saturday: [],
-                    Sunday: []
-                };
+    for (let week = 1; week <= 40; week++) { // Update the range if necessary to include all weeks
+        weeklySchedule[week] = {
+            Monday: [],
+            Tuesday: [],
+            Wednesday: [],
+            Thursday: [],
+            Friday: [],
+            Saturday: [],
+            Sunday: []
+        };
 
-                const weekData = trainingPlan[week];
-                if (weekData) {
-                    const workouts = weekData.workouts;
-                    workouts.forEach(workout => {
-                        // Assign workouts to days based on current workout day assignments
-                        const assignedDay = workoutDayAssignments[workout.type] || 'Monday';
-                        weeklySchedule[week][assignedDay].push(workout);
-                    });
+        const weekData = trainingPlan[week];
+        if (weekData) {
+            const workouts = weekData.workouts;
+            workouts.forEach(workout => {
+                // Assign workouts to days based on type
+                if (workout.type === 'long') {
+                    weeklySchedule[week].Sunday.push(workout);
+                } else if (workout.type === 'tempo') {
+                    weeklySchedule[week].Tuesday.push(workout);
+                } else if (workout.type === 'speed') {
+                    weeklySchedule[week].Thursday.push(workout);
+                } else if (workout.type === 'race') {
+                    weeklySchedule[week].Saturday.push(workout); // Assign races to Saturday
+                } else {
+                    weeklySchedule[week].Monday.push(workout); // Default fallback
                 }
-            }
+            });
         }
+    }
+}
 
         // Workout Day Settings Functions
         function showWorkoutDaySettings() {
