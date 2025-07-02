@@ -1,4 +1,4 @@
-02-07
+02-07 43
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1170,7 +1170,7 @@
 
         function updateAllWorkoutPaces() {
             // Update training plan with current paces
-            for (let week = 1; week <= 40; week++) {
+            for (let week = 1; week <= 43; week++) {
                 const weekData = trainingPlan[week];
                 if (weekData) {
                     weekData.workouts.forEach(workout => {
@@ -2051,7 +2051,7 @@ function checkSkippedDaysWorkouts(startDate, endDate) {
             let totalWorkouts = 0;
             let totalWeeksWithWorkouts = 0;
             
-            for (let week = 1; week <= 40; week++) {
+            for (let week = 1; week <= 43; week++) {
                 const weekWorkouts = trainingPlan[week].workouts;
                 const customWeekWorkouts = customWorkouts[week] || [];
                 const allWeekWorkouts = [...weekWorkouts, ...customWeekWorkouts];
