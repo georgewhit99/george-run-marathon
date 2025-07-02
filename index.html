@@ -1049,7 +1049,7 @@
                     }
                     
                     // Restore all state with fallbacks
-                    currentWeek = Math.max(1, Math.min(40, progressData.currentWeek || 1));
+                    currentWeek = Math.max(1, Math.min(43, progressData.currentWeek || 1));
                     completedWorkouts = new Set(Array.isArray(progressData.completedWorkouts) ? progressData.completedWorkouts : []);
                     totalDistance = Math.max(0, progressData.totalDistance || 0);
                     currentStreak = Math.max(0, progressData.currentStreak || 0);
@@ -1207,7 +1207,7 @@
         }
 
         function initializeSchedule() {
-            for (let week = 1; week <= 40; week++) {
+            for (let week = 1; week <= 43; week++) {
                 weeklySchedule[week] = {
                     Monday: [],
                     Tuesday: [],
@@ -1444,7 +1444,7 @@
 
         function changeWeek(direction) {
             const newWeek = currentWeek + direction;
-            if (newWeek >= 1 && newWeek <= 40) {
+            if (newWeek >= 1 && newWeek <= 43) {
                 currentWeek = newWeek;
                 renderWeeklyCalendar();
                 
@@ -1585,7 +1585,7 @@
 
         function findWorkoutById(workoutId) {
             // First check custom workouts
-            for (let week = 1; week <= 40; week++) {
+            for (let week = 1; week <= 43; week++) {
                 if (customWorkouts[week]) {
                     const workout = customWorkouts[week].find(w => w.id === workoutId);
                     if (workout) return workout;
@@ -1593,7 +1593,7 @@
             }
             
             // Then check training plan
-            for (let week = 1; week <= 40; week++) {
+            for (let week = 1; week <= 43; week++) {
                 const weekData = trainingPlan[week];
                 if (weekData) {
                     const workout = weekData.workouts.find(w => w.id === workoutId);
@@ -1721,7 +1721,7 @@ function checkSkippedDaysWorkouts(startDate, endDate) {
             const completionRates = [];
             const workoutTypeData = { long: 0, tempo: 0, speed: 0, easy: 0, race: 0, custom: 0, recovery: 0 };
             
-            for (let week = 1; week <= 40; week++) {
+            for (let week = 1; week <= 43; week++) {
                 const weekWorkouts = trainingPlan[week].workouts;
                 const customWeekWorkouts = customWorkouts[week] || [];
                 const allWeekWorkouts = [...weekWorkouts, ...customWeekWorkouts];
@@ -1762,7 +1762,7 @@ function checkSkippedDaysWorkouts(startDate, endDate) {
                 { name: "Marathon Pace", weeks: [17, 18, 19, 20, 21, 22, 23, 24], color: '#F59E0B' },
                 { name: "Peak Training", weeks: [25, 26, 27, 28, 29, 30, 31, 32], color: '#EF4444' },
                 { name: "Sharpening", weeks: [33, 34, 35, 36], color: '#8B5CF6' },
-                { name: "Peak & Taper", weeks: [37, 38, 39, 40], color: '#6B7280' }
+                { name: "Peak & Taper", weeks: [37, 38, 39, 40, 41, 42, 43], color: '#6B7280' }
             ];
             
             return phases.map(phase => {
@@ -2302,7 +2302,7 @@ function checkSkippedDaysWorkouts(startDate, endDate) {
             const weekDropdown = document.getElementById('week-dropdown');
             weekDropdown.innerHTML = ''; // Clear existing options
 
-            for (let week = 1; week <= 40; week++) {
+            for (let week = 1; week <= 43; week++) {
                 const option = document.createElement('option');
                 option.value = week;
                 option.textContent = `Week ${week}`;
