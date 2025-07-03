@@ -1,3 +1,4 @@
+race 43
 race 42 
 <!DOCTYPE html>
 <html lang="en">
@@ -820,7 +821,7 @@ race 42
                 title: "Taper Week 3",
                 workouts: [
                     { id: 'w42-long', type: 'long', distance: 8, pace: '6:20', description: 'Long Run: 8 km @ 6:20/km', details: 'Build endurance with steady aerobic effort.' },
-                    { id: 'w42-tempo', type: 'tempo', distance: 2, pace: '5:25', description: 'Tempo Run: 2 km @ 5:25/km', details: 'Sustain a comfortably hard effort.' },
+                    { id: 'w42-tempo', type: 'race', distance: 2, pace: '5:25', description: 'Tempo Run: 2 km @ 5:25/km', details: 'Sustain a comfortably hard effort.' },
                     { id: 'w42-speed', type: 'speed', distance: 1, pace: '4:20', description: 'Strides', details: '• 3×100m strides • 1km warm-up, 1km cool-down' },
                 ]
             },
@@ -1067,7 +1068,11 @@ race 42
                     
                     // Restore weekly schedule if it exists
                     if (progressData.weeklySchedule && typeof progressData.weeklySchedule === 'object') {
-                        weeklySchedule = progressData.weeklySchedule;
+                    
+                        weeklySchedule = trainingPlan[currentWeek];
+populateCalendar(weeklySchedule);
+
+weeklySchedule = progressData.weeklySchedule;
                     } else {
                         initializeSchedule();
                     }
@@ -1204,6 +1209,20 @@ race 42
             }
         }
 
+function populateCalendar(weeklySchedule) {
+    const calendar = document.getElementById('weekly-calendar');
+    calendar.innerHTML = ''; // Clear previous data
+    weeklySchedule.workouts.forEach(workout => {
+        const workoutElement = document.createElement('div');
+        workoutElement.textContent = `${workout.type}: ${workout.distance} km @ ${workout.pace}`;
+        calendar.appendChild(workoutElement);
+    });
+}
+function selectWeek() {
+    const selectedWeek = parseInt(document.getElementById('week-dropdown').value, 10);
+    currentWeek = selectedWeek;
+    populateCalendar(trainingPlan[currentWeek]);
+}
         function initializeSchedule() {
             for (let week = 1; week <= 43; week++) {
                 weeklySchedule[week] = {
