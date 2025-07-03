@@ -1,4 +1,4 @@
-race 43
+Edit workout
 race 42 
 <!DOCTYPE html>
 <html lang="en">
@@ -311,6 +311,61 @@ race 42
     </div>
 </div>
 
+<div id="edit-workout-modal" class="hidden fixed inset-0 z-50 modal-backdrop bg-black/50 flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-xl max-w-md w-full">
+        <div class="p-6">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-2xl font-bold">Edit Workout</h3>
+                <button onclick="closeEditWorkoutModal()" class="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-2xl">×</button>
+            </div>
+            
+            <form id="edit-workout-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Workout Type</label>
+                    <select id="edit-type" class="w-full text-base px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-primary">
+                        <option value="easy">Easy Run</option>
+                        <option value="long">Long Run</option>
+                        <option value="tempo">Tempo Run</option>
+                        <option value="speed">Speed/Intervals</option>
+                        <option value="recovery">Recovery Run</option>
+                        <option value="race">Race</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Distance (km)</label>
+                    <input type="number" id="edit-distance" step="0.1" min="0.1" max="50" 
+                           class="w-full text-base px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-primary"
+                           placeholder="e.g. 5.0">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Pace</label>
+                    <input type="text" id="edit-pace" 
+                           class="w-full text-base px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-primary"
+                           placeholder="e.g. 5:30 or varied">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Workout Description</label>
+                    <input type="text" id="edit-description" 
+                           class="w-full text-base px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-primary"
+                           placeholder="e.g. Long Run in the park">
+                </div>
+            </form>
+            
+            <div class="flex gap-3 mt-6">
+                <button onclick="saveEditedWorkout()" class="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-medium transition-colors">
+                    Save Changes
+                </button>
+                <button onclick="closeEditWorkoutModal()" class="px-6 py-3 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg font-medium transition-colors">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
     <!-- Pace Settings Modal -->
     <div id="pace-modal" class="hidden fixed inset-0 z-50 modal-backdrop bg-black/50 flex items-center justify-center p-4">
         <div class="bg-white dark:bg-gray-800 rounded-xl max-w-md w-full">
@@ -323,6 +378,7 @@ race 42
                 <div id="pace-settings" class="space-y-4">
                     <!-- Pace settings will be populated here -->
                 </div>
+                
                 
                 <div class="flex gap-3 mt-6">
                     <button onclick="savePaceSettings()" class="flex-1 bg-primary hover:bg-primary-dark text-white py-3 px-4 rounded-lg font-medium transition-colors">
@@ -1215,9 +1271,12 @@ function populateCalendar(weeklySchedule) {
     weeklySchedule.workouts.forEach(workout => {
         const workoutElement = document.createElement('div');
         workoutElement.textContent = `${workout.type}: ${workout.distance} km @ ${workout.pace}`;
+        workoutElement.classList.add('workout-card');
+        workoutElement.onclick = () => openEditWorkoutModal(workout.id); // Add edit functionality
         calendar.appendChild(workoutElement);
     });
 }
+
 function selectWeek() {
     const selectedWeek = parseInt(document.getElementById('week-dropdown').value, 10);
     currentWeek = selectedWeek;
@@ -1708,7 +1767,28 @@ function checkSkippedDaysWorkouts(startDate, endDate) {
             
             modal.classList.remove('hidden');
         }
+function saveEditedWorkout() {
+    const editedType = document.getElementById('edit-type').value;
+    const editedDistance = parseFloat(document.getElementById('edit-distance').value);
+    const editedPace = document.getElementById('edit-pace').value;
+    const editedDescription = document.getElementById('edit-description').value;
 
+    const workoutId = currentWorkout.id; // Assume currentWorkout contains the ID of the workout being edited
+    const workout = findWorkoutById(workoutId);
+    if (!workout) return;
+
+    // Update workout details
+    workout.type = editedType;
+    workout.distance = editedDistance;
+    workout.pace = editedPace;
+    workout.description = editedDescription;
+
+    // Update calendar view
+    populateCalendar(trainingPlan[currentWeek]);
+
+    // Hide the modal
+    closeEditWorkoutModal();
+}
         function savePaceSettings() {
             // Update paces object
             Object.keys(paces).forEach(type => {
@@ -2131,6 +2211,25 @@ function checkSkippedDaysWorkouts(startDate, endDate) {
                 currentChart = null;
             }
         }
+
+function openEditWorkoutModal(workoutId) {
+    const workout = findWorkoutById(workoutId); // Function to locate workout by ID
+    if (!workout) return;
+
+    // Populate modal fields with workout data
+    document.getElementById('edit-type').value = workout.type;
+    document.getElementById('edit-distance').value = workout.distance;
+    document.getElementById('edit-pace').value = workout.pace;
+    document.getElementById('edit-description').value = workout.description || '';
+    
+    // Show the modal
+    document.getElementById('edit-workout-modal').classList.remove('hidden');
+}
+
+function findWorkoutById(workoutId) {
+    const weekSchedule = trainingPlan[currentWeek];
+    return weekSchedule.workouts.find(workout => workout.id === workoutId);
+}
 
         function showDataManagement() {
             // Update storage status
