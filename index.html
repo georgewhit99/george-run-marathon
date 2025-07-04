@@ -1,4 +1,4 @@
-Code working 04-07
+Code working 04-07 2
 
 <!DOCTYPE html>
 <html lang="en">
@@ -103,31 +103,25 @@ Code working 04-07
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
     <div id="app" class="max-w-7xl mx-auto px-4 py-6">
         <!-- Header -->
-        <div class="flex items-center justify-between mb-8">
-            <div>
-                <h1 class="text-4xl font-bold text-primary">George's Marathon Plan</h1>
-               
-            </div>
-            <div class="flex gap-3">
-                   <button onclick="showProgress()" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-medium transition-colors">
-                    📊 Progress
-                </button>
-     <button onclick="showPaceSettings()" class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 px-4 py-2 rounded-lg font-medium transition-colors">
-    ⚙️ Adjust Paces
-    <div class="mt-2 space-y-3">
-        <!-- Export Progress Data -->
-        <button onclick="exportData()" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-medium transition-colors">
+        <div class="text-center mb-8">
+    <h1 class="text-5xl font-extrabold text-primary mb-4">
+        George's Marathon Plan
+    </h1>
+    <div class="flex flex-col gap-4">
+        <button onclick="showProgress()" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-medium transition-transform transform hover:scale-105">
+            📊 Progress
+        </button>
+        <button onclick="showPaceSettings()" class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 px-4 py-2 rounded-lg font-medium transition-transform transform hover:scale-105">
+            ⚙️ Adjust Paces
+        </button>
+        <button onclick="exportData()" class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg font-medium transition-transform transform hover:scale-105">
             📥 Export Progress Data
         </button>
-
-        <!-- Import Progress Data -->
-        <div class="relative">
-            <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(event)">
-            <button onclick="document.getElementById('import-file').click()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-colors">
-                📤 Import Progress Data
-            </button>
-        </div>
+        <button onclick="document.getElementById('import-file').click()" class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition-transform transform hover:scale-105">
+            📤 Import Progress Data
+        </button>
     </div>
+</div>
 </button>
              
            
