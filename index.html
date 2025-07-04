@@ -112,13 +112,13 @@
                    <button onclick="showProgress()" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-medium transition-colors">
                     📊 Progress
                 </button>
-      <!-- Settings Button -->
-<button onclick="toggleSettingsOptions()" class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 px-4 py-2 rounded-lg font-medium transition-colors relative">
-    ⚙️ Settings
+     <!-- Adjust Paces Button -->
+<button onclick="togglePaceOptions()" class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 px-4 py-2 rounded-lg font-medium transition-colors relative">
+    ⚙️ Adjust Paces
 </button>
 
 <!-- Nested Options -->
-<div id="settings-options" class="absolute top-full left-0 bg-white dark:bg-gray-800 rounded-lg shadow-lg mt-2 p-4 hidden">
+<div id="pace-options" class="absolute top-full left-0 bg-white dark:bg-gray-800 rounded-lg shadow-lg mt-2 p-4 hidden">
     <!-- Export Progress Data -->
     <button onclick="exportData()" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-medium transition-colors">
         📥 Export Progress Data
@@ -134,16 +134,12 @@
 </div>
 
 <script>
-    // Function to toggle the visibility of settings options
-    function toggleSettingsOptions() {
-        const settingsOptions = document.getElementById('settings-options');
-        settingsOptions.classList.toggle('hidden');
+    // Function to toggle the visibility of pace options
+    function togglePaceOptions() {
+        const paceOptions = document.getElementById('pace-options');
+        paceOptions.classList.toggle('hidden');
     }
 </script>
-             
-           
-            </div>
-        </div>
 
         <!-- Total Distance Gamified View -->
         <div class="mb-6 bg-gradient-to-r from-purple-600 via-blue-600 to-green-500 rounded-2xl p-6 text-white shadow-lg transform hover:scale-105 transition-all duration-300">
