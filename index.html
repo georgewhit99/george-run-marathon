@@ -1,5 +1,3 @@
-race 43
-race 42 
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -51,6 +49,9 @@ race 42
         }
         .custom-workout {
             border-left-color: #8B5CF6 !important;
+        }
+        .edited-workout {
+            border-left-color: #F59E0B !important;
         }
         .chart-container {
             position: relative;
@@ -190,7 +191,7 @@ race 42
         <!-- Workout Legend -->
         <div class="bg-white dark:bg-gray-800 rounded-xl p-6">
             <h3 class="text-lg font-semibold mb-4">Workout Types</h3>
-            <div class="grid grid-cols-2 md:grid-cols-6 gap-4 text-sm">
+            <div class="grid grid-cols-2 md:grid-cols-7 gap-4 text-sm">
                 <div class="flex items-center gap-2">
                     <div class="w-4 h-4 bg-blue-500 rounded"></div>
                     <span>Long Run</span>
@@ -214,6 +215,10 @@ race 42
                 <div class="flex items-center gap-2">
                     <div class="w-4 h-4 bg-purple-400 rounded"></div>
                     <span>Custom</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 bg-yellow-500 rounded"></div>
+                    <span>Edited</span>
                 </div>
             </div>
         </div>
@@ -290,20 +295,81 @@ race 42
             <div class="flex items-center justify-between mb-4">
                 <h3 id="modal-title" class="text-3xl font-extrabold">Workout Details</h3>
                 <div class="flex gap-2">
+                    <button id="edit-workout-btn" onclick="toggleEditMode()" class="text-yellow-300 hover:text-yellow-100 text-xl" title="Edit workout">
+                        ✏️
+                    </button>
                     <button id="delete-workout-btn" onclick="deleteWorkout()" class="text-red-300 hover:text-red-100 text-xl hidden" title="Delete custom workout">
                         🗑️
                     </button>
                     <button onclick="closeModal()" class="text-white hover:text-gray-300 text-2xl">×</button>
                 </div>
             </div>
+            
+            <!-- View Mode Content -->
             <div id="modal-content" class="space-y-6">
                 <!-- Workout details dynamically added here -->
             </div>
-            <div class="grid grid-cols-2 gap-4 mt-6">
+            
+            <!-- Edit Mode Content -->
+            <div id="modal-edit-content" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-sm font-medium mb-2">Workout Type</label>
+                    <select id="edit-type" class="w-full text-base px-4 py-3 rounded-lg border border-gray-300 bg-gray-800 text-white focus:ring-2 focus:ring-yellow-400 focus:border-transparent">
+                        <option value="easy">Easy Run</option>
+                        <option value="long">Long Run</option>
+                        <option value="tempo">Tempo Run</option>
+                        <option value="speed">Speed/Intervals</option>
+                        <option value="recovery">Recovery Run</option>
+                        <option value="race">Race</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Distance (km)</label>
+                    <input type="number" id="edit-distance" step="0.1" min="0.1" max="50" 
+                           class="w-full text-base px-4 py-3 rounded-lg border border-gray-300 bg-gray-800 text-white focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+                           placeholder="e.g. 5.0">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Target Pace</label>
+                    <input type="text" id="edit-pace" 
+                           class="w-full text-base px-4 py-3 rounded-lg border border-gray-300 bg-gray-800 text-white focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+                           placeholder="e.g. 5:30 or varied">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Workout Description</label>
+                    <input type="text" id="edit-description" 
+                           class="w-full text-base px-4 py-3 rounded-lg border border-gray-300 bg-gray-800 text-white focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+                           placeholder="e.g. Tempo run">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Detailed Instructions</label>
+                    <textarea id="edit-details" rows="3"
+                              class="w-full text-base px-4 py-3 rounded-lg border border-gray-300 bg-gray-800 text-white focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+                              placeholder="Additional workout details..."></textarea>
+                </div>
+            </div>
+            
+            <!-- View Mode Buttons -->
+            <div id="modal-view-buttons" class="grid grid-cols-2 gap-4 mt-6">
                 <button id="complete-btn" onclick="completeWorkout()" class="bg-green-500 hover:bg-green-600 text-white py-3 px-4 rounded-lg font-bold transition-colors">
                     ✅ Mark Complete
                 </button>
                 <button onclick="closeModal()" class="bg-gray-300 text-gray-800 hover:bg-gray-400 py-3 px-4 rounded-lg font-bold transition-colors">
+                    Cancel
+                </button>
+            </div>
+            
+            <!-- Edit Mode Buttons -->
+            <div id="modal-edit-buttons" class="grid grid-cols-2 gap-4 mt-6 hidden">
+                <button onclick="saveWorkoutEdit()" class="bg-yellow-500 hover:bg-yellow-600 text-white py-3 px-4 rounded-lg font-bold transition-colors">
+                    💾 Save Changes
+                </button>
+                <button onclick="cancelEditMode()" class="bg-gray-300 text-gray-800 hover:bg-gray-400 py-3 px-4 rounded-lg font-bold transition-colors">
                     Cancel
                 </button>
             </div>
@@ -475,8 +541,10 @@ race 42
         let lastCompletionDate = null;
         let weeklySchedule = {};
         let customWorkouts = {}; // Store custom workouts by week
+        let editedWorkouts = {}; // Store edited workouts by ID
         let currentChart = null;
         let activeChartType = 'weekly-distance';
+        let isEditMode = false;
 
         // Default paces (adjustable by user)
         let paces = {
@@ -983,6 +1051,7 @@ race 42
                     lastCompletionDate,
                     weeklySchedule,
                     customWorkouts, // Save custom workouts
+                    editedWorkouts, // Save edited workouts
                     paces,
                     savedAt: now,
                     storageMethod: storageMethod
@@ -1060,6 +1129,11 @@ race 42
                         customWorkouts = progressData.customWorkouts;
                     }
                     
+                    // Restore edited workouts
+                    if (progressData.editedWorkouts && typeof progressData.editedWorkouts === 'object') {
+                        editedWorkouts = progressData.editedWorkouts;
+                    }
+                    
                     // Restore custom paces if they exist
                     if (progressData.paces && typeof progressData.paces === 'object') {
                         Object.assign(paces, progressData.paces);
@@ -1068,11 +1142,7 @@ race 42
                     
                     // Restore weekly schedule if it exists
                     if (progressData.weeklySchedule && typeof progressData.weeklySchedule === 'object') {
-                    
-                        weeklySchedule = trainingPlan[currentWeek];
-populateCalendar(weeklySchedule);
-
-weeklySchedule = progressData.weeklySchedule;
+                        weeklySchedule = progressData.weeklySchedule;
                     } else {
                         initializeSchedule();
                     }
@@ -1109,6 +1179,7 @@ weeklySchedule = progressData.weeklySchedule;
                 achievements = [];
                 lastCompletionDate = null;
                 customWorkouts = {}; // Clear custom workouts
+                editedWorkouts = {}; // Clear edited workouts
                 
                 // Reset paces to defaults
                 paces = {
@@ -1209,20 +1280,22 @@ weeklySchedule = progressData.weeklySchedule;
             }
         }
 
-function populateCalendar(weeklySchedule) {
-    const calendar = document.getElementById('weekly-calendar');
-    calendar.innerHTML = ''; // Clear previous data
-    weeklySchedule.workouts.forEach(workout => {
-        const workoutElement = document.createElement('div');
-        workoutElement.textContent = `${workout.type}: ${workout.distance} km @ ${workout.pace}`;
-        calendar.appendChild(workoutElement);
-    });
-}
-function selectWeek() {
-    const selectedWeek = parseInt(document.getElementById('week-dropdown').value, 10);
-    currentWeek = selectedWeek;
-    populateCalendar(trainingPlan[currentWeek]);
-}
+        function populateCalendar(weeklySchedule) {
+            const calendar = document.getElementById('weekly-calendar');
+            calendar.innerHTML = ''; // Clear previous data
+            weeklySchedule.workouts.forEach(workout => {
+                const workoutElement = document.createElement('div');
+                workoutElement.textContent = `${workout.type}: ${workout.distance} km @ ${workout.pace}`;
+                calendar.appendChild(workoutElement);
+            });
+        }
+
+        function selectWeek() {
+            const selectedWeek = parseInt(document.getElementById('week-dropdown').value, 10);
+            currentWeek = selectedWeek;
+            populateCalendar(trainingPlan[currentWeek]);
+        }
+
         function initializeSchedule() {
             for (let week = 1; week <= 43; week++) {
                 weeklySchedule[week] = {
@@ -1363,6 +1436,118 @@ function selectWeek() {
             showSaveNotification(`Custom workout "${description}" added successfully!`, 'success');
         }
 
+        // Edit workout functions
+        function toggleEditMode() {
+            if (!currentWorkout) return;
+            
+            isEditMode = !isEditMode;
+            
+            if (isEditMode) {
+                // Switch to edit mode
+                document.getElementById('modal-content').classList.add('hidden');
+                document.getElementById('modal-edit-content').classList.remove('hidden');
+                document.getElementById('modal-view-buttons').classList.add('hidden');
+                document.getElementById('modal-edit-buttons').classList.remove('hidden');
+                
+                // Populate edit form with current workout data
+                const effectiveWorkout = getEffectiveWorkout(currentWorkout);
+                document.getElementById('edit-type').value = effectiveWorkout.type;
+                document.getElementById('edit-distance').value = effectiveWorkout.distance;
+                document.getElementById('edit-pace').value = effectiveWorkout.pace;
+                document.getElementById('edit-description').value = effectiveWorkout.description;
+                document.getElementById('edit-details').value = effectiveWorkout.details;
+                
+                // Update modal title
+                document.getElementById('modal-title').textContent = 'Edit Workout';
+                document.getElementById('edit-workout-btn').title = 'Cancel edit';
+                document.getElementById('edit-workout-btn').textContent = '❌';
+            } else {
+                cancelEditMode();
+            }
+        }
+
+        function cancelEditMode() {
+            isEditMode = false;
+            
+            // Switch back to view mode
+            document.getElementById('modal-content').classList.remove('hidden');
+            document.getElementById('modal-edit-content').classList.add('hidden');
+            document.getElementById('modal-view-buttons').classList.remove('hidden');
+            document.getElementById('modal-edit-buttons').classList.add('hidden');
+            
+            // Reset modal title and button
+            document.getElementById('modal-title').textContent = 'Workout Details';
+            document.getElementById('edit-workout-btn').title = 'Edit workout';
+            document.getElementById('edit-workout-btn').textContent = '✏️';
+        }
+
+        function saveWorkoutEdit() {
+            if (!currentWorkout) return;
+            
+            // Get edited values
+            const editedType = document.getElementById('edit-type').value;
+            const editedDistance = parseFloat(document.getElementById('edit-distance').value);
+            const editedPace = document.getElementById('edit-pace').value.trim();
+            const editedDescription = document.getElementById('edit-description').value.trim();
+            const editedDetails = document.getElementById('edit-details').value.trim();
+            
+            // Validation
+            if (!editedDistance || editedDistance <= 0) {
+                alert('Please enter a valid distance');
+                return;
+            }
+            
+            if (!editedPace) {
+                alert('Please enter a pace');
+                return;
+            }
+            
+            if (!editedDescription) {
+                alert('Please enter a workout description');
+                return;
+            }
+            
+            // Create edited workout object
+            const editedWorkout = {
+                type: editedType,
+                distance: editedDistance,
+                pace: editedPace,
+                description: editedDescription,
+                details: editedDetails || editedDescription,
+                isEdited: true
+            };
+            
+            // Store the edited workout
+            editedWorkouts[currentWorkout.id] = editedWorkout;
+            
+            // Update current workout reference
+            currentWorkout = {
+                ...currentWorkout,
+                ...editedWorkout
+            };
+            
+            // Close edit mode and refresh display
+            cancelEditMode();
+            showWorkoutDetails(currentWorkout.id);
+            renderWeeklyCalendar();
+            
+            // Save progress
+            saveProgress(true);
+            
+            showSaveNotification('Workout updated successfully!', 'success');
+        }
+
+        function getEffectiveWorkout(workout) {
+            // Return the edited version if it exists, otherwise the original
+            if (editedWorkouts[workout.id]) {
+                return {
+                    ...workout,
+                    ...editedWorkouts[workout.id]
+                };
+            }
+            return workout;
+        }
+
         function renderWeeklyCalendar() {
             const calendar = document.getElementById('weekly-calendar');
             const weekData = weeklySchedule[currentWeek] || {};
@@ -1387,7 +1572,9 @@ function selectWeek() {
         }
 
         function renderWorkoutCard(workout) {
+            const effectiveWorkout = getEffectiveWorkout(workout);
             const isCompleted = completedWorkouts.has(workout.id);
+            
             const typeColors = {
                 long: 'border-blue-500',
                 tempo: 'border-orange-500', 
@@ -1398,26 +1585,30 @@ function selectWeek() {
                 custom: 'border-purple-400'
             };
 
-            const customClass = workout.isCustom ? 'custom-workout' : '';
+            let cardClasses = ['workout-card'];
+            if (workout.isCustom) cardClasses.push('custom-workout');
+            if (effectiveWorkout.isEdited) cardClasses.push('edited-workout');
+            if (isCompleted) cardClasses.push('completed-workout');
 
             return `
-                <div class="workout-card ${customClass} ${isCompleted ? 'completed-workout' : ''} bg-white dark:bg-gray-700 rounded-lg p-3 mb-2 border-l-4 ${typeColors[workout.type] || 'border-gray-500'} cursor-pointer shadow-sm hover:shadow-md transition-all"
+                <div class="${cardClasses.join(' ')} ${isCompleted ? 'completed-workout' : ''} bg-white dark:bg-gray-700 rounded-lg p-3 mb-2 border-l-4 ${effectiveWorkout.isEdited ? 'border-yellow-500' : typeColors[effectiveWorkout.type] || 'border-gray-500'} cursor-pointer shadow-sm hover:shadow-md transition-all"
                      draggable="true" 
                      ondragstart="dragStart(event)" 
                      data-workout-id="${workout.id}"
                      onclick="showWorkoutDetails('${workout.id}')">
                     <div class="flex items-center justify-between mb-1">
                         <span class="font-medium text-sm capitalize flex items-center gap-1">
-                            ${workout.type}
+                            ${effectiveWorkout.type}
                             ${workout.isCustom ? '<span class="text-xs bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 px-1 rounded">Custom</span>' : ''}
+                            ${effectiveWorkout.isEdited ? '<span class="text-xs bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-1 rounded">Edited</span>' : ''}
                         </span>
-                        <span class="text-xs text-gray-500">${workout.distance}km</span>
+                        <span class="text-xs text-gray-500">${effectiveWorkout.distance}km</span>
                     </div>
                     <div class="text-xs text-gray-600 dark:text-gray-400 truncate">
-                        ${workout.description}
+                        ${effectiveWorkout.description}
                     </div>
                     <div class="text-xs text-primary font-medium mt-1">
-                        @ ${workout.pace}/km
+                        @ ${effectiveWorkout.pace}/km
                     </div>
                     ${isCompleted ? '<div class="text-xs text-green-600 dark:text-green-400 mt-1">✅ Completed</div>' : ''}
                 </div>
@@ -1546,20 +1737,23 @@ function selectWeek() {
             if (!workout) return;
 
             currentWorkout = workout;
+            const effectiveWorkout = getEffectiveWorkout(workout);
+            
             const modal = document.getElementById('workout-modal');
             const title = document.getElementById('modal-title');
             const content = document.getElementById('modal-content');
             const completeBtn = document.getElementById('complete-btn');
             const deleteBtn = document.getElementById('delete-workout-btn');
 
-            title.textContent = workout.title || `${workout.type.charAt(0).toUpperCase() + workout.type.slice(1)} Run`;
+            title.textContent = effectiveWorkout.title || `${effectiveWorkout.type.charAt(0).toUpperCase() + effectiveWorkout.type.slice(1)} Run`;
 
             content.innerHTML = `
                 <div class="text-lg">
-                    <p><strong>Distance:</strong> ${workout.distance} km</p>
-                    <p><strong>Pace:</strong> ${workout.pace}</p>
-                    <p><strong>Description:</strong> ${workout.details}</p>
+                    <p><strong>Distance:</strong> ${effectiveWorkout.distance} km</p>
+                    <p><strong>Pace:</strong> ${effectiveWorkout.pace}</p>
+                    <p><strong>Description:</strong> ${effectiveWorkout.details}</p>
                     ${workout.isCustom ? '<p class="text-purple-300 text-sm mt-2">🔧 Custom Workout</p>' : ''}
+                    ${effectiveWorkout.isEdited ? '<p class="text-yellow-300 text-sm mt-2">✏️ Edited Workout</p>' : ''}
                 </div>
             `;
 
@@ -1570,6 +1764,9 @@ function selectWeek() {
                 deleteBtn.classList.add('hidden');
             }
 
+            // Reset edit mode
+            cancelEditMode();
+            
             modal.classList.remove('hidden');
         }
 
@@ -1591,6 +1788,9 @@ function selectWeek() {
                 
                 // Remove from completed workouts if it was completed
                 completedWorkouts.delete(workoutId);
+                
+                // Remove from edited workouts if it was edited
+                delete editedWorkouts[workoutId];
                 
                 closeModal();
                 renderWeeklyCalendar();
@@ -1620,11 +1820,13 @@ function selectWeek() {
             return null;
         }
 
-            function completeWorkout() {
+        function completeWorkout() {
             if (!currentWorkout || completedWorkouts.has(currentWorkout.id)) return;
             
+            const effectiveWorkout = getEffectiveWorkout(currentWorkout);
+            
             completedWorkouts.add(currentWorkout.id);
-            totalDistance += currentWorkout.distance;
+            totalDistance += effectiveWorkout.distance;
             
             // Update streak logic
             const today = new Date().toDateString();
@@ -1639,7 +1841,7 @@ function selectWeek() {
             }
             lastCompletionDate = today;
             
-            showCelebration(currentWorkout);
+            showCelebration(effectiveWorkout);
             closeModal();
             renderWeeklyCalendar();
             
@@ -1647,20 +1849,20 @@ function selectWeek() {
             saveProgress(true);
         }
 
-function checkSkippedDaysWorkouts(startDate, endDate) {
-    let date = new Date(startDate);
-    const end = new Date(endDate);
+        function checkSkippedDaysWorkouts(startDate, endDate) {
+            let date = new Date(startDate);
+            const end = new Date(endDate);
 
-    while (date <= end) {
-        const formattedDate = date.toDateString();
-        const hasWorkouts = trainingPlan.some(week => 
-            week.workouts.some(workout => workout.date === formattedDate)
-        );
-        if (hasWorkouts) return true;
-        date.setDate(date.getDate() + 1);
-    }
-    return false;
-}
+            while (date <= end) {
+                const formattedDate = date.toDateString();
+                const hasWorkouts = trainingPlan.some(week => 
+                    week.workouts.some(workout => workout.date === formattedDate)
+                );
+                if (hasWorkouts) return true;
+                date.setDate(date.getDate() + 1);
+            }
+            return false;
+        }
 
         function showCelebration(workout) {
             const celebration = document.createElement('div');
@@ -1672,6 +1874,7 @@ function checkSkippedDaysWorkouts(startDate, endDate) {
                     <p class="text-gray-600 dark:text-gray-400 mb-2">${workout.distance}km ${workout.type} run</p>
                     <p class="text-sm text-primary font-medium">+${workout.distance * 10} XP</p>
                     ${workout.isCustom ? '<p class="text-xs text-purple-600 dark:text-purple-400 mt-1">Custom workout completed! 🔧</p>' : ''}
+                    ${workout.isEdited ? '<p class="text-xs text-yellow-600 dark:text-yellow-400 mt-1">Edited workout completed! ✏️</p>' : ''}
                 </div>
             `;
             
@@ -1689,6 +1892,8 @@ function checkSkippedDaysWorkouts(startDate, endDate) {
         function closeModal() {
             document.getElementById('workout-modal').classList.add('hidden');
             currentWorkout = null;
+            isEditMode = false;
+            cancelEditMode();
         }
 
         function showPaceSettings() {
@@ -1748,9 +1953,10 @@ function checkSkippedDaysWorkouts(startDate, endDate) {
                 
                 allWeekWorkouts.forEach(workout => {
                     if (completedWorkouts.has(workout.id)) {
-                        weekDistance += workout.distance;
+                        const effectiveWorkout = getEffectiveWorkout(workout);
+                        weekDistance += effectiveWorkout.distance;
                         weekCompleted++;
-                        workoutTypeData[workout.type] = (workoutTypeData[workout.type] || 0) + 1;
+                        workoutTypeData[effectiveWorkout.type] = (workoutTypeData[effectiveWorkout.type] || 0) + 1;
                     }
                 });
                 
@@ -1796,7 +2002,8 @@ function checkSkippedDaysWorkouts(startDate, endDate) {
                     
                     allWeekWorkouts.forEach(workout => {
                         if (completedWorkouts.has(workout.id)) {
-                            totalDistance += workout.distance;
+                            const effectiveWorkout = getEffectiveWorkout(workout);
+                            totalDistance += effectiveWorkout.distance;
                             completedWorkouts++;
                         }
                     });
@@ -2101,7 +2308,12 @@ function checkSkippedDaysWorkouts(startDate, endDate) {
                 const weekPercentage = allWeekWorkouts.length > 0 ? Math.round((weekCompleted / allWeekWorkouts.length) * 100) : 0;
                 const weekDistance = allWeekWorkouts
                     .filter(w => completedWorkouts.has(w.id))
-                    .reduce((sum, w) => sum + w.distance, 0);
+                    .reduce((sum, w) => {
+                        const effectiveWorkout = getEffectiveWorkout(w);
+                        return sum + effectiveWorkout.distance;
+                    }, 0);
+                
+                const hasEditedWorkouts = allWeekWorkouts.some(w => editedWorkouts[w.id]);
                 
                 return `
                     <div class="flex items-center justify-between py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded px-2 transition-colors">
@@ -2113,6 +2325,7 @@ function checkSkippedDaysWorkouts(startDate, endDate) {
                             </div>
                             <span class="text-xs text-gray-500 w-8">${weekCompleted}/${allWeekWorkouts.length}</span>
                             ${customWeekWorkouts.length > 0 ? '<span class="text-xs text-purple-500">🔧</span>' : ''}
+                            ${hasEditedWorkouts ? '<span class="text-xs text-yellow-500">✏️</span>' : ''}
                         </div>
                     </div>
                 `;
@@ -2165,9 +2378,10 @@ function checkSkippedDaysWorkouts(startDate, endDate) {
                     lastCompletionDate,
                     weeklySchedule,
                     customWorkouts, // Include custom workouts in export
+                    editedWorkouts, // Include edited workouts in export
                     paces,
                     exportedAt: new Date().toISOString(),
-                    appVersion: '1.1'
+                    appVersion: '1.2'
                 };
                 
                 const dataStr = JSON.stringify(progressData, null, 2);
@@ -2216,6 +2430,11 @@ function checkSkippedDaysWorkouts(startDate, endDate) {
                         customWorkouts = progressData.customWorkouts;
                     }
                     
+                    // Restore edited workouts
+                    if (progressData.editedWorkouts && typeof progressData.editedWorkouts === 'object') {
+                        editedWorkouts = progressData.editedWorkouts;
+                    }
+                    
                     if (progressData.paces) {
                         Object.assign(paces, progressData.paces);
                         updateAllWorkoutPaces();
@@ -2262,7 +2481,8 @@ function checkSkippedDaysWorkouts(startDate, endDate) {
                 .flatMap(week => week.workouts)
                 .filter(workout => completedWorkouts.has(workout.id))
                 .forEach(workout => {
-                    totalDistanceCovered += workout.distance;
+                    const effectiveWorkout = getEffectiveWorkout(workout);
+                    totalDistanceCovered += effectiveWorkout.distance;
                 });
             
             // Check custom workouts
@@ -2270,7 +2490,8 @@ function checkSkippedDaysWorkouts(startDate, endDate) {
                 .flatMap(weekWorkouts => weekWorkouts)
                 .filter(workout => completedWorkouts.has(workout.id))
                 .forEach(workout => {
-                    totalDistanceCovered += workout.distance;
+                    const effectiveWorkout = getEffectiveWorkout(workout);
+                    totalDistanceCovered += effectiveWorkout.distance;
                 });
 
             // Update the global total distance variable
