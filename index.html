@@ -112,23 +112,34 @@
                    <button onclick="showProgress()" class="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-medium transition-colors">
                     📊 Progress
                 </button>
-           <button onclick="showPaceSettings()" class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 px-4 py-2 rounded-lg font-medium transition-colors">
+      <!-- Settings Button -->
+<button onclick="toggleSettingsOptions()" class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 px-4 py-2 rounded-lg font-medium transition-colors relative">
     ⚙️ Settings
-    <div class="mt-2 space-y-3">
-        <!-- Export Progress Data -->
-        <button onclick="exportData()" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-medium transition-colors">
-            📥 Export Progress Data
-        </button>
-
-        <!-- Import Progress Data -->
-        <div class="relative">
-            <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(event)">
-            <button onclick="document.getElementById('import-file').click()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-colors">
-                📤 Import Progress Data
-            </button>
-        </div>
-    </div>
 </button>
+
+<!-- Nested Options -->
+<div id="settings-options" class="absolute top-full left-0 bg-white dark:bg-gray-800 rounded-lg shadow-lg mt-2 p-4 hidden">
+    <!-- Export Progress Data -->
+    <button onclick="exportData()" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-medium transition-colors">
+        📥 Export Progress Data
+    </button>
+
+    <!-- Import Progress Data -->
+    <div class="relative mt-2">
+        <input type="file" id="import-file" accept=".json" class="hidden" onchange="importData(event)">
+        <button onclick="document.getElementById('import-file').click()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-colors">
+            📤 Import Progress Data
+        </button>
+    </div>
+</div>
+
+<script>
+    // Function to toggle the visibility of settings options
+    function toggleSettingsOptions() {
+        const settingsOptions = document.getElementById('settings-options');
+        settingsOptions.classList.toggle('hidden');
+    }
+</script>
              
            
             </div>
