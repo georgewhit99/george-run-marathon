@@ -97,6 +97,52 @@
         .modal-backdrop {
             backdrop-filter: blur(10px);
         }
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 40;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+            padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+        }
+        .dark .bottom-nav {
+            background: rgba(31, 41, 55, 0.95);
+            border-top-color: rgba(255, 255, 255, 0.08);
+        }
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            padding: 6px 12px;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+            color: #6b7280;
+        }
+        .dark .bottom-nav-item {
+            color: #9ca3af;
+        }
+        .bottom-nav-item:hover, .bottom-nav-item.active {
+            background: rgba(93, 92, 222, 0.1);
+            color: #5D5CDE;
+        }
+        .bottom-nav-item .nav-icon {
+            font-size: 22px;
+            line-height: 1;
+        }
+        .bottom-nav-item .nav-label {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+        }
+        /* Add padding to main content to account for bottom nav */
+        #app {
+            padding-bottom: 90px;
+        }
     </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
@@ -112,7 +158,7 @@
         <button onclick="showPaceSettings()" class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 px-3 py-2 rounded-lg font-medium transition-transform transform hover:scale-105 shadow-md">
             ⚙️ Adjust Paces
         </button>
-        <button onclick="exportData()" class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 px-3 py-2 rounded-lg font-medium transition-transform transform hover:scale-105 shadow-md">  ���� Export Data
+        <button onclick="exportData()" class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 px-3 py-2 rounded-lg font-medium transition-transform transform hover:scale-105 shadow-md">  📥 Export Data
         </button>
         <button onclick="document.getElementById('import-file').click()" class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 px-3 py-2 rounded-lg font-medium transition-transform transform hover:scale-105 shadow-md">  📤 Import Data
         </button>
@@ -1660,19 +1706,23 @@
             const calendar = document.getElementById('weekly-calendar');
             const weekData = weeklySchedule[currentWeek] || {};
             
-            calendar.innerHTML = dayNames.map(day => `
+            calendar.innerHTML = dayNames.map(day => {
+                const dayDate = getDayDate(currentWeek, day);
+                return `
                 <div class="day-column">
-                    <div class="day-header bg-white dark:bg-gray-800 rounded-t-xl p-3 border-b border-gray-200 dark:border-gray-700">
-                        <h4 class="font-semibold text-center">${day}</h4>
+                    <div class="day-header bg-white dark:bg-gray-800 rounded-t-xl p-4 border-b border-gray-200 dark:border-gray-700">
+                        <h4 class="text-lg font-bold text-center text-gray-900 dark:text-white">${day}</h4>
+                        <div class="text-sm text-center text-gray-400 dark:text-gray-500 font-medium mt-1">${dayDate}</div>
                     </div>
-                    <div class="day-slot bg-gray-50 dark:bg-gray-800 rounded-b-xl p-3 min-h-[120px]" 
-                         data-day="${day}" 
-                         ondragover="allowDrop(event)" 
+                    <div class="day-slot bg-gray-50 dark:bg-gray-800 rounded-b-xl p-3 min-h-[120px]"
+                         data-day="${day}"
+                         ondragover="allowDrop(event)"
                          ondrop="drop(event)">
                         ${(weekData[day] || []).map(workout => renderWorkoutCard(workout)).join('')}
                     </div>
                 </div>
-            `).join('');
+            `;
+            }).join('');
             
             updateWeekInfo();
             updateWeeklyProgress();
@@ -1700,25 +1750,25 @@
 
             return `
                 <div class="${cardClasses.join(' ')} ${isCompleted ? 'completed-workout' : ''} bg-white dark:bg-gray-700 rounded-lg p-3 mb-2 border-l-4 ${effectiveWorkout.isEdited ? 'border-yellow-500' : typeColors[effectiveWorkout.type] || 'border-gray-500'} cursor-pointer shadow-sm hover:shadow-md transition-all"
-                     draggable="true" 
-                     ondragstart="dragStart(event)" 
+                     draggable="true"
+                     ondragstart="dragStart(event)"
                      data-workout-id="${workout.id}"
                      onclick="showWorkoutDetails('${workout.id}')">
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="font-medium text-sm capitalize flex items-center gap-1">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-base font-bold capitalize text-gray-900 dark:text-white flex items-center gap-1.5">
                             ${effectiveWorkout.type}
-                            ${workout.isCustom ? '<span class="text-xs bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 px-1 rounded">Custom</span>' : ''}
-                            ${effectiveWorkout.isEdited ? '<span class="text-xs bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 px-1 rounded">Edited</span>' : ''}
+                            ${workout.isCustom ? '<span class="text-[10px] font-semibold bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 px-1.5 py-0.5 rounded-full">Custom</span>' : ''}
+                            ${effectiveWorkout.isEdited ? '<span class="text-[10px] font-semibold bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300 px-1.5 py-0.5 rounded-full">Edited</span>' : ''}
                         </span>
-                        <span class="text-xs text-gray-500">${effectiveWorkout.distance}km</span>
+                        <span class="text-lg font-bold text-primary">${effectiveWorkout.distance}<span class="text-xs font-medium text-gray-400 ml-0.5">km</span></span>
                     </div>
-                    <div class="text-xs text-gray-600 dark:text-gray-400 truncate">
+                    <div class="text-xs text-gray-400 dark:text-gray-500 truncate mb-1">
                         ${effectiveWorkout.description}
                     </div>
-                    <div class="text-xs text-primary font-medium mt-1">
+                    <div class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">
                         @ ${effectiveWorkout.pace}/km
                     </div>
-                    ${isCompleted ? '<div class="text-xs text-green-600 dark:text-green-400 mt-1">✅ Completed</div>' : ''}
+                    ${isCompleted ? '<div class="text-xs text-green-500 dark:text-green-400 font-semibold mt-1.5">✅ Completed</div>' : ''}
                 </div>
             `;
         }
@@ -1728,17 +1778,31 @@
             const baseDate = new Date('2025-06-16');
             const startDate = new Date(baseDate);
             startDate.setDate(baseDate.getDate() + (weekNumber - 1) * 7);
-            
+
             const endDate = new Date(startDate);
             endDate.setDate(startDate.getDate() + 6);
-            
+
             const formatDate = (date) => {
                 const day = date.getDate().toString().padStart(2, '0');
                 const month = (date.getMonth() + 1).toString().padStart(2, '0');
                 return `${day}/${month}`;
             };
-            
+
             return `${formatDate(startDate)} - ${formatDate(endDate)}`;
+        }
+
+        function getDayDate(weekNumber, dayName) {
+            // Start from June 16, 2025 (which is a Monday)
+            const baseDate = new Date('2025-06-16');
+            const weekStart = new Date(baseDate);
+            weekStart.setDate(baseDate.getDate() + (weekNumber - 1) * 7);
+
+            const dayOffsets = { Monday: 0, Tuesday: 1, Wednesday: 2, Thursday: 3, Friday: 4, Saturday: 5, Sunday: 6 };
+            const targetDate = new Date(weekStart);
+            targetDate.setDate(weekStart.getDate() + dayOffsets[dayName]);
+
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            return `${targetDate.getDate()} ${months[targetDate.getMonth()]}`;
         }
 
         function updateWeekInfo() {
@@ -2705,6 +2769,42 @@
                 setTimeout(() => renderChart(activeChartType), 100);
             }
         });
+    </script>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="bottom-nav">
+        <div class="max-w-lg mx-auto flex justify-around items-center">
+            <button onclick="scrollToTop()" class="bottom-nav-item active">
+                <span class="nav-icon">📅</span>
+                <span class="nav-label">CALENDAR</span>
+            </button>
+            <button onclick="showProgress()" class="bottom-nav-item">
+                <span class="nav-icon">📊</span>
+                <span class="nav-label">PROGRESS</span>
+            </button>
+            <button onclick="showCustomWorkoutModal()" class="bottom-nav-item">
+                <span class="nav-icon">➕</span>
+                <span class="nav-label">ADD</span>
+            </button>
+            <button onclick="showPaceSettings()" class="bottom-nav-item">
+                <span class="nav-icon">⚙️</span>
+                <span class="nav-label">PACES</span>
+            </button>
+            <button onclick="showDataModal()" class="bottom-nav-item">
+                <span class="nav-icon">💾</span>
+                <span class="nav-label">DATA</span>
+            </button>
+        </div>
+    </nav>
+
+    <script>
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showDataModal() {
+            document.getElementById('data-modal').classList.remove('hidden');
+        }
     </script>
 </body>
 </html>
