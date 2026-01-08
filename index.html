@@ -41,9 +41,17 @@
             border: 2px dashed rgba(93, 92, 222, 0.3);
         }
         .completed-workout {
-            opacity: 0.7;
             background: linear-gradient(135deg, #10b981, #059669);
             border-color: #059669;
+        }
+        .completed-workout .text-gray-700,
+        .completed-workout .text-gray-600,
+        .completed-workout .text-gray-900 {
+            color: #ffffff !important;
+        }
+        .dark .completed-workout .text-gray-200,
+        .dark .completed-workout .text-gray-300 {
+            color: #ffffff !important;
         }
         .modal-backdrop {
             backdrop-filter: blur(4px);
@@ -1399,7 +1407,7 @@
                         if (!assignedDay) {
                             // Assign workouts to days based on type (fallback defaults)
                             if (workout.type === 'long') {
-                                assignedDay = 'Friday';
+                                assignedDay = 'Sunday';
                             } else if (workout.type === 'tempo') {
                                 assignedDay = 'Tuesday';
                             } else if (workout.type === 'speed') {
@@ -1479,7 +1487,7 @@
                         weekData.workouts.forEach(workout => {
                             let assignedDay = workout.preferredDay;
                             if (!assignedDay) {
-                                if (workout.type === 'long') assignedDay = 'Sunday';
+                                if (workout.type === 'long') assignedDay = 'Friday';
                                 else if (workout.type === 'tempo') assignedDay = 'Tuesday';
                                 else if (workout.type === 'speed') assignedDay = 'Thursday';
                                 else if (workout.type === 'race') assignedDay = 'Saturday';
@@ -1762,10 +1770,10 @@
                         </span>
                         <span class="text-lg font-bold text-primary">${effectiveWorkout.distance}<span class="text-xs font-medium text-gray-400 ml-0.5">km</span></span>
                     </div>
-                    <div class="text-xs text-gray-400 dark:text-gray-500 truncate mb-1">
+                    <div class="text-sm text-gray-700 dark:text-gray-200 truncate mb-1">
                         ${effectiveWorkout.description}
                     </div>
-                    <div class="text-[11px] text-gray-400 dark:text-gray-500 font-medium">
+                    <div class="text-xs text-gray-600 dark:text-gray-300 font-medium">
                         @ ${effectiveWorkout.pace}/km
                     </div>
                     ${isCompleted ? '<div class="text-xs text-green-500 dark:text-green-400 font-semibold mt-1.5">✅ Completed</div>' : ''}
@@ -2046,7 +2054,7 @@
                     <p class="text-gray-600 dark:text-gray-400 mb-2">${workout.distance}km ${workout.type} run</p>
                     <p class="text-sm text-primary font-medium">+${workout.distance * 10} XP</p>
                     ${workout.isCustom ? '<p class="text-xs text-purple-600 dark:text-purple-400 mt-1">Custom workout completed! 🔧</p>' : ''}
-                    ${workout.isEdited ? '<p class="text-xs text-yellow-600 dark:text-yellow-400 mt-1">Edited workout completed! ✏️</p>' : ''}
+                    ${workout.isEdited ? '<p class="text-xs text-yellow-600 dark:text-yellow-400 mt-1">Edited workout completed! ���️</p>' : ''}
                 </div>
             `;
             
