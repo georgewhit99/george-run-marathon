@@ -85,6 +85,84 @@
             background: #374151;
             color: #9ca3af;
         }
+        /* Collapsible day cards */
+        .day-column .day-header {
+            cursor: pointer;
+            user-select: none;
+        }
+        .day-column .day-header:hover {
+            background: rgba(93, 92, 222, 0.05);
+        }
+        .dark .day-column .day-header:hover {
+            background: rgba(93, 92, 222, 0.1);
+        }
+        .expand-indicator {
+            transition: transform 0.3s ease;
+            display: inline-block;
+        }
+        .day-column.expanded .expand-indicator {
+            transform: rotate(180deg);
+        }
+        .workout-details-full {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, opacity 0.2s ease-out;
+            opacity: 0;
+        }
+        .day-column.expanded .workout-details-full {
+            max-height: 1000px;
+            opacity: 1;
+            transition: max-height 0.4s ease-in, opacity 0.3s ease-in;
+        }
+        .workout-summary {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 8px 0;
+        }
+        .workout-summary-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            cursor: pointer;
+        }
+        .workout-summary-pill:hover {
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .workout-summary-pill.completed {
+            opacity: 0.7;
+            text-decoration: line-through;
+        }
+        .workout-summary-pill.long { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+        .workout-summary-pill.tempo { background: rgba(249, 115, 22, 0.15); color: #f97316; }
+        .workout-summary-pill.speed { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+        .workout-summary-pill.easy { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+        .workout-summary-pill.race { background: rgba(168, 85, 247, 0.15); color: #a855f7; }
+        .workout-summary-pill.recovery { background: rgba(234, 179, 8, 0.15); color: #eab308; }
+        .workout-summary-pill.custom { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; }
+        .dark .workout-summary-pill.long { background: rgba(59, 130, 246, 0.25); }
+        .dark .workout-summary-pill.tempo { background: rgba(249, 115, 22, 0.25); }
+        .dark .workout-summary-pill.speed { background: rgba(239, 68, 68, 0.25); }
+        .dark .workout-summary-pill.easy { background: rgba(34, 197, 94, 0.25); }
+        .dark .workout-summary-pill.race { background: rgba(168, 85, 247, 0.25); }
+        .dark .workout-summary-pill.recovery { background: rgba(234, 179, 8, 0.25); }
+        .dark .workout-summary-pill.custom { background: rgba(139, 92, 246, 0.25); }
+        .day-total-distance {
+            font-size: 11px;
+            font-weight: 700;
+            color: #6b7280;
+            margin-left: auto;
+            padding-left: 8px;
+        }
+        .dark .day-total-distance {
+            color: #9ca3af;
+        }
         #workout-modal {
             box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.5);
         }
@@ -1705,28 +1783,80 @@
         function renderWeeklyCalendar() {
             const calendar = document.getElementById('weekly-calendar');
             const weekData = weeklySchedule[currentWeek] || {};
-            
+
             calendar.innerHTML = dayNames.map(day => {
                 const dayDate = getDayDate(currentWeek, day);
+                const dayWorkouts = weekData[day] || [];
+                const hasWorkouts = dayWorkouts.length > 0;
+                const totalDayDistance = dayWorkouts.reduce((sum, w) => {
+                    const effectiveW = getEffectiveWorkout(w);
+                    return sum + (effectiveW.distance || 0);
+                }, 0);
+
                 return `
-                <div class="day-column">
-                    <div class="day-header bg-white dark:bg-gray-800 rounded-t-xl p-4 border-b border-gray-200 dark:border-gray-700">
-                        <h4 class="text-lg font-bold text-center text-gray-900 dark:text-white">${day}</h4>
-                        <div class="text-sm text-center text-gray-400 dark:text-gray-500 font-medium mt-1">${dayDate}</div>
+                <div class="day-column" data-day-column="${day}">
+                    <div class="day-header bg-white dark:bg-gray-800 rounded-t-xl p-4 border-b border-gray-200 dark:border-gray-700"
+                         onclick="toggleDayExpand('${day}')">
+                        <div class="flex items-center justify-between">
+                            <div class="flex-1">
+                                <h4 class="text-lg font-bold text-gray-900 dark:text-white">${day}</h4>
+                                <div class="text-sm text-gray-400 dark:text-gray-500 font-medium mt-1">${dayDate}</div>
+                            </div>
+                            ${hasWorkouts ? `<span class="expand-indicator text-gray-400">▼</span>` : ''}
+                        </div>
+                        ${hasWorkouts ? `
+                        <div class="workout-summary mt-2">
+                            ${dayWorkouts.map(workout => renderWorkoutPill(workout)).join('')}
+                            <span class="day-total-distance">${totalDayDistance.toFixed(1)} km</span>
+                        </div>
+                        ` : '<div class="text-sm text-gray-400 dark:text-gray-500 italic mt-2">Rest day</div>'}
                     </div>
-                    <div class="day-slot bg-gray-50 dark:bg-gray-800 rounded-b-xl p-3 min-h-[120px]"
-                         data-day="${day}"
-                         ondragover="allowDrop(event)"
-                         ondrop="drop(event)">
-                        ${(weekData[day] || []).map(workout => renderWorkoutCard(workout)).join('')}
+                    <div class="workout-details-full">
+                        <div class="day-slot bg-gray-50 dark:bg-gray-800 rounded-b-xl p-3"
+                             data-day="${day}"
+                             ondragover="allowDrop(event)"
+                             ondrop="drop(event)">
+                            ${dayWorkouts.map(workout => renderWorkoutCard(workout)).join('')}
+                        </div>
                     </div>
                 </div>
             `;
             }).join('');
-            
+
             updateWeekInfo();
             updateWeeklyProgress();
             updateTotalDistance();
+        }
+
+        function renderWorkoutPill(workout) {
+            const effectiveWorkout = getEffectiveWorkout(workout);
+            const isCompleted = completedWorkouts.has(workout.id);
+            const type = effectiveWorkout.type;
+
+            const typeEmojis = {
+                long: '🏃',
+                tempo: '⚡',
+                speed: '🔥',
+                easy: '🌿',
+                race: '🏆',
+                recovery: '💤',
+                custom: '✨'
+            };
+
+            return `
+                <span class="workout-summary-pill ${type} ${isCompleted ? 'completed' : ''}"
+                      onclick="event.stopPropagation(); showWorkoutDetails('${workout.id}')"
+                      title="${effectiveWorkout.description}">
+                    ${typeEmojis[type] || '📍'} ${effectiveWorkout.distance}km
+                </span>
+            `;
+        }
+
+        function toggleDayExpand(day) {
+            const column = document.querySelector(`[data-day-column="${day}"]`);
+            if (column) {
+                column.classList.toggle('expanded');
+            }
         }
 
         function renderWorkoutCard(workout) {
