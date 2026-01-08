@@ -59,9 +59,6 @@
         .custom-workout {
             border-left-color: #8B5CF6 !important;
         }
-        .edited-workout {
-            border-left-color: #F59E0B !important;
-        }
         .chart-container {
             position: relative;
             height: 300px;
@@ -275,10 +272,6 @@
                 <div class="flex items-center gap-2">
                     <div class="w-4 h-4 bg-purple-400 rounded"></div>
                     <span>Custom</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <div class="w-4 h-4 bg-yellow-500 rounded"></div>
-                    <span>Edited</span>
                 </div>
             </div>
         </div>
@@ -1757,7 +1750,7 @@
             if (isCompleted) cardClasses.push('completed-workout');
 
             return `
-                <div class="${cardClasses.join(' ')} ${isCompleted ? 'completed-workout' : ''} bg-white dark:bg-gray-700 rounded-lg p-3 mb-2 border-l-4 ${effectiveWorkout.isEdited ? 'border-yellow-500' : typeColors[effectiveWorkout.type] || 'border-gray-500'} cursor-pointer shadow-sm hover:shadow-md transition-all"
+                <div class="${cardClasses.join(' ')} ${isCompleted ? 'completed-workout' : ''} bg-white dark:bg-gray-700 rounded-lg p-3 mb-2 border-l-4 ${typeColors[effectiveWorkout.type] || 'border-gray-500'} cursor-pointer shadow-sm hover:shadow-md transition-all"
                      draggable="true"
                      ondragstart="dragStart(event)"
                      data-workout-id="${workout.id}"
@@ -2054,7 +2047,7 @@
                     <p class="text-gray-600 dark:text-gray-400 mb-2">${workout.distance}km ${workout.type} run</p>
                     <p class="text-sm text-primary font-medium">+${workout.distance * 10} XP</p>
                     ${workout.isCustom ? '<p class="text-xs text-purple-600 dark:text-purple-400 mt-1">Custom workout completed! 🔧</p>' : ''}
-                    ${workout.isEdited ? '<p class="text-xs text-yellow-600 dark:text-yellow-400 mt-1">Edited workout completed! ���️</p>' : ''}
+                    ${workout.isEdited ? '<p class="text-xs text-yellow-600 dark:text-yellow-400 mt-1">Edited workout completed! ✏️</p>' : ''}
                 </div>
             `;
             
