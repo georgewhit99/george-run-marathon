@@ -949,7 +949,7 @@
             43: {
                 title: "Race Week – Marathon Day",
                 workouts: [
-                    { id: 'w43-long', type: 'race', distance: 42.2, pace: '5:30', description: 'Brighton Marathon Day: 42.2 km @ 5:30/km', details: 'One year of effort, all for this. Execute your race plan and enjoy every kilometer!' },
+                    { id: 'w43-long', type: 'race', distance: 42.2, pace: '5:30', description: 'Brighton Marathon Day: 42.2 km @ 5:30/km', details: 'One year of effort, all for this. Execute your race plan and enjoy every kilometer!', preferredDay: 'Sunday' },
                     { id: 'w43-tempo', type: 'tempo', distance: 3, pace: '5:30', description: 'Pre-Race Opener: 3 km @ 4:50/km', details: 'Short race pace effort 3 days before marathon. Legs feeling sharp and ready.' },
                     { id: 'w43-speed', type: 'speed', distance: 5, pace: '4:20', description: '5km + 4×150m strides', details: 'Easy activation. Body is primed and ready for race day. Trust your training!' },
                 ]
@@ -1425,8 +1425,8 @@
         }
 
         function rebuildWeeklyScheduleFromSaved(savedSchedule) {
-            // Rebuild weeklySchedule using fresh workout objects from trainingPlan
-            // while preserving the day assignments from the saved schedule
+            // Rebuild weeklySchedule: standard workouts always use current defaults,
+            // custom workouts preserve their saved day placement
             for (let week = 1; week <= 43; week++) {
                 weeklySchedule[week] = {
                     Monday: [],
@@ -1438,60 +1438,47 @@
                     Sunday: []
                 };
 
+                // Always place training plan workouts using current default day assignments
+                const weekData = trainingPlan[week];
+                if (weekData) {
+                    weekData.workouts.forEach(workout => {
+                        let assignedDay = workout.preferredDay;
+                        if (!assignedDay) {
+                            if (workout.type === 'long') assignedDay = 'Friday';
+                            else if (workout.type === 'tempo') assignedDay = 'Tuesday';
+                            else if (workout.type === 'speed') assignedDay = 'Thursday';
+                            else if (workout.type === 'race') assignedDay = 'Saturday';
+                            else assignedDay = 'Monday';
+                        }
+                        if (weeklySchedule[week][assignedDay]) {
+                            weeklySchedule[week][assignedDay].push(workout);
+                        } else {
+                            weeklySchedule[week].Monday.push(workout);
+                        }
+                    });
+                }
+
+                // Then restore custom workouts from saved data, keeping their saved day
                 const savedWeek = savedSchedule[week];
                 if (savedWeek) {
-                    // Go through each day in the saved schedule
                     for (let day in savedWeek) {
                         if (weeklySchedule[week][day] && Array.isArray(savedWeek[day])) {
                             savedWeek[day].forEach(savedWorkout => {
-                                // Find fresh workout object from trainingPlan or customWorkouts
-                                let freshWorkout = null;
-
-                                // Check if it's a custom workout
-                                if (savedWorkout.isCustom && customWorkouts[week]) {
-                                    freshWorkout = customWorkouts[week].find(w => w.id === savedWorkout.id);
-                                }
-
-                                // Check training plan
-                                if (!freshWorkout && trainingPlan[week]) {
-                                    freshWorkout = trainingPlan[week].workouts.find(w => w.id === savedWorkout.id);
-                                }
-
-                                // If found, use fresh reference; if not (orphaned custom workout), use saved
-                                if (freshWorkout) {
+                                if (savedWorkout.isCustom) {
+                                    let freshWorkout = customWorkouts[week] && customWorkouts[week].find(w => w.id === savedWorkout.id);
+                                    if (!freshWorkout) {
+                                        if (!customWorkouts[week]) {
+                                            customWorkouts[week] = [];
+                                        }
+                                        if (!customWorkouts[week].find(w => w.id === savedWorkout.id)) {
+                                            customWorkouts[week].push(savedWorkout);
+                                        }
+                                        freshWorkout = savedWorkout;
+                                    }
                                     weeklySchedule[week][day].push(freshWorkout);
-                                } else if (savedWorkout.isCustom) {
-                                    // Restore orphaned custom workout to customWorkouts and schedule
-                                    if (!customWorkouts[week]) {
-                                        customWorkouts[week] = [];
-                                    }
-                                    if (!customWorkouts[week].find(w => w.id === savedWorkout.id)) {
-                                        customWorkouts[week].push(savedWorkout);
-                                    }
-                                    weeklySchedule[week][day].push(savedWorkout);
                                 }
                             });
                         }
-                    }
-                } else {
-                    // No saved data for this week, initialize from training plan
-                    const weekData = trainingPlan[week];
-                    if (weekData) {
-                        weekData.workouts.forEach(workout => {
-                            let assignedDay = workout.preferredDay;
-                            if (!assignedDay) {
-                                if (workout.type === 'long') assignedDay = 'Friday';
-                                else if (workout.type === 'tempo') assignedDay = 'Tuesday';
-                                else if (workout.type === 'speed') assignedDay = 'Thursday';
-                                else if (workout.type === 'race') assignedDay = 'Saturday';
-                                else assignedDay = 'Monday';
-                            }
-                            if (weeklySchedule[week][assignedDay]) {
-                                weeklySchedule[week][assignedDay].push(workout);
-                            } else {
-                                weeklySchedule[week].Monday.push(workout);
-                            }
-                        });
                     }
                 }
             }
