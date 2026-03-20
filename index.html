@@ -285,101 +285,6 @@
             letter-spacing: 0.05em;
             margin-top: 2px;
         }
-
-        /* Mobile donation cards */
-        .donation-cards {
-            display: none;
-        }
-        @media (max-width: 640px) {
-            .donation-table-wrapper {
-                display: none;
-            }
-            .donation-cards {
-                display: flex;
-                flex-direction: column;
-                gap: 10px;
-                max-height: 520px;
-                overflow-y: auto;
-                padding: 2px;
-            }
-            .donation-card {
-                background: white;
-                border-radius: 12px;
-                padding: 14px;
-                border: 1px solid #e5e7eb;
-                position: relative;
-                transition: box-shadow 0.2s;
-            }
-            .dark .donation-card {
-                background: #1f2937;
-                border-color: #374151;
-            }
-            .donation-card:hover {
-                box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-            }
-            .donation-card.card-paid {
-                border-left: 4px solid #10b981;
-                background: rgba(16, 185, 129, 0.04);
-            }
-            .dark .donation-card.card-paid {
-                background: rgba(16, 185, 129, 0.08);
-            }
-            .donation-card-header {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                margin-bottom: 12px;
-            }
-            .donation-card-mile {
-                font-size: 20px;
-                font-weight: 800;
-                color: #5D5CDE;
-                line-height: 1;
-            }
-            .donation-card-field {
-                margin-bottom: 10px;
-            }
-            .donation-card-field:last-child {
-                margin-bottom: 0;
-            }
-            .donation-card-label {
-                font-size: 11px;
-                font-weight: 600;
-                text-transform: uppercase;
-                letter-spacing: 0.05em;
-                color: #6b7280;
-                margin-bottom: 4px;
-            }
-            .dark .donation-card-label {
-                color: #9ca3af;
-            }
-            .donation-card-input {
-                width: 100%;
-                background: #f9fafb;
-                border: 1px solid #e5e7eb;
-                border-radius: 8px;
-                padding: 10px 12px;
-                font-size: 16px;
-                color: inherit;
-                transition: all 0.2s;
-            }
-            .dark .donation-card-input {
-                background: #111827;
-                border-color: #374151;
-            }
-            .donation-card-input:focus {
-                outline: none;
-                border-color: #5D5CDE;
-                box-shadow: 0 0 0 2px rgba(93,92,222,0.15);
-                background: white;
-            }
-            .dark .donation-card-input:focus {
-                background: #1f2937;
-            }
-            .donation-card-input::placeholder {
-                color: #9ca3af;
-            }
-        }
     </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
@@ -763,8 +668,7 @@
                             <span class="text-sm font-normal text-gray-500">(Click to edit any field)</span>
                         </h4>
                         <div id="donation-summary" class="donation-summary"></div>
-                        <!-- Desktop table view -->
-                        <div class="donation-table-wrapper overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700" style="max-height: 520px; overflow-y: auto;">
+                        <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700" style="max-height: 520px; overflow-y: auto;">
                             <table class="donation-table">
                                 <thead>
                                     <tr>
@@ -778,10 +682,6 @@
                                     <!-- Populated by JS -->
                                 </tbody>
                             </table>
-                        </div>
-                        <!-- Mobile card view -->
-                        <div id="donation-cards" class="donation-cards">
-                            <!-- Populated by JS -->
                         </div>
                     </div>
 
@@ -1384,4 +1284,1815 @@
             return null;
         }
 
-        functio...
+        function removeStorageItem(key) {
+            if (storageMethod === 'localStorage') {
+                window['localStorage'].removeItem(key);
+                return true;
+            } else if (storageMethod === 'cookies') {
+                return deleteCookie(key);
+            }
+            return false;
+        }
+
+        // Custom modal dialogs to replace alert/confirm (not supported in iframe)
+        function showAlertModal(message) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-sm w-full mx-4">
+                    <p class="text-gray-700 dark:text-gray-300 mb-4">${message}</p>
+                    <div class="flex justify-end">
+                        <button class="px-4 py-2 bg-blue-500 text-white hover:bg-blue-600 rounded" onclick="this.closest('.fixed').remove()">OK</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        function showConfirmModal(message, onConfirm) {
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+            modal.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-sm w-full mx-4">
+                    <p class="text-gray-700 dark:text-gray-300 mb-4">${message}</p>
+                    <div class="flex justify-end space-x-3">
+                        <button class="cancel-btn px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">Cancel</button>
+                        <button class="confirm-btn px-4 py-2 bg-red-500 text-white hover:bg-red-600 rounded">Confirm</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            modal.querySelector('.cancel-btn').onclick = () => modal.remove();
+            modal.querySelector('.confirm-btn').onclick = () => { modal.remove(); onConfirm(); };
+        }
+
+        function saveProgress(showNotification = false) {
+            // Prevent excessive save attempts
+            const now = Date.now();
+            if (now - lastSaveTime < 1000) { // Minimum 1 second between saves
+                return true;
+            }
+            lastSaveTime = now;
+
+            if (!isStorageAvailable()) {
+                if (showNotification) {
+                    showSaveNotification(`Storage not available (${storageMethod}) - progress cannot be saved`, 'error');
+                }
+                return false;
+            }
+
+            try {
+                const progressData = {
+                    currentWeek,
+                    completedWorkouts: Array.from(completedWorkouts),
+                    totalDistance,
+                    currentStreak,
+                    achievements,
+                    lastCompletionDate,
+                    weeklySchedule,
+                    customWorkouts, // Save custom workouts
+                    editedWorkouts, // Save edited workouts
+                    donationData, // Save donation tracker
+                    paces,
+                    savedAt: now,
+                    storageMethod: storageMethod
+                };
+                
+                const dataString = JSON.stringify(progressData);
+                
+                // Check data size limits based on storage method
+                const sizeLimit = storageMethod === 'localStorage' ? 4000000 : 3000; // 4MB for localStorage, 3KB for cookies
+                if (dataString.length > sizeLimit) {
+                    throw new Error(`Data too large for ${storageMethod}`);
+                }
+                
+                setStorageItem('marathonTrainingProgress', dataString);
+                
+                // Reset error count on successful save
+                saveErrorCount = 0;
+                saveAttempts = 0;
+                
+                if (showNotification) {
+                    showSaveNotification(`Progress saved successfully (${storageMethod})`, 'success');
+                }
+                return true;
+            } catch (error) {
+                console.error('Failed to save progress:', error);
+                saveErrorCount++;
+                saveAttempts++;
+                
+                // Only show error notification after multiple failures or if explicitly requested
+                if (showNotification || saveErrorCount >= 3) {
+                    let errorMessage = 'Failed to save progress';
+                    
+                    if (error.name === 'QuotaExceededError' || error.message.includes('quota')) {
+                        errorMessage = 'Storage quota exceeded - please clear browser data or export your progress';
+                    } else if (error.message.includes('too large')) {
+                        errorMessage = `Training data too large for ${storageMethod} - please export your progress`;
+                    } else if (!isStorageAvailable()) {
+                        errorMessage = `${storageMethod} storage disabled - check browser settings`;
+                    }
+                    
+                    showSaveNotification(errorMessage, 'error');
+                }
+                
+                return false;
+            }
+        }
+
+        function loadProgress() {
+            if (!isStorageAvailable()) {
+                initializeSchedule();
+                showSaveNotification(`${storageMethod} storage not available - progress will not be saved`, 'error');
+                return false;
+            }
+
+            try {
+                const savedData = getStorageItem('marathonTrainingProgress');
+                if (savedData) {
+                    const progressData = JSON.parse(savedData);
+                    
+                    // Validate data structure
+                    if (typeof progressData !== 'object' || progressData === null) {
+                        throw new Error('Invalid data format');
+                    }
+                    
+                    // Restore all state with fallbacks
+                    currentWeek = Math.max(1, Math.min(43, progressData.currentWeek || 1));
+                    completedWorkouts = new Set(Array.isArray(progressData.completedWorkouts) ? progressData.completedWorkouts : []);
+                    totalDistance = Math.max(0, progressData.totalDistance || 0);
+                    currentStreak = Math.max(0, progressData.currentStreak || 0);
+                    achievements = Array.isArray(progressData.achievements) ? progressData.achievements : [];
+                    lastCompletionDate = progressData.lastCompletionDate || null;
+                    
+                    // Restore custom workouts
+                    if (progressData.customWorkouts && typeof progressData.customWorkouts === 'object') {
+                        customWorkouts = progressData.customWorkouts;
+                    }
+                    
+                    // Restore edited workouts
+                    if (progressData.editedWorkouts && typeof progressData.editedWorkouts === 'object') {
+                        editedWorkouts = progressData.editedWorkouts;
+                    }
+
+                    // Restore donation data
+                    if (Array.isArray(progressData.donationData) && progressData.donationData.length === 26) {
+                        donationData = progressData.donationData;
+                    }
+
+                    // Restore custom paces if they exist
+                    if (progressData.paces && typeof progressData.paces === 'object') {
+                        Object.assign(paces, progressData.paces);
+                        updateAllWorkoutPaces();
+                    }
+                    
+                    // Restore weekly schedule if it exists
+                    if (progressData.weeklySchedule && typeof progressData.weeklySchedule === 'object') {
+                        // Rebuild weeklySchedule with fresh workout objects from trainingPlan
+                        // while preserving day assignments from saved data
+                        rebuildWeeklyScheduleFromSaved(progressData.weeklySchedule);
+                    } else {
+                        initializeSchedule();
+                    }
+                    
+                    // Only show success notification if we have meaningful data
+                    if (completedWorkouts.size > 0 || currentWeek > 1) {
+                        const method = progressData.storageMethod || storageMethod;
+                        showSaveNotification(`Previous progress restored (${method})`, 'success');
+                    }
+                    return true;
+                }
+            } catch (error) {
+                console.error('Failed to load progress:', error);
+                // Don't show error for normal "no data" case
+                if (getStorageItem('marathonTrainingProgress')) {
+                    showSaveNotification('Previous progress corrupted - starting fresh', 'error');
+                }
+            }
+            
+            // Initialize if no saved data or loading failed
+            initializeSchedule();
+            return false;
+        }
+
+        function clearProgress() {
+            try {
+                removeStorageItem('marathonTrainingProgress');
+                
+                // Reset all state
+                currentWeek = 1;
+                completedWorkouts.clear();
+                totalDistance = 0;
+                currentStreak = 0;
+                achievements = [];
+                lastCompletionDate = null;
+                customWorkouts = {}; // Clear custom workouts
+                editedWorkouts = {}; // Clear edited workouts
+
+                // Reset donation data
+                donationData = donationData.map(d => ({ mile: d.mile, paid: false, donor: '', song: '' }));
+
+                // Reset paces to defaults
+                paces = {
+                    long: '5:50',
+                    tempo: '4:45',
+                    speed: '4:10',
+                    easy: '6:15',
+                    recovery: '6:30'
+                };
+                
+                initializeSchedule();
+                renderWeeklyCalendar();
+                showSaveNotification(`Progress cleared successfully (${storageMethod})`, 'success');
+                return true;
+            } catch (error) {
+                console.error('Failed to clear progress:', error);
+                showSaveNotification('Failed to clear progress', 'error');
+                return false;
+            }
+        }
+
+        function showSaveNotification(message, type = 'info') {
+            // Don't show too many notifications
+            const existingNotifications = document.querySelectorAll('.save-notification');
+            if (existingNotifications.length >= 2) {
+                existingNotifications[0].remove();
+            }
+            
+            const notification = document.createElement('div');
+            notification.className = `save-notification fixed top-4 right-4 z-50 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 transform translate-x-full shadow-lg ${
+                type === 'success' ? 'bg-green-500 text-white' : 
+                type === 'error' ? 'bg-red-500 text-white' : 
+                'bg-blue-500 text-white'
+            }`;
+            notification.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <span>${type === 'success' ? '✅' : type === 'error' ? '⚠️' : 'ℹ️'}</span>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            // Auto-remove after delay (longer for errors)
+            const delay = type === 'error' ? 7000 : 2000;
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.style.transform = 'translateX(100%)';
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.remove();
+                        }
+                    }, 300);
+                }
+            }, delay);
+        }
+
+        function updateAllWorkoutPaces() {
+            // Update training plan with current paces
+            for (let week = 1; week <= 43; week++) {
+                const weekData = trainingPlan[week];
+                if (weekData) {
+                    weekData.workouts.forEach(workout => {
+                        // Update pace based on workout type
+                        if (workout.type === 'long' && paces.long) {
+                            workout.pace = paces.long;
+                        } else if (workout.type === 'tempo' && paces.tempo) {
+                            workout.pace = paces.tempo;
+                        } else if (workout.type === 'speed' && paces.speed) {
+                            workout.pace = paces.speed;
+                        } else if (workout.type === 'easy' && paces.easy) {
+                            workout.pace = paces.easy;
+                        } else if (workout.type === 'recovery' && paces.recovery) {
+                            workout.pace = paces.recovery;
+                        }
+                        
+                        // Update description to reflect new pace
+                        if (workout.pace !== 'varied' && workout.pace !== 'strides' && workout.pace !== 'progression') {
+                            if (workout.type === 'long') {
+                                workout.description = `Long Run: ${workout.distance} km @ ${workout.pace}/km`;
+                            } else if (workout.type === 'tempo') {
+                                workout.description = `Tempo Run: ${workout.distance} km @ ${workout.pace}/km`;
+                            } else if (workout.type === 'speed' && workout.description.includes('x')) {
+                                // Keep interval descriptions but update pace references
+                                const intervalMatch = workout.description.match(/(\d+x\d+m)/);
+                                if (intervalMatch) {
+                                    workout.description = workout.description.replace(/@\s*[\d:]+\/km/, `@ ${workout.pace}/km`);
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
+        function populateCalendar(weeklySchedule) {
+            const calendar = document.getElementById('weekly-calendar');
+            calendar.innerHTML = ''; // Clear previous data
+            weeklySchedule.workouts.forEach(workout => {
+                const workoutElement = document.createElement('div');
+                workoutElement.textContent = `${workout.type}: ${workout.distance} km @ ${workout.pace}`;
+                calendar.appendChild(workoutElement);
+            });
+        }
+
+        function initializeSchedule() {
+            for (let week = 1; week <= 43; week++) {
+                weeklySchedule[week] = {
+                    Monday: [],
+                    Tuesday: [],
+                    Wednesday: [],
+                    Thursday: [],
+                    Friday: [],
+                    Saturday: [],
+                    Sunday: []
+                };
+
+                const weekData = trainingPlan[week];
+                if (weekData) {
+                    const workouts = weekData.workouts;
+                    workouts.forEach(workout => {
+                        // Check if workout has a preferred day specified, otherwise use type-based defaults
+                        let assignedDay = workout.preferredDay;
+                        
+                        if (!assignedDay) {
+                            // Assign workouts to days based on type (fallback defaults)
+                            if (workout.type === 'long') {
+                                assignedDay = 'Friday';
+                            } else if (workout.type === 'tempo') {
+                                assignedDay = 'Tuesday';
+                            } else if (workout.type === 'speed') {
+                                assignedDay = 'Thursday';
+                            } else if (workout.type === 'race') {
+                                assignedDay = 'Saturday';
+                            } else {
+                                assignedDay = 'Monday'; // Default fallback
+                            }
+                        }
+                        
+                        // Ensure the assigned day exists in our schedule
+                        if (weeklySchedule[week][assignedDay]) {
+                            weeklySchedule[week][assignedDay].push(workout);
+                        } else {
+                            // Fallback to Monday if invalid day specified
+                            weeklySchedule[week].Monday.push(workout);
+                        }
+                    });
+                }
+            }
+        }
+
+        function rebuildWeeklyScheduleFromSaved(savedSchedule) {
+            // Rebuild weeklySchedule: standard workouts always use current defaults,
+            // custom workouts preserve their saved day placement
+            for (let week = 1; week <= 43; week++) {
+                weeklySchedule[week] = {
+                    Monday: [],
+                    Tuesday: [],
+                    Wednesday: [],
+                    Thursday: [],
+                    Friday: [],
+                    Saturday: [],
+                    Sunday: []
+                };
+
+                // Always place training plan workouts using current default day assignments
+                const weekData = trainingPlan[week];
+                if (weekData) {
+                    weekData.workouts.forEach(workout => {
+                        let assignedDay = workout.preferredDay;
+                        if (!assignedDay) {
+                            if (workout.type === 'long') assignedDay = 'Friday';
+                            else if (workout.type === 'tempo') assignedDay = 'Tuesday';
+                            else if (workout.type === 'speed') assignedDay = 'Thursday';
+                            else if (workout.type === 'race') assignedDay = 'Saturday';
+                            else assignedDay = 'Monday';
+                        }
+                        if (weeklySchedule[week][assignedDay]) {
+                            weeklySchedule[week][assignedDay].push(workout);
+                        } else {
+                            weeklySchedule[week].Monday.push(workout);
+                        }
+                    });
+                }
+
+                // Then restore custom workouts from saved data, keeping their saved day
+                const savedWeek = savedSchedule[week];
+                if (savedWeek) {
+                    for (let day in savedWeek) {
+                        if (weeklySchedule[week][day] && Array.isArray(savedWeek[day])) {
+                            savedWeek[day].forEach(savedWorkout => {
+                                if (savedWorkout.isCustom) {
+                                    let freshWorkout = customWorkouts[week] && customWorkouts[week].find(w => w.id === savedWorkout.id);
+                                    if (!freshWorkout) {
+                                        if (!customWorkouts[week]) {
+                                            customWorkouts[week] = [];
+                                        }
+                                        if (!customWorkouts[week].find(w => w.id === savedWorkout.id)) {
+                                            customWorkouts[week].push(savedWorkout);
+                                        }
+                                        freshWorkout = savedWorkout;
+                                    }
+                                    weeklySchedule[week][day].push(freshWorkout);
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+        }
+
+        // Custom workout functions
+        function showCustomWorkoutModal() {
+            document.getElementById('custom-workout-modal').classList.remove('hidden');
+            
+            // Pre-populate pace based on selected type
+            const typeSelect = document.getElementById('custom-type');
+            const paceInput = document.getElementById('custom-pace');
+            
+            typeSelect.addEventListener('change', function() {
+                const selectedType = this.value;
+                if (paces[selectedType]) {
+                    paceInput.value = paces[selectedType];
+                } else if (selectedType === 'custom') {
+                    paceInput.value = '';
+                    paceInput.placeholder = 'e.g. 5:30 or varied';
+                }
+            });
+            
+            // Set initial pace
+            if (paces[typeSelect.value]) {
+                paceInput.value = paces[typeSelect.value];
+            }
+        }
+
+        function closeCustomWorkoutModal() {
+            document.getElementById('custom-workout-modal').classList.add('hidden');
+            // Reset form
+            document.getElementById('custom-workout-form').reset();
+        }
+
+        function createCustomWorkout() {
+            const type = document.getElementById('custom-type').value;
+            const distance = parseFloat(document.getElementById('custom-distance').value);
+            const pace = document.getElementById('custom-pace').value.trim();
+            const description = document.getElementById('custom-description').value.trim();
+            const details = document.getElementById('custom-details').value.trim();
+            
+            // Validation
+            if (!distance || distance <= 0) {
+                showAlertModal('Please enter a valid distance');
+                return;
+            }
+
+            if (!pace) {
+                showAlertModal('Please enter a pace');
+                return;
+            }
+
+            if (!description) {
+                showAlertModal('Please enter a workout description');
+                return;
+            }
+
+            // Generate unique ID for custom workout
+            const customId = `custom_${currentWeek}_${Date.now()}`;
+            
+            // Create workout object
+            const customWorkout = {
+                id: customId,
+                type: type,
+                distance: distance,
+                pace: pace,
+                description: description,
+                details: details || `Custom ${type} workout - ${description}`,
+                isCustom: true
+            };
+            
+            // Store custom workout
+            if (!customWorkouts[currentWeek]) {
+                customWorkouts[currentWeek] = [];
+            }
+            customWorkouts[currentWeek].push(customWorkout);
+            
+            // Add to current week's available workouts
+            if (!weeklySchedule[currentWeek]) {
+                weeklySchedule[currentWeek] = {
+                    Monday: [], Tuesday: [], Wednesday: [], Thursday: [], 
+                    Friday: [], Saturday: [], Sunday: []
+                };
+            }
+            
+            // Add to Monday by default (user can drag to preferred day)
+            weeklySchedule[currentWeek].Monday.push(customWorkout);
+            
+            // Close modal and refresh calendar
+            closeCustomWorkoutModal();
+            renderWeeklyCalendar();
+            
+            // Save progress
+            saveProgress(true);
+            
+            showSaveNotification(`Custom workout "${description}" added successfully!`, 'success');
+        }
+
+        // Edit workout functions
+        function toggleEditMode() {
+            if (!currentWorkout) return;
+            
+            isEditMode = !isEditMode;
+            
+            if (isEditMode) {
+                // Switch to edit mode
+                document.getElementById('modal-content').classList.add('hidden');
+                document.getElementById('modal-edit-content').classList.remove('hidden');
+                document.getElementById('modal-view-buttons').classList.add('hidden');
+                document.getElementById('modal-edit-buttons').classList.remove('hidden');
+                
+                // Populate edit form with current workout data
+                const effectiveWorkout = getEffectiveWorkout(currentWorkout);
+                document.getElementById('edit-type').value = effectiveWorkout.type;
+                document.getElementById('edit-distance').value = effectiveWorkout.distance;
+                document.getElementById('edit-pace').value = effectiveWorkout.pace;
+                document.getElementById('edit-description').value = effectiveWorkout.description;
+                document.getElementById('edit-details').value = effectiveWorkout.details;
+                
+                // Update modal title
+                document.getElementById('modal-title').textContent = 'Edit Workout';
+                document.getElementById('edit-workout-btn').title = 'Cancel edit';
+                document.getElementById('edit-workout-btn').textContent = '❌';
+            } else {
+                cancelEditMode();
+            }
+        }
+
+        function cancelEditMode() {
+            isEditMode = false;
+            
+            // Switch back to view mode
+            document.getElementById('modal-content').classList.remove('hidden');
+            document.getElementById('modal-edit-content').classList.add('hidden');
+            document.getElementById('modal-view-buttons').classList.remove('hidden');
+            document.getElementById('modal-edit-buttons').classList.add('hidden');
+            
+            // Reset modal title and button
+            document.getElementById('modal-title').textContent = 'Workout Details';
+            document.getElementById('edit-workout-btn').title = 'Edit workout';
+            document.getElementById('edit-workout-btn').textContent = '✏️';
+        }
+
+        function saveWorkoutEdit() {
+            if (!currentWorkout) return;
+            
+            // Get edited values
+            const editedType = document.getElementById('edit-type').value;
+            const editedDistance = parseFloat(document.getElementById('edit-distance').value);
+            const editedPace = document.getElementById('edit-pace').value.trim();
+            const editedDescription = document.getElementById('edit-description').value.trim();
+            const editedDetails = document.getElementById('edit-details').value.trim();
+            
+            // Validation
+            if (!editedDistance || editedDistance <= 0) {
+                showAlertModal('Please enter a valid distance');
+                return;
+            }
+
+            if (!editedPace) {
+                showAlertModal('Please enter a pace');
+                return;
+            }
+
+            if (!editedDescription) {
+                showAlertModal('Please enter a workout description');
+                return;
+            }
+
+            // Create edited workout object
+            const editedWorkout = {
+                type: editedType,
+                distance: editedDistance,
+                pace: editedPace,
+                description: editedDescription,
+                details: editedDetails || editedDescription,
+                isEdited: true
+            };
+            
+            // Store the edited workout
+            editedWorkouts[currentWorkout.id] = editedWorkout;
+            
+            // Update current workout reference
+            currentWorkout = {
+                ...currentWorkout,
+                ...editedWorkout
+            };
+            
+            // Close edit mode and refresh display
+            cancelEditMode();
+            showWorkoutDetails(currentWorkout.id);
+            renderWeeklyCalendar();
+            
+            // Save progress
+            saveProgress(true);
+            
+            showSaveNotification('Workout updated successfully!', 'success');
+        }
+
+        function getEffectiveWorkout(workout) {
+            // Return the edited version if it exists, otherwise the original
+            if (editedWorkouts[workout.id]) {
+                return {
+                    ...workout,
+                    ...editedWorkouts[workout.id]
+                };
+            }
+            return workout;
+        }
+
+        function renderWeeklyCalendar() {
+            const calendar = document.getElementById('weekly-calendar');
+            const weekData = weeklySchedule[currentWeek] || {};
+            
+            calendar.innerHTML = dayNames.map(day => {
+                const dayDate = getDayDate(currentWeek, day);
+                return `
+                <div class="day-column">
+                    <div class="day-header bg-white dark:bg-gray-800 rounded-t-xl p-4 border-b border-gray-200 dark:border-gray-700">
+                        <h4 class="text-lg font-bold text-center text-gray-900 dark:text-white">${day}</h4>
+                        <div class="text-sm text-center text-gray-400 dark:text-gray-500 font-medium mt-1">${dayDate}</div>
+                    </div>
+                    <div class="day-slot bg-gray-50 dark:bg-gray-800 rounded-b-xl p-3 min-h-[120px]"
+                         data-day="${day}"
+                         ondragover="allowDrop(event)"
+                         ondrop="drop(event)">
+                        ${(weekData[day] || []).map(workout => renderWorkoutCard(workout)).join('')}
+                    </div>
+                </div>
+            `;
+            }).join('');
+            
+            updateWeekInfo();
+            updateWeeklyProgress();
+            updateTotalDistance();
+        }
+
+        function renderWorkoutCard(workout) {
+            const effectiveWorkout = getEffectiveWorkout(workout);
+            const isCompleted = completedWorkouts.has(workout.id);
+            
+            const typeColors = {
+                long: 'border-blue-500',
+                tempo: 'border-orange-500', 
+                speed: 'border-red-500',
+                easy: 'border-green-500',
+                race: 'border-purple-500',
+                recovery: 'border-yellow-500',
+                custom: 'border-purple-400'
+            };
+
+            let cardClasses = ['workout-card'];
+            if (workout.isCustom) cardClasses.push('custom-workout');
+            if (effectiveWorkout.isEdited) cardClasses.push('edited-workout');
+            if (isCompleted) cardClasses.push('completed-workout');
+
+            return `
+                <div class="${cardClasses.join(' ')} ${isCompleted ? 'completed-workout' : ''} bg-white dark:bg-gray-700 rounded-lg p-3 mb-2 border-l-4 ${typeColors[effectiveWorkout.type] || 'border-gray-500'} cursor-pointer shadow-sm hover:shadow-md transition-all"
+                     draggable="true"
+                     ondragstart="dragStart(event)"
+                     data-workout-id="${workout.id}"
+                     onclick="showWorkoutDetails('${workout.id}')">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-base font-bold capitalize text-gray-900 dark:text-white flex items-center gap-1.5">
+                            ${effectiveWorkout.type}
+                            ${workout.isCustom ? '<span class="text-[10px] font-semibold bg-purple-100 dark:bg-purple-900 text-purple-700 dark:text-purple-300 px-1.5 py-0.5 rounded-full">Custom</span>' : ''}
+                            ${effectiveWorkout.isEdited ? '<span class="text-[10px] font-semibold bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300 px-1.5 py-0.5 rounded-full">Edited</span>' : ''}
+                        </span>
+                        <span class="text-lg font-bold text-primary">${effectiveWorkout.distance}<span class="text-xs font-medium text-gray-400 ml-0.5">km</span></span>
+                    </div>
+                    <div class="text-sm text-gray-700 dark:text-gray-200 truncate mb-1">
+                        ${effectiveWorkout.description}
+                    </div>
+                    <div class="text-xs text-gray-600 dark:text-gray-300 font-medium">
+                        @ ${effectiveWorkout.pace}/km
+                    </div>
+                    ${isCompleted ? '<div class="text-xs text-green-500 dark:text-green-400 font-semibold mt-1.5">✅ Completed</div>' : ''}
+                </div>
+            `;
+        }
+
+        function getWeekDateRange(weekNumber) {
+            // Start from June 16, 2025 (which is a Monday)
+            const baseDate = new Date('2025-06-16');
+            const startDate = new Date(baseDate);
+            startDate.setDate(baseDate.getDate() + (weekNumber - 1) * 7);
+
+            const endDate = new Date(startDate);
+            endDate.setDate(startDate.getDate() + 6);
+
+            const formatDate = (date) => {
+                const day = date.getDate().toString().padStart(2, '0');
+                const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                return `${day}/${month}`;
+            };
+
+            return `${formatDate(startDate)} - ${formatDate(endDate)}`;
+        }
+
+        function getDayDate(weekNumber, dayName) {
+            // Start from June 16, 2025 (which is a Monday)
+            const baseDate = new Date('2025-06-16');
+            const weekStart = new Date(baseDate);
+            weekStart.setDate(baseDate.getDate() + (weekNumber - 1) * 7);
+
+            const dayOffsets = { Monday: 0, Tuesday: 1, Wednesday: 2, Thursday: 3, Friday: 4, Saturday: 5, Sunday: 6 };
+            const targetDate = new Date(weekStart);
+            targetDate.setDate(weekStart.getDate() + dayOffsets[dayName]);
+
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            return `${targetDate.getDate()} ${months[targetDate.getMonth()]}`;
+        }
+
+        function updateWeekInfo() {
+            const weekTitle = document.getElementById('week-title');
+            const weekSubtitle = document.getElementById('week-subtitle');
+            
+            const dateRange = getWeekDateRange(currentWeek);
+            weekTitle.innerHTML = `Week ${currentWeek}<br><span class="text-lg font-normal text-gray-600 dark:text-gray-400">${dateRange}</span>`;
+            
+            // Find the current phase
+            let currentPhase = "Aerobic Base & Routine Building";
+            for (let phase in weekPhases) {
+                if (currentWeek >= parseInt(phase)) {
+                    currentPhase = weekPhases[phase];
+                }
+            }
+            weekSubtitle.textContent = currentPhase;
+        }
+
+        function changeWeek(direction) {
+            const newWeek = currentWeek + direction;
+            if (newWeek >= 1 && newWeek <= 43) {
+                currentWeek = newWeek;
+                renderWeeklyCalendar();
+                
+                // Update dropdown selection
+                const dropdown = document.getElementById('week-dropdown');
+                if (dropdown) {
+                    dropdown.value = currentWeek;
+                }
+                
+                // Save progress after changing week
+                saveProgress();
+            }
+        }
+
+        // Drag and drop functions
+        function allowDrop(ev) {
+            ev.preventDefault();
+            ev.target.closest('.day-slot').classList.add('drag-over');
+        }
+
+        function dragStart(ev) {
+            ev.dataTransfer.setData("text", ev.target.dataset.workoutId);
+            ev.target.classList.add('dragging');
+        }
+
+        function drop(ev) {
+            ev.preventDefault();
+            const workoutId = ev.dataTransfer.getData("text");
+            const targetDay = ev.target.closest('.day-slot').dataset.day;
+            const sourceElement = document.querySelector(`[data-workout-id="${workoutId}"]`);
+            
+            if (sourceElement) {
+                // Find source day and remove workout
+                let sourceDay = null;
+                for (let day in weeklySchedule[currentWeek]) {
+                    const dayWorkouts = weeklySchedule[currentWeek][day];
+                    const workoutIndex = dayWorkouts.findIndex(w => w.id === workoutId);
+                    if (workoutIndex !== -1) {
+                        sourceDay = day;
+                        dayWorkouts.splice(workoutIndex, 1);
+                        break;
+                    }
+                }
+                
+                // Add workout to target day
+                if (sourceDay) {
+                    // Find workout in either training plan or custom workouts
+                    let workout = null;
+                    
+                    // First check if it's a custom workout
+                    if (customWorkouts[currentWeek]) {
+                        workout = customWorkouts[currentWeek].find(w => w.id === workoutId);
+                    }
+                    
+                    // If not found in custom workouts, check training plan
+                    if (!workout && trainingPlan[currentWeek]) {
+                        workout = trainingPlan[currentWeek].workouts.find(w => w.id === workoutId);
+                    }
+                    
+                    if (workout) {
+                        weeklySchedule[currentWeek][targetDay].push(workout);
+                    }
+                }
+            }
+            
+            // Clean up drag state
+            document.querySelectorAll('.day-slot').forEach(slot => {
+                slot.classList.remove('drag-over');
+            });
+            document.querySelectorAll('.workout-card').forEach(card => {
+                card.classList.remove('dragging');
+            });
+            
+            renderWeeklyCalendar();
+            
+            // Save progress after moving workout
+            saveProgress();
+        }
+
+        function showWorkoutDetails(workoutId) {
+            let workout = findWorkoutById(workoutId);
+            if (!workout) return;
+
+            currentWorkout = workout;
+            const effectiveWorkout = getEffectiveWorkout(workout);
+            
+            const modal = document.getElementById('workout-modal');
+            const title = document.getElementById('modal-title');
+            const content = document.getElementById('modal-content');
+            const completeBtn = document.getElementById('complete-btn');
+            const deleteBtn = document.getElementById('delete-workout-btn');
+
+            title.textContent = effectiveWorkout.title || `${effectiveWorkout.type.charAt(0).toUpperCase() + effectiveWorkout.type.slice(1)} Run`;
+
+            content.innerHTML = `
+                <div class="text-lg">
+                    <p><strong>Distance:</strong> ${effectiveWorkout.distance} km</p>
+                    <p><strong>Pace:</strong> ${effectiveWorkout.pace}</p>
+                    <p><strong>Description:</strong> ${effectiveWorkout.details}</p>
+                    ${workout.isCustom ? '<p class="text-purple-300 text-sm mt-2">🔧 Custom Workout</p>' : ''}
+                    ${effectiveWorkout.isEdited ? '<p class="text-yellow-300 text-sm mt-2">✏️ Edited Workout</p>' : ''}
+                </div>
+            `;
+
+            // Show delete button only for custom workouts
+            if (workout.isCustom) {
+                deleteBtn.classList.remove('hidden');
+            } else {
+                deleteBtn.classList.add('hidden');
+            }
+
+            // Reset edit mode
+            cancelEditMode();
+            
+            modal.classList.remove('hidden');
+        }
+
+        function deleteWorkout() {
+            if (!currentWorkout || !currentWorkout.isCustom) return;
+
+            showConfirmModal('Are you sure you want to delete this custom workout?', () => {
+                const workoutId = currentWorkout.id;
+
+                // Remove from custom workouts
+                if (customWorkouts[currentWeek]) {
+                    customWorkouts[currentWeek] = customWorkouts[currentWeek].filter(w => w.id !== workoutId);
+                }
+
+                // Remove from weekly schedule
+                for (let day in weeklySchedule[currentWeek]) {
+                    weeklySchedule[currentWeek][day] = weeklySchedule[currentWeek][day].filter(w => w.id !== workoutId);
+                }
+
+                // Remove from completed workouts if it was completed
+                completedWorkouts.delete(workoutId);
+
+                // Remove from edited workouts if it was edited
+                delete editedWorkouts[workoutId];
+
+                closeModal();
+                renderWeeklyCalendar();
+                saveProgress(true);
+
+                showSaveNotification('Custom workout deleted', 'success');
+            });
+        }
+
+        function findWorkoutById(workoutId) {
+            // First check custom workouts
+            for (let week = 1; week <= 43; week++) {
+                if (customWorkouts[week]) {
+                    const workout = customWorkouts[week].find(w => w.id === workoutId);
+                    if (workout) return workout;
+                }
+            }
+            
+            // Then check training plan
+            for (let week = 1; week <= 43; week++) {
+                const weekData = trainingPlan[week];
+                if (weekData) {
+                    const workout = weekData.workouts.find(w => w.id === workoutId);
+                    if (workout) return workout;
+                }
+            }
+            return null;
+        }
+
+        function completeWorkout() {
+            if (!currentWorkout || completedWorkouts.has(currentWorkout.id)) return;
+            
+            const effectiveWorkout = getEffectiveWorkout(currentWorkout);
+            
+            completedWorkouts.add(currentWorkout.id);
+            totalDistance += effectiveWorkout.distance;
+            
+            // Update streak logic
+            const today = new Date().toDateString();
+            if (lastCompletionDate === today) {
+                // Same day, no streak change
+            } else if (lastCompletionDate === new Date(Date.now() - 86400000).toDateString()) {
+                // Yesterday, continue streak
+                currentStreak++;
+            } else {
+                // Start new streak
+                currentStreak = 1;
+            }
+            lastCompletionDate = today;
+            
+            showCelebration(effectiveWorkout);
+            closeModal();
+            renderWeeklyCalendar();
+            
+            // Save progress after completing workout
+            saveProgress(true);
+        }
+
+        function checkSkippedDaysWorkouts(startDate, endDate) {
+            let currentDate = new Date(startDate);
+            const endTime = new Date(endDate).getTime();
+
+            while (currentDate.getTime() <= endTime) {
+                const formattedDate = currentDate.toDateString();
+                const hasWorkouts = trainingPlan.some(week =>
+                    week.workouts.some(workout => workout.date === formattedDate)
+                );
+                if (hasWorkouts) return true;
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+            return false;
+        }
+
+        function showCelebration(workout) {
+            const celebration = document.createElement('div');
+            celebration.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/20';
+            celebration.innerHTML = `
+                <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 text-center max-w-sm mx-4 transform scale-0 transition-transform duration-500">
+                    <div class="text-6xl mb-4">🎉</div>
+                    <h3 class="text-2xl font-bold text-primary mb-2">Workout Complete!</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-2">${workout.distance}km ${workout.type} run</p>
+                    <p class="text-sm text-primary font-medium">+${workout.distance * 10} XP</p>
+                    ${workout.isCustom ? '<p class="text-xs text-purple-600 dark:text-purple-400 mt-1">Custom workout completed! 🔧</p>' : ''}
+                    ${workout.isEdited ? '<p class="text-xs text-yellow-600 dark:text-yellow-400 mt-1">Edited workout completed! ✏️</p>' : ''}
+                </div>
+            `;
+            
+            document.body.appendChild(celebration);
+            
+            setTimeout(() => {
+                celebration.querySelector('div').style.transform = 'scale(1)';
+            }, 100);
+            
+            setTimeout(() => {
+                celebration.remove();
+            }, 3000);
+        }
+
+        function closeModal() {
+            document.getElementById('workout-modal').classList.add('hidden');
+            currentWorkout = null;
+            isEditMode = false;
+            cancelEditMode();
+        }
+
+        function showPaceSettings() {
+            const modal = document.getElementById('pace-modal');
+            const settings = document.getElementById('pace-settings');
+            
+            settings.innerHTML = Object.entries(paces).map(([type, pace]) => `
+                <div>
+                    <label class="block text-sm font-medium mb-2 capitalize">${type} Pace</label>
+                    <input type="text" 
+                           id="pace-${type}" 
+                           value="${pace}" 
+                           placeholder="e.g. 5:30"
+                           class="w-full text-base px-4 py-3 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent">
+                </div>
+            `).join('');
+            
+            modal.classList.remove('hidden');
+        }
+
+        function savePaceSettings() {
+            // Update paces object
+            Object.keys(paces).forEach(type => {
+                const input = document.getElementById(`pace-${type}`);
+                if (input && input.value) {
+                    paces[type] = input.value;
+                }
+            });
+            
+            updateAllWorkoutPaces();
+            renderWeeklyCalendar();
+            closePaceModal();
+            
+            // Save progress after updating paces
+            saveProgress(true);
+        }
+
+        function closePaceModal() {
+            document.getElementById('pace-modal').classList.add('hidden');
+        }
+
+        // Enhanced progress functions with charts
+        function getProgressData() {
+            // Calculate weekly data
+            const weeklyData = [];
+            let cumulativeDistance = 0;
+            const completionRates = [];
+            const workoutTypeData = { long: 0, tempo: 0, speed: 0, easy: 0, race: 0, custom: 0, recovery: 0 };
+            
+            for (let week = 1; week <= 43; week++) {
+                const weekWorkouts = trainingPlan[week].workouts;
+                const customWeekWorkouts = customWorkouts[week] || [];
+                const allWeekWorkouts = [...weekWorkouts, ...customWeekWorkouts];
+                
+                let weekDistance = 0;
+                let weekCompleted = 0;
+                
+                allWeekWorkouts.forEach(workout => {
+                    if (completedWorkouts.has(workout.id)) {
+                        const effectiveWorkout = getEffectiveWorkout(workout);
+                        weekDistance += effectiveWorkout.distance;
+                        weekCompleted++;
+                        workoutTypeData[effectiveWorkout.type] = (workoutTypeData[effectiveWorkout.type] || 0) + 1;
+                    }
+                });
+                
+                cumulativeDistance += weekDistance;
+                const completionRate = allWeekWorkouts.length > 0 ? (weekCompleted / allWeekWorkouts.length) * 100 : 0;
+                
+                weeklyData.push({
+                    week,
+                    distance: weekDistance,
+                    cumulative: cumulativeDistance,
+                    completionRate,
+                    completedWorkouts: weekCompleted,
+                    totalWorkouts: allWeekWorkouts.length
+                });
+                
+                completionRates.push(completionRate);
+            }
+            
+            return { weeklyData, workoutTypeData, completionRates };
+        }
+
+        function getPhaseData() {
+            const phases = [
+                { name: "Aerobic Base", weeks: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], color: '#10B981' },
+                { name: "Endurance Build", weeks: [11, 12, 13, 14, 15, 16, 17, 18], color: '#3B82F6' },
+                { name: "Marathon Pace", weeks: [19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29], color: '#F59E0B' },
+                { name: "Peak Training", weeks: [30, 31, 32, 33, 34, 35, 36], color: '#EF4444' },
+                { name: "Sharpening", weeks: [37, 38, 39], color: '#8B5CF6' },
+                { name: "Taper & Race", weeks: [40, 41, 42, 43], color: '#6B7280' }
+            ];
+            
+            return phases.map(phase => {
+                let totalDistance = 0;
+                let completedWorkouts = 0;
+                let totalWorkouts = 0;
+                
+                phase.weeks.forEach(week => {
+                    const weekWorkouts = trainingPlan[week].workouts;
+                    const customWeekWorkouts = customWorkouts[week] || [];
+                    const allWeekWorkouts = [...weekWorkouts, ...customWeekWorkouts];
+                    
+                    totalWorkouts += allWeekWorkouts.length;
+                    
+                    allWeekWorkouts.forEach(workout => {
+                        if (completedWorkouts.has(workout.id)) {
+                            const effectiveWorkout = getEffectiveWorkout(workout);
+                            totalDistance += effectiveWorkout.distance;
+                            completedWorkouts++;
+                        }
+                    });
+                });
+                
+                return {
+                    ...phase,
+                    distance: totalDistance,
+                    completionRate: totalWorkouts > 0 ? (completedWorkouts / totalWorkouts) * 100 : 0,
+                    completedWorkouts,
+                    totalWorkouts
+                };
+            });
+        }
+
+        function switchChart(chartType) {
+            // Update active tab
+            document.querySelectorAll('.chart-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            activeChartType = chartType;
+            renderChart(chartType);
+        }
+
+        function renderChart(chartType) {
+            const ctx = document.getElementById('progress-chart');
+            if (!ctx) return;
+            
+            // Destroy existing chart
+            if (currentChart) {
+                currentChart.destroy();
+            }
+            
+            const { weeklyData, workoutTypeData, completionRates } = getProgressData();
+            
+            // Set chart theme colors based on dark mode
+            const isDark = document.documentElement.classList.contains('dark');
+            const textColor = isDark ? '#F3F4F6' : '#374151';
+            const gridColor = isDark ? '#374151' : '#E5E7EB';
+            
+            Chart.defaults.color = textColor;
+            Chart.defaults.borderColor = gridColor;
+            
+            switch (chartType) {
+                case 'weekly-distance':
+                    currentChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: weeklyData.map(w => `Week ${w.week}`),
+                            datasets: [{
+                                label: 'Distance (km)',
+                                data: weeklyData.map(w => w.distance),
+                                backgroundColor: '#5D5CDE',
+                                borderColor: '#4A49B8',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: 'Weekly Distance Completed',
+                                    font: { size: 16, weight: 'bold' }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Distance (km)'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    break;
+                    
+                case 'cumulative':
+                    currentChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: weeklyData.map(w => `Week ${w.week}`),
+                            datasets: [{
+                                label: 'Cumulative Distance (km)',
+                                data: weeklyData.map(w => w.cumulative),
+                                borderColor: '#10B981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                fill: true,
+                                tension: 0.3
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: 'Cumulative Distance Progress',
+                                    font: { size: 16, weight: 'bold' }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    title: {
+                                        display: true,
+                                        text: 'Total Distance (km)'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    break;
+                    
+                case 'workout-types':
+                    const typeLabels = Object.keys(workoutTypeData);
+                    const typeColors = {
+                        long: '#3B82F6',
+                        tempo: '#F59E0B', 
+                        speed: '#EF4444',
+                        easy: '#10B981',
+                        race: '#8B5CF6',
+                        custom: '#6366F1',
+                        recovery: '#F97316'
+                    };
+                    
+                    currentChart = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: typeLabels.map(label => label.charAt(0).toUpperCase() + label.slice(1)),
+                            datasets: [{
+                                data: Object.values(workoutTypeData),
+                                backgroundColor: typeLabels.map(type => typeColors[type]),
+                                borderWidth: 2,
+                                borderColor: isDark ? '#1F2937' : '#FFFFFF'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: 'Completed Workouts by Type',
+                                    font: { size: 16, weight: 'bold' }
+                                },
+                                legend: {
+                                    position: 'bottom',
+                                    labels: {
+                                        padding: 20,
+                                        usePointStyle: true
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    break;
+                    
+                case 'completion-rate':
+                    currentChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: weeklyData.map(w => `Week ${w.week}`),
+                            datasets: [{
+                                label: 'Completion Rate (%)',
+                                data: weeklyData.map(w => w.completionRate),
+                                borderColor: '#F59E0B',
+                                backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                                fill: true,
+                                tension: 0.3
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: 'Weekly Completion Rate',
+                                    font: { size: 16, weight: 'bold' }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    max: 100,
+                                    title: {
+                                        display: true,
+                                        text: 'Completion Rate (%)'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    break;
+                    
+                case 'phase-analysis':
+                    const phaseData = getPhaseData();
+                    currentChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: phaseData.map(p => p.name),
+                            datasets: [
+                                {
+                                    label: 'Distance (km)',
+                                    data: phaseData.map(p => p.distance),
+                                    backgroundColor: phaseData.map(p => p.color),
+                                    yAxisID: 'y'
+                                },
+                                {
+                                    label: 'Completion Rate (%)',
+                                    data: phaseData.map(p => p.completionRate),
+                                    type: 'line',
+                                    borderColor: '#EF4444',
+                                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                                    yAxisID: 'y1'
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                title: {
+                                    display: true,
+                                    text: 'Training Phase Analysis',
+                                    font: { size: 16, weight: 'bold' }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    type: 'linear',
+                                    display: true,
+                                    position: 'left',
+                                    title: {
+                                        display: true,
+                                        text: 'Distance (km)'
+                                    }
+                                },
+                                y1: {
+                                    type: 'linear',
+                                    display: true,
+                                    position: 'right',
+                                    title: {
+                                        display: true,
+                                        text: 'Completion Rate (%)'
+                                    },
+                                    max: 100,
+                                    grid: {
+                                        drawOnChartArea: false,
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    break;
+            }
+        }
+
+        // Donation tracker functions
+        function renderDonationTable() {
+            const tbody = document.getElementById('donation-table-body');
+            if (!tbody) return;
+
+            tbody.innerHTML = donationData.map((d, idx) => {
+                const rowClass = d.paid ? 'donation-row-paid' : '';
+                const badgeClass = d.paid ? 'paid' : 'unpaid';
+                const badgeText = d.paid ? '✓ PAID' : '—';
+                return `<tr class="${rowClass}">
+                    <td class="mile-num">${d.mile}</td>
+                    <td>
+                        <span class="donation-paid-badge ${badgeClass}" onclick="toggleDonationPaid(${idx})" title="Click to toggle">${badgeText}</span>
+                    </td>
+                    <td>
+                        <input class="donation-input" type="text" value="${escapeHTML(d.donor)}" placeholder="Donor name"
+                            onchange="updateDonation(${idx},'donor',this.value)" style="font-size:16px;">
+                    </td>
+                    <td>
+                        <input class="donation-input" type="text" value="${escapeHTML(d.song)}" placeholder="Song choice"
+                            onchange="updateDonation(${idx},'song',this.value)" style="font-size:16px;">
+                    </td>
+                </tr>`;
+            }).join('');
+
+            renderDonationSummary();
+        }
+
+        function renderDonationSummary() {
+            const el = document.getElementById('donation-summary');
+            if (!el) return;
+            const totalMiles = donationData.length;
+            const paidCount = donationData.filter(d => d.paid).length;
+            const claimedCount = donationData.filter(d => d.donor).length;
+            const unclaimed = totalMiles - claimedCount;
+            el.innerHTML = `
+                <div class="donation-stat">
+                    <div class="stat-value">${paidCount}/${totalMiles}</div>
+                    <div class="stat-label">Miles Paid</div>
+                </div>
+                <div class="donation-stat" style="background:linear-gradient(135deg,#10b981,#059669);">
+                    <div class="stat-value">${claimedCount}</div>
+                    <div class="stat-label">Miles Claimed</div>
+                </div>
+                <div class="donation-stat" style="background:linear-gradient(135deg,#f59e0b,#d97706);">
+                    <div class="stat-value">${unclaimed}</div>
+                    <div class="stat-label">Miles Available</div>
+                </div>
+            `;
+        }
+
+        function toggleDonationPaid(idx) {
+            donationData[idx].paid = !donationData[idx].paid;
+            renderDonationTable();
+            saveProgress();
+        }
+
+        function updateDonation(idx, field, value) {
+            donationData[idx][field] = value;
+            renderDonationSummary();
+            saveProgress();
+        }
+
+        function escapeHTML(str) {
+            if (!str) return '';
+            return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        function showProgress() {
+            const modal = document.getElementById('progress-modal');
+            
+            // Calculate stats
+            let totalWorkouts = 0;
+            let totalWeeksWithWorkouts = 0;
+            
+            for (let week = 1; week <= 43; week++) {
+                const weekWorkouts = trainingPlan[week].workouts;
+                const customWeekWorkouts = customWorkouts[week] || [];
+                const allWeekWorkouts = [...weekWorkouts, ...customWeekWorkouts];
+                totalWorkouts += allWeekWorkouts.length;
+                
+                if (allWeekWorkouts.some(w => completedWorkouts.has(w.id))) {
+                    totalWeeksWithWorkouts++;
+                }
+            }
+            
+            const completed = completedWorkouts.size;
+            const percentage = Math.round((completed / totalWorkouts) * 100);
+            const avgWeekly = totalWeeksWithWorkouts > 0 ? Math.round(totalDistance / totalWeeksWithWorkouts) : 0;
+            
+            // Update overview stats
+            document.getElementById('overall-progress-bar').style.width = `${percentage}%`;
+            document.getElementById('completed-count').textContent = completed;
+            document.getElementById('total-km').textContent = Math.round(totalDistance);
+            document.getElementById('current-streak').textContent = currentStreak;
+            document.getElementById('avg-weekly').textContent = avgWeekly;
+            
+            // Update weekly breakdown
+            const weeklyBreakdown = document.getElementById('weekly-breakdown');
+            weeklyBreakdown.innerHTML = Array.from({length: 43}, (_, i) => {
+                const week = i + 1;
+                const weekWorkouts = trainingPlan[week].workouts;
+                const customWeekWorkouts = customWorkouts[week] || [];
+                const allWeekWorkouts = [...weekWorkouts, ...customWeekWorkouts];
+                const weekCompleted = allWeekWorkouts.filter(w => completedWorkouts.has(w.id)).length;
+                const weekPercentage = allWeekWorkouts.length > 0 ? Math.round((weekCompleted / allWeekWorkouts.length) * 100) : 0;
+                const weekDistance = allWeekWorkouts
+                    .filter(w => completedWorkouts.has(w.id))
+                    .reduce((sum, w) => {
+                        const effectiveWorkout = getEffectiveWorkout(w);
+                        return sum + effectiveWorkout.distance;
+                    }, 0);
+                
+                const hasEditedWorkouts = allWeekWorkouts.some(w => editedWorkouts[w.id]);
+                
+                return `
+                    <div class="flex items-center justify-between py-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded px-2 transition-colors">
+                        <span class="text-sm font-medium">Week ${week}</span>
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs text-gray-500 w-16">${Math.round(weekDistance)}km</span>
+                            <div class="w-20 bg-gray-200 dark:bg-gray-600 rounded-full h-2">
+                                <div class="bg-primary rounded-full h-2 transition-all duration-300" style="width: ${weekPercentage}%"></div>
+                            </div>
+                            <span class="text-xs text-gray-500 w-8">${weekCompleted}/${allWeekWorkouts.length}</span>
+                            ${customWeekWorkouts.length > 0 ? '<span class="text-xs text-purple-500">🔧</span>' : ''}
+                            ${hasEditedWorkouts ? '<span class="text-xs text-yellow-500">✏️</span>' : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            // Render donation tracker
+            renderDonationTable();
+
+            modal.classList.remove('hidden');
+
+            // Render initial chart
+            setTimeout(() => renderChart(activeChartType), 100);
+        }
+
+        function closeProgressModal() {
+            document.getElementById('progress-modal').classList.add('hidden');
+            if (currentChart) {
+                currentChart.destroy();
+                currentChart = null;
+            }
+        }
+
+        function showDataManagement() {
+            // Update storage status
+            const storageAvailable = isStorageAvailable();
+            document.getElementById('storage-status').textContent = storageAvailable ? `Yes (${storageMethod})` : 'No';
+            document.getElementById('storage-method').textContent = storageMethod;
+            
+            // Calculate data size
+            try {
+                const savedData = getStorageItem('marathonTrainingProgress');
+                const dataSize = savedData ? (savedData.length / 1024).toFixed(1) + ' KB' : '0 KB';
+                document.getElementById('data-size').textContent = dataSize;
+            } catch (e) {
+                document.getElementById('data-size').textContent = 'Unknown';
+            }
+            
+            document.getElementById('data-modal').classList.remove('hidden');
+        }
+
+        function closeDataModal() {
+            document.getElementById('data-modal').classList.add('hidden');
+        }
+
+        function exportData() {
+            try {
+                const progressData = {
+                    currentWeek,
+                    completedWorkouts: Array.from(completedWorkouts),
+                    totalDistance,
+                    currentStreak,
+                    achievements,
+                    lastCompletionDate,
+                    weeklySchedule,
+                    customWorkouts, // Include custom workouts in export
+                    editedWorkouts, // Include edited workouts in export
+                    donationData, // Include donation tracker in export
+                    paces,
+                    exportedAt: new Date().toISOString(),
+                    appVersion: '1.2'
+                };
+                
+                const dataStr = JSON.stringify(progressData, null, 2);
+                const dataBlob = new Blob([dataStr], {type: 'application/json'});
+                const url = URL.createObjectURL(dataBlob);
+                
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `marathon-training-progress-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                
+                showSaveNotification('Progress data exported successfully', 'success');
+            } catch (error) {
+                console.error('Export failed:', error);
+                showSaveNotification('Failed to export progress data', 'error');
+            }
+        }
+
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const progressData = JSON.parse(e.target.result);
+                    
+                    // Validate the data structure
+                    if (!progressData.completedWorkouts || !Array.isArray(progressData.completedWorkouts)) {
+                        throw new Error('Invalid data format');
+                    }
+                    
+                    // Restore the data
+                    currentWeek = progressData.currentWeek || 1;
+                    completedWorkouts = new Set(progressData.completedWorkouts);
+                    totalDistance = progressData.totalDistance || 0;
+                    currentStreak = progressData.currentStreak || 0;
+                    achievements = progressData.achievements || [];
+                    lastCompletionDate = progressData.lastCompletionDate || null;
+                    
+                    // Restore custom workouts
+                    if (progressData.customWorkouts && typeof progressData.customWorkouts === 'object') {
+                        customWorkouts = progressData.customWorkouts;
+                    }
+                    
+                    // Restore edited workouts
+                    if (progressData.editedWorkouts && typeof progressData.editedWorkouts === 'object') {
+                        editedWorkouts = progressData.editedWorkouts;
+                    }
+
+                    // Restore donation data
+                    if (Array.isArray(progressData.donationData) && progressData.donationData.length === 26) {
+                        donationData = progressData.donationData;
+                    }
+
+                    if (progressData.paces) {
+                        Object.assign(paces, progressData.paces);
+                        updateAllWorkoutPaces();
+                    }
+                    
+                    if (progressData.weeklySchedule) {
+                        weeklySchedule = progressData.weeklySchedule;
+                    } else {
+                        initializeSchedule();
+                    }
+                    
+                    // Save the imported data
+                    saveProgress(true);
+                    
+                    // Update the UI
+                    renderWeeklyCalendar();
+                    closeDataModal();
+                    
+                    showSaveNotification('Progress data imported successfully', 'success');
+                } catch (error) {
+                    console.error('Import failed:', error);
+                    showSaveNotification('Failed to import progress data - invalid file format', 'error');
+                }
+            };
+            
+            reader.readAsText(file);
+            // Reset the file input
+            event.target.value = '';
+        }
+
+        function confirmClearData() {
+            showConfirmModal('Are you sure you want to clear all progress? This action cannot be undone.', () => {
+                clearProgress();
+                closeDataModal();
+            });
+        }
+
+        function updateTotalDistance() {
+            // Calculate total distance from completed workouts including custom ones
+            let totalDistanceCovered = 0;
+            
+            // Check training plan workouts
+            Object.values(trainingPlan)
+                .flatMap(week => week.workouts)
+                .filter(workout => completedWorkouts.has(workout.id))
+                .forEach(workout => {
+                    const effectiveWorkout = getEffectiveWorkout(workout);
+                    totalDistanceCovered += effectiveWorkout.distance;
+                });
+            
+            // Check custom workouts
+            Object.values(customWorkouts)
+                .flatMap(weekWorkouts => weekWorkouts)
+                .filter(workout => completedWorkouts.has(workout.id))
+                .forEach(workout => {
+                    const effectiveWorkout = getEffectiveWorkout(workout);
+                    totalDistanceCovered += effectiveWorkout.distance;
+                });
+
+            // Update the global total distance variable
+            totalDistance = totalDistanceCovered;
+
+            // Update the displayed total distance
+            const totalDistanceElement = document.getElementById('total-distance');
+            if (totalDistanceElement) {
+                totalDistanceElement.textContent = `${Math.round(totalDistance)} km`;
+            }
+
+            // Update the progress bar for total distance (target: 975km for 43 weeks)
+            const totalDistanceProgress = document.getElementById('total-distance-progress');
+            if (totalDistanceProgress) {
+                const progressPercentage = Math.min(100, (totalDistance / 975) * 100);
+                totalDistanceProgress.style.width = `${progressPercentage}%`;
+            }
+        }
+
+        function updateWeeklyProgress() {
+            const weekData = trainingPlan[currentWeek];
+            const customWeekData = customWorkouts[currentWeek] || [];
+            
+            if (!weekData || !weekData.workouts) return;
+
+            const allWorkouts = [...weekData.workouts, ...customWeekData];
+            const totalWorkouts = allWorkouts.length;
+            const completedWorkoutsInWeek = allWorkouts.filter(workout => completedWorkouts.has(workout.id)).length;
+
+            const progressPercentage = totalWorkouts > 0 ? Math.round((completedWorkoutsInWeek / totalWorkouts) * 100) : 0;
+
+            // Update progress bar and text
+            const progressBar = document.getElementById('weekly-progress-bar');
+            const progressText = document.getElementById('weekly-progress-text');
+            
+            if (progressBar) {
+                progressBar.style.width = `${progressPercentage}%`;
+            }
+            
+            if (progressText) {
+                progressText.textContent = `${completedWorkoutsInWeek}/${totalWorkouts} workouts completed (${progressPercentage}%)`;
+            }
+        }
+
+        function populateWeekDropdown() {
+            const weekDropdown = document.getElementById('week-dropdown');
+            weekDropdown.innerHTML = ''; // Clear existing options
+
+            for (let week = 1; week <= 43; week++) {
+                const option = document.createElement('option');
+                option.value = week;
+                option.textContent = `Week ${week}`;
+                weekDropdown.appendChild(option);
+            }
+
+            // Set the default selected week based on currentWeek
+            weekDropdown.value = currentWeek;
+        }
+
+        function selectWeek() {
+            const selectedWeek = document.getElementById('week-dropdown').value;
+            currentWeek = parseInt(selectedWeek);
+            renderWeeklyCalendar();
+            saveProgress();
+        }
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            // Detect and initialize storage method first
+            detectStorageMethod();
+            console.log(`Storage method detected: ${storageMethod}`);
+            
+            // Load saved progress first, then render
+            loadProgress();
+            populateWeekDropdown();
+            renderWeeklyCalendar();
+        });
+
+        // Close modals when clicking outside
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal-backdrop')) {
+                closeModal();
+                closePaceModal();
+                closeProgressModal();
+                closeDataModal();
+                closeCustomWorkoutModal();
+            }
+        });
+
+        // Auto-save progress periodically (every 2 minutes to reduce frequency)
+        setInterval(() => {
+            saveProgress();
+        }, 120000);
+
+        // Save before page unload
+        window.addEventListener('beforeunload', () => {
+            saveProgress();
+        });
+
+        // Handle dark mode changes for charts
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+            if (currentChart && activeChartType) {
+                setTimeout(() => renderChart(activeChartType), 100);
+            }
+        });
+    </script>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="bottom-nav">
+        <div class="max-w-lg mx-auto flex justify-around items-center">
+            <button onclick="scrollToTop()" class="bottom-nav-item active">
+                <span class="nav-icon">📅</span>
+                <span class="nav-label">CALENDAR</span>
+            </button>
+            <button onclick="showProgress()" class="bottom-nav-item">
+                <span class="nav-icon">📊</span>
+                <span class="nav-label">PROGRESS</span>
+            </button>
+            <button onclick="showCustomWorkoutModal()" class="bottom-nav-item">
+                <span class="nav-icon">➕</span>
+                <span class="nav-label">ADD</span>
+            </button>
+            <button onclick="showPaceSettings()" class="bottom-nav-item">
+                <span class="nav-icon">⚙️</span>
+                <span class="nav-label">PACES</span>
+            </button>
+            <button onclick="showDataModal()" class="bottom-nav-item">
+                <span class="nav-icon">💾</span>
+                <span class="nav-label">DATA</span>
+            </button>
+        </div>
+    </nav>
+
+    <script>
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showDataModal() {
+            document.getElementById('data-modal').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
