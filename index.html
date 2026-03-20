@@ -148,6 +148,143 @@
         #app {
             padding-bottom: 90px;
         }
+
+        /* Donation Tracker Styles */
+        .donation-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 14px;
+        }
+        .donation-table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            background: #5D5CDE;
+            color: white;
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .donation-table thead th:first-child {
+            border-radius: 8px 0 0 0;
+        }
+        .donation-table thead th:last-child {
+            border-radius: 0 8px 0 0;
+        }
+        .donation-table tbody tr {
+            transition: background-color 0.15s ease;
+        }
+        .donation-table tbody tr:hover {
+            background-color: rgba(93, 92, 222, 0.06);
+        }
+        .dark .donation-table tbody tr:hover {
+            background-color: rgba(93, 92, 222, 0.15);
+        }
+        .donation-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #e5e7eb;
+            vertical-align: middle;
+        }
+        .dark .donation-table td {
+            border-bottom-color: #374151;
+        }
+        .donation-table .mile-num {
+            font-weight: 700;
+            font-size: 15px;
+            text-align: center;
+            width: 50px;
+            color: #5D5CDE;
+        }
+        .donation-paid-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+        .donation-paid-badge.paid {
+            background: #10b981;
+            color: white;
+        }
+        .donation-paid-badge.unpaid {
+            background: #e5e7eb;
+            color: #6b7280;
+        }
+        .dark .donation-paid-badge.unpaid {
+            background: #374151;
+            color: #9ca3af;
+        }
+        .donation-paid-badge:hover {
+            transform: scale(1.08);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .donation-input {
+            width: 100%;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            padding: 5px 8px;
+            font-size: 14px;
+            color: inherit;
+            transition: all 0.2s;
+            min-width: 0;
+        }
+        .donation-input:hover {
+            border-color: #d1d5db;
+        }
+        .dark .donation-input:hover {
+            border-color: #4b5563;
+        }
+        .donation-input:focus {
+            outline: none;
+            border-color: #5D5CDE;
+            background: white;
+            box-shadow: 0 0 0 2px rgba(93,92,222,0.15);
+        }
+        .dark .donation-input:focus {
+            background: #1f2937;
+        }
+        .donation-row-paid {
+            background: rgba(16, 185, 129, 0.06);
+        }
+        .dark .donation-row-paid {
+            background: rgba(16, 185, 129, 0.1);
+        }
+        .donation-summary {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+        .donation-stat {
+            background: linear-gradient(135deg, #5D5CDE, #8B5CF6);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            text-align: center;
+            flex: 1;
+            min-width: 100px;
+        }
+        .donation-stat .stat-value {
+            font-size: 22px;
+            font-weight: 800;
+        }
+        .donation-stat .stat-label {
+            font-size: 11px;
+            opacity: 0.85;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 2px;
+        }
     </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
@@ -524,6 +661,30 @@
                     </div>
                 </div>
                 
+                    <!-- Donation Tracker -->
+                    <div class="bg-gray-50 dark:bg-gray-800 rounded-xl p-6">
+                        <h4 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                            💷 Mile Donation Tracker
+                            <span class="text-sm font-normal text-gray-500">(Click to edit any field)</span>
+                        </h4>
+                        <div id="donation-summary" class="donation-summary"></div>
+                        <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700" style="max-height: 520px; overflow-y: auto;">
+                            <table class="donation-table">
+                                <thead>
+                                    <tr>
+                                        <th>Mile</th>
+                                        <th>Status</th>
+                                        <th>Donor</th>
+                                        <th>Song Choice</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="donation-table-body">
+                                    <!-- Populated by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
                 <button onclick="closeProgressModal()" class="w-full mt-6 bg-primary hover:bg-primary-dark text-white py-3 px-4 rounded-lg font-medium transition-colors">
                     Close
                 </button>
@@ -621,6 +782,36 @@
         let currentChart = null;
         let activeChartType = 'weekly-distance';
         let isEditMode = false;
+
+        // Donation tracker data (26 miles)
+        let donationData = [
+            { mile: 1, paid: false, donor: '', song: '' },
+            { mile: 2, paid: false, donor: '', song: '' },
+            { mile: 3, paid: false, donor: '', song: '' },
+            { mile: 4, paid: false, donor: '', song: '' },
+            { mile: 5, paid: true, donor: 'Jon G', song: 'Together in Electric Dreams' },
+            { mile: 6, paid: true, donor: 'Pete', song: 'You Are My Sunshine' },
+            { mile: 7, paid: false, donor: '', song: '' },
+            { mile: 8, paid: false, donor: '', song: '' },
+            { mile: 9, paid: false, donor: '', song: '' },
+            { mile: 10, paid: true, donor: 'Rob', song: 'Carnaval De Paris' },
+            { mile: 11, paid: false, donor: '', song: '' },
+            { mile: 12, paid: false, donor: 'Bushy', song: 'Good Day - Nappy Roots' },
+            { mile: 13, paid: true, donor: 'Dave T', song: 'WAP' },
+            { mile: 14, paid: false, donor: '', song: '' },
+            { mile: 15, paid: true, donor: 'Allan Pike', song: 'Call me Al' },
+            { mile: 16, paid: true, donor: 'Tony A', song: 'winter Bear - Coby Grant' },
+            { mile: 17, paid: false, donor: '', song: '' },
+            { mile: 18, paid: false, donor: '', song: '' },
+            { mile: 19, paid: false, donor: '', song: '' },
+            { mile: 20, paid: true, donor: 'Nobby', song: 'Mr Brightside' },
+            { mile: 21, paid: true, donor: 'Tony A', song: 'GW pick' },
+            { mile: 22, paid: true, donor: 'Pete', song: 'Aqua - Barbie Girl' },
+            { mile: 23, paid: false, donor: 'Wayne', song: 'Tubthumping' },
+            { mile: 24, paid: true, donor: '07856997929', song: 'Praise You - Fatboy Slim' },
+            { mile: 25, paid: true, donor: 'Stu', song: 'Coldplay Everglow' },
+            { mile: 26, paid: false, donor: 'Andy Lindley', song: '' }
+        ];
 
         // Default paces (adjustable by user)
         let paces = {
@@ -1161,6 +1352,7 @@
                     weeklySchedule,
                     customWorkouts, // Save custom workouts
                     editedWorkouts, // Save edited workouts
+                    donationData, // Save donation tracker
                     paces,
                     savedAt: now,
                     storageMethod: storageMethod
@@ -1242,7 +1434,12 @@
                     if (progressData.editedWorkouts && typeof progressData.editedWorkouts === 'object') {
                         editedWorkouts = progressData.editedWorkouts;
                     }
-                    
+
+                    // Restore donation data
+                    if (Array.isArray(progressData.donationData) && progressData.donationData.length === 26) {
+                        donationData = progressData.donationData;
+                    }
+
                     // Restore custom paces if they exist
                     if (progressData.paces && typeof progressData.paces === 'object') {
                         Object.assign(paces, progressData.paces);
@@ -1291,7 +1488,10 @@
                 lastCompletionDate = null;
                 customWorkouts = {}; // Clear custom workouts
                 editedWorkouts = {}; // Clear edited workouts
-                
+
+                // Reset donation data
+                donationData = donationData.map(d => ({ mile: d.mile, paid: false, donor: '', song: '' }));
+
                 // Reset paces to defaults
                 paces = {
                     long: '5:50',
@@ -2451,6 +2651,74 @@
             }
         }
 
+        // Donation tracker functions
+        function renderDonationTable() {
+            const tbody = document.getElementById('donation-table-body');
+            if (!tbody) return;
+
+            tbody.innerHTML = donationData.map((d, idx) => {
+                const rowClass = d.paid ? 'donation-row-paid' : '';
+                const badgeClass = d.paid ? 'paid' : 'unpaid';
+                const badgeText = d.paid ? '✓ PAID' : '—';
+                return `<tr class="${rowClass}">
+                    <td class="mile-num">${d.mile}</td>
+                    <td>
+                        <span class="donation-paid-badge ${badgeClass}" onclick="toggleDonationPaid(${idx})" title="Click to toggle">${badgeText}</span>
+                    </td>
+                    <td>
+                        <input class="donation-input" type="text" value="${escapeHTML(d.donor)}" placeholder="Donor name"
+                            onchange="updateDonation(${idx},'donor',this.value)" style="font-size:16px;">
+                    </td>
+                    <td>
+                        <input class="donation-input" type="text" value="${escapeHTML(d.song)}" placeholder="Song choice"
+                            onchange="updateDonation(${idx},'song',this.value)" style="font-size:16px;">
+                    </td>
+                </tr>`;
+            }).join('');
+
+            renderDonationSummary();
+        }
+
+        function renderDonationSummary() {
+            const el = document.getElementById('donation-summary');
+            if (!el) return;
+            const totalMiles = donationData.length;
+            const paidCount = donationData.filter(d => d.paid).length;
+            const claimedCount = donationData.filter(d => d.donor).length;
+            const unclaimed = totalMiles - claimedCount;
+            el.innerHTML = `
+                <div class="donation-stat">
+                    <div class="stat-value">${paidCount}/${totalMiles}</div>
+                    <div class="stat-label">Miles Paid</div>
+                </div>
+                <div class="donation-stat" style="background:linear-gradient(135deg,#10b981,#059669);">
+                    <div class="stat-value">${claimedCount}</div>
+                    <div class="stat-label">Miles Claimed</div>
+                </div>
+                <div class="donation-stat" style="background:linear-gradient(135deg,#f59e0b,#d97706);">
+                    <div class="stat-value">${unclaimed}</div>
+                    <div class="stat-label">Miles Available</div>
+                </div>
+            `;
+        }
+
+        function toggleDonationPaid(idx) {
+            donationData[idx].paid = !donationData[idx].paid;
+            renderDonationTable();
+            saveProgress();
+        }
+
+        function updateDonation(idx, field, value) {
+            donationData[idx][field] = value;
+            renderDonationSummary();
+            saveProgress();
+        }
+
+        function escapeHTML(str) {
+            if (!str) return '';
+            return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
         function showProgress() {
             const modal = document.getElementById('progress-modal');
             
@@ -2514,8 +2782,11 @@
                 `;
             }).join('');
             
+            // Render donation tracker
+            renderDonationTable();
+
             modal.classList.remove('hidden');
-            
+
             // Render initial chart
             setTimeout(() => renderChart(activeChartType), 100);
         }
@@ -2562,6 +2833,7 @@
                     weeklySchedule,
                     customWorkouts, // Include custom workouts in export
                     editedWorkouts, // Include edited workouts in export
+                    donationData, // Include donation tracker in export
                     paces,
                     exportedAt: new Date().toISOString(),
                     appVersion: '1.2'
@@ -2617,7 +2889,12 @@
                     if (progressData.editedWorkouts && typeof progressData.editedWorkouts === 'object') {
                         editedWorkouts = progressData.editedWorkouts;
                     }
-                    
+
+                    // Restore donation data
+                    if (Array.isArray(progressData.donationData) && progressData.donationData.length === 26) {
+                        donationData = progressData.donationData;
+                    }
+
                     if (progressData.paces) {
                         Object.assign(paces, progressData.paces);
                         updateAllWorkoutPaces();
